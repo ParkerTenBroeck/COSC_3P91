@@ -1,10 +1,10 @@
-package vehicle;
+package traffic_sim.vehicle;
 
-import io.View;
-import io.Input;
-import map.Intersection;
-import map.Map;
-import map.Road;
+import traffic_sim.io.View;
+import traffic_sim.io.Input;
+import traffic_sim.map.intersection.Intersection;
+import traffic_sim.map.Map;
+import traffic_sim.map.Road;
 
 import java.awt.*;
 import java.util.ArrayList;

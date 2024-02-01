@@ -1,10 +1,10 @@
-import io.View;
-import io.Display;
-import io.Input;
-import map.DrainIntersection;
-import map.Map;
-import map.SourceIntersection;
-import vehicle.Player;
+import traffic_sim.io.View;
+import traffic_sim.io.Display;
+import traffic_sim.io.Input;
+import traffic_sim.map.intersection.DrainIntersection;
+import traffic_sim.map.Map;
+import traffic_sim.map.intersection.SourceIntersection;
+import traffic_sim.vehicle.Player;
 
 import java.awt.*;
 

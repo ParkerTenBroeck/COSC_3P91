@@ -1,6 +1,8 @@
-package map;
+package traffic_sim.map.intersection;
 
-import vehicle.Vehicle;
+import traffic_sim.map.Map;
+import traffic_sim.map.Road;
+import traffic_sim.vehicle.Vehicle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +65,8 @@ public class Intersection {
         public String getName() {
             return this.name;
         }
+
+        public Road.Lane getLane() { return this.lane; };
 
         public boolean canFit(Vehicle vehicle) {
             return this.lane.canFit(vehicle);

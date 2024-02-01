@@ -1,4 +1,6 @@
-package map;
+package traffic_sim.map.intersection;
+
+import traffic_sim.map.Map;
 
 public class DrainIntersection extends Intersection{
     public DrainIntersection(String name, float x, float y) {

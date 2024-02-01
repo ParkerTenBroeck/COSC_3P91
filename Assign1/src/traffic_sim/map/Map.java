@@ -1,8 +1,9 @@
-package map;
+package traffic_sim.map;
 
-import io.View;
-import vehicle.Player;
-import vehicle.Vehicle;
+import traffic_sim.io.View;
+import traffic_sim.map.intersection.Intersection;
+import traffic_sim.vehicle.Player;
+import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
 import java.util.ArrayList;

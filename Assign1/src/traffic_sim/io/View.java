@@ -1,6 +1,6 @@
-package io;
+package traffic_sim.io;
 
-import vehicle.Vehicle;
+import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
 

@@ -1,4 +1,4 @@
-package io;
+package traffic_sim.io;
 
 import javax.swing.*;
 import java.awt.*;

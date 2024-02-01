@@ -1,4 +1,4 @@
-package io;
+package traffic_sim.io;
 
 import java.awt.event.*;
 import java.util.HashSet;

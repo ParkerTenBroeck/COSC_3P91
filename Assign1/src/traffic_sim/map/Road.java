@@ -1,7 +1,7 @@
-package map;
+package traffic_sim.map;
 
-import io.View;
-import vehicle.Vehicle;
+import traffic_sim.io.View;
+import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class Road {
                     var turn = vehicle.chooseTurn(turns);
                     if (turn != null){
                         lane.vehicles.remove(lane.vehicles.size() - 1);
-                        turn.lane.vehicles.add(0, vehicle);
+                        turn.getLane().vehicles.add(0, vehicle);
                         vehicle.setDistanceAlongRoad(0);
                         end = length;
                         continue;
