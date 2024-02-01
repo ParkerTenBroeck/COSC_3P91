@@ -22,13 +22,13 @@ public class Road {
         }
     }
 
-    public void tick(Map map, float delta){
+    public void tick(RoadMap map, float delta){
         for(var lane : lanes){
             var end = length;
             for(int i = lane.vehicles.size() - 1; i >= 0; i --){
                 var vehicle = lane.vehicles.get(i);
                 vehicle.tick(map, this, delta);
-                var new_pos = vehicle.getDistanceAlongRoad() + speedLimit * delta * vehicle.getSpeedPercentage();
+                var new_pos = vehicle.getDistanceAlongRoad() + speedLimit * delta * vehicle.getSpeedMultiplier();
                 new_pos = Float.min(end, new_pos);
                 if (new_pos + 0.0001 > length){
                     var turns = map.roadEnds(this).getTurns(lane);
@@ -49,7 +49,7 @@ public class Road {
         }
     }
 
-    public void draw(View g, Map map){
+    public void draw(View g, RoadMap map){
         var start = map.roadStarts(this);
         var end = map.roadEnds(this);
 
@@ -66,11 +66,18 @@ public class Road {
         g.setColor(Color.LIGHT_GRAY);
         g.drawLine(start.getX(), start.getY(), end.getX(), end.getY());
         for (var lane : lanes){
-            float p = lane.remainingSpace / this.length;
-            g.setColor(Color.RED);
-            g.drawLine(end.getX()*p+start.getX()*(1-p)+rx, end.getY()*p+start.getY()*(1-p)+ry, end.getX()+rx, end.getY()+ry);
-            g.setColor(Color.GREEN);
-            g.drawLine(start.getX()+rx, start.getY()+ry, end.getX()*(p)+start.getX()*(1-p)+rx, end.getY()*(p)+start.getY()*(1-p)+ry);
+
+
+            if (g.getDebug()){
+                float p = lane.remainingSpace / this.length;
+                g.setColor(Color.RED);
+                g.drawLine(end.getX()*p+start.getX()*(1-p)+rx, end.getY()*p+start.getY()*(1-p)+ry, end.getX()+rx, end.getY()+ry);
+                g.setColor(Color.GREEN);
+                g.drawLine(start.getX()+rx, start.getY()+ry, end.getX()*(p)+start.getX()*(1-p)+rx, end.getY()*(p)+start.getY()*(1-p)+ry);
+            }else{
+                g.setColor(Color.YELLOW);
+                g.drawLine(start.getX()+rx, start.getY()+ry, end.getX()+rx, end.getY()+ry);
+            }
 
             for(var vehicle : lane.vehicles){
                 var position = map.carPosition(start, end, this, vehicle);
@@ -139,7 +146,7 @@ public class Road {
         }
 
         public void addVehicle(Vehicle vehicle) {
-            vehicle.putOnRoad(Road.this);
+            vehicle.putInLane(this);
             this.vehicles.add(0, vehicle);
             this.remainingSpace = 0;
         }

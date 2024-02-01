@@ -2,14 +2,13 @@ package traffic_sim.map;
 
 import traffic_sim.io.View;
 import traffic_sim.map.intersection.Intersection;
-import traffic_sim.vehicle.Player;
 import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Map {
+public class RoadMap {
     private final ArrayList<Road> roads = new ArrayList<>();
     private final ArrayList<Intersection> intersectionNames = new ArrayList<>();
 
@@ -60,7 +59,7 @@ public class Map {
         middle.addTurn(from, to, turnDirection);
     }
 
-    public void init(Player player){
+    public void init(Vehicle player){
         this.roads.get(0).getLane(0).addVehicle(player);
     }
 
@@ -74,20 +73,12 @@ public class Map {
     }
 
     public void draw(View g){
-
-        g.setColor(Color.RED);
         for(var intersection : this.intersectionNames){
-            g.fillOval(intersection.getX(), intersection.getY(), 2, 2);
+            intersection.draw(g, this);
         }
-        g.setColor(Color.WHITE);
-        for(var intersection : this.intersectionNames){
-            g.drawString(intersection.getName(), intersection.getX(), intersection.getY());
-        }
-
         for(var road : roads){
             road.draw(g, this);
         }
-
     }
 
     public float[] carPosition(Road road, Vehicle vehicle) {

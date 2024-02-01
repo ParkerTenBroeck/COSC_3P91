@@ -1,9 +1,11 @@
 package traffic_sim.map.intersection;
 
-import traffic_sim.map.Map;
+import traffic_sim.io.View;
+import traffic_sim.map.RoadMap;
 import traffic_sim.map.Road;
 import traffic_sim.vehicle.Vehicle;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -22,7 +24,7 @@ public class Intersection {
         this.y = y;
     }
 
-    public void tick(Map map, double delta){}
+    public void tick(RoadMap map, double delta){}
 
     public float distance(Intersection other){
         var xdiff = this.x - other.x;
@@ -51,6 +53,13 @@ public class Intersection {
 
     public ArrayList<Turn> getTurns(Road.Lane lane) {
         return this.turns.get(lane);
+    }
+
+    public void draw(View g, RoadMap map) {
+        g.setColor(Color.RED);
+        g.fillOval(this.getX(), this.getY(), 2, 2);
+        g.setColor(Color.WHITE);
+        g.drawString(this.getName(), this.getX(), this.getY());
     }
 
     public static class Turn{

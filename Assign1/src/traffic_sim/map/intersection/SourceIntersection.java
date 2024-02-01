@@ -1,7 +1,7 @@
 package traffic_sim.map.intersection;
 
-import traffic_sim.map.Map;
-import traffic_sim.vehicle.Player;
+import traffic_sim.map.RoadMap;
+import traffic_sim.vehicle.Car;
 import traffic_sim.vehicle.Vehicle;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class SourceIntersection extends Intersection{
     }
 
     @Override
-    public void tick(Map map, double delta) {
+    public void tick(RoadMap map, double delta) {
         var outgoing = map.outgoing(this);
         if (outgoing == null) return;
         if (!outgoing.isEmpty()){
@@ -24,7 +24,7 @@ public class SourceIntersection extends Intersection{
                 var lane = (int)(random.getNumLanes()*Math.random());
                 if (random.getSpace(lane) > 2.0){
                     if (toAdd.isEmpty()){
-                        random.getLane(lane).addVehicle(new Vehicle());
+                        random.getLane(lane).addVehicle(new Car());
                     }else{
                         random.getLane(lane).addVehicle(toAdd.remove(0));
                     }
@@ -33,7 +33,7 @@ public class SourceIntersection extends Intersection{
         }
     }
 
-    public void toAdd(Player player) {
+    public void toAdd(Vehicle player) {
         toAdd.add(player);
     }
 }

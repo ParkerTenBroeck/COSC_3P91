@@ -15,6 +15,8 @@ public class View {
     public float zoom;
     private Vehicle follow;
 
+    private boolean debug = true;
+
     public View(Display display, Input input){
         this.display = display;
         this.input = input;
@@ -64,6 +66,14 @@ public class View {
             this.panX = -follow.getLastX();
             this.panY = -follow.getLastY();
         }
+    }
+
+    public void setDebug(boolean debug){
+        this.debug = debug;
+    }
+
+    public boolean getDebug(){
+        return this.debug;
     }
 
     public void setFollowing(Vehicle vehicle) {

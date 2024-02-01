@@ -1,16 +1,15 @@
-import traffic_sim.io.View;
-import traffic_sim.io.Display;
-import traffic_sim.io.Input;
+import traffic_sim.Simulation;
 import traffic_sim.map.intersection.DrainIntersection;
-import traffic_sim.map.Map;
+import traffic_sim.map.RoadMap;
 import traffic_sim.map.intersection.SourceIntersection;
-import traffic_sim.vehicle.Player;
+import traffic_sim.vehicle.Car;
+import traffic_sim.vehicle.controller.PlayerController;
 
 import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
-        var map = new Map();
+        var map = new RoadMap();
         var i1 = map.addIntersection("1", 0,0);
         var i2 = map.addIntersection("2", 10,0);
         var i3 = map.addIntersection("3", 10,10);
@@ -66,77 +65,57 @@ public class Main {
 
         r1.setSpeedLimit(2.0f);
 
-        var input = new Input();
-        var display = new Display(input);
+        var simulation = new Simulation(map);
 
-        var graphics = new View(display, input);
-
-        var player = new Player(input);
+        var player = new Car(new PlayerController(simulation.getInput()), Color.MAGENTA);
         map.init(player);
 
-        graphics.panX = 0;
-        graphics.panY = 0;
-        graphics.zoom = 21;
+        simulation.getView().panX = 0;
+        simulation.getView().panY = 0;
+        simulation.getView().zoom = 21;
 
-        while(true){
-            float tick = 0.1f;
-            {
-                var num = 5;
-                var r_tick = tick/num;
-                for(int i = 0; i < num; i ++){
-                    map.tick(r_tick);
-                }
+        simulation.addSystem((sim, tick) -> {
+            if (sim.getInput().keyHeld('d')){
+                sim.getView().panX -= sim.getTrueDelta()*7;
+            }
+            if (sim.getInput().keyHeld('a')){
+                sim.getView().panX += sim.getTrueDelta()*7;
+            }
+            if (sim.getInput().keyHeld('w')){
+                sim.getView().panY += sim.getTrueDelta()*7;
+            }
+            if (sim.getInput().keyHeld('s')){
+                sim.getView().panY -= sim.getTrueDelta()*7;
+            }
+            if (sim.getInput().keyHeld('q')){
+                sim.getView().zoom += sim.getTrueDelta()*sim.getView().zoom*2;
+            }
+            if (sim.getInput().keyHeld('e')){
+                sim.getView().zoom -= sim.getTrueDelta()*sim.getView().zoom*2;
+            }
+            if (sim.getInput().keyPressed(' ')){
+                sim.setPaused(!sim.getPaused());
+            }
+            if (sim.getInput().keyPressed('v')){
+                sim.getView().setDebug(!sim.getView().getDebug());
             }
 
-            graphics.setColor(Color.BLACK);
-            graphics.clearScreen();
-
-            map.draw(graphics);
-
-            if (input.keyHeld('d')){
-                graphics.panX -= tick*2;
-            }
-            if (input.keyHeld('a')){
-                graphics.panX += tick*2;
-            }
-            if (input.keyHeld('w')){
-                graphics.panY += tick*2;
-            }
-            if (input.keyHeld('s')){
-                graphics.panY -= tick*2;
-            }
-            if (input.keyHeld('q')){
-                graphics.zoom *= tick*10.5;
-            }
-            if (input.keyHeld('e')){
-                graphics.zoom /= tick*10.5;
-            }
-            if (input.keyPressed('f')){
-                if (graphics.getFollowing() == null){
-                    graphics.setFollowing(player);
+            if (sim.getInput().keyPressed('f')){
+                if (sim.getView().getFollowing() == null){
+                    sim.getView().setFollowing(player);
                 }else{
-                    graphics.setFollowing(null);
+                    sim.getView().setFollowing(null);
                 }
             }
-            if (input.keyPressed('r')){
+            if (sim.getInput().keyPressed('r')){
                 if (!player.isOnRoad()){
                     is.toAdd(player);
                 }
             }
+        });
 
-            graphics.setColor(Color.WHITE);
+        simulation.run();
 
-            graphics.drawOval(graphics.getScreenX(), graphics.getScreenY(), 2,2);
 
-            graphics.drawStringHud("X: " + graphics.panX, 10,10);
-            graphics.drawStringHud("Y: " + graphics.panY, 10,20);
-            graphics.drawStringHud("Zoom: " + graphics.zoom, 10,30);
-
-            graphics.update();
-            try{
-                Thread.sleep(16);
-            }catch (Exception ignore){
-            }
-        }
     }
 }
