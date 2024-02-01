@@ -9,17 +9,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Map {
-    ArrayList<Road> roads = new ArrayList<>();
+    private final ArrayList<Road> roads = new ArrayList<>();
+    private final ArrayList<Intersection> intersectionNames = new ArrayList<>();
 
-    HashMap<Road, Intersection> roadEnds = new HashMap<>();
-    HashMap<Road, Intersection> roadStarts = new HashMap<>();
-    HashMap<String, Intersection> intersectionNames = new HashMap<>();
-    HashMap<String, Road> connections = new HashMap<>();
+
+    private final HashMap<Road, Intersection> roadEnds = new HashMap<>();
+    private final HashMap<Road, Intersection> roadStarts = new HashMap<>();
+    private final HashMap<Intersection, ArrayList<Road>> outgoing = new HashMap<>();
+    private final HashMap<Intersection, ArrayList<Road>> incoming = new HashMap<>();
+
+
 
     public Intersection addIntersection(String name, double x, double y){
         var intersection = new Intersection(name, x, y);
-        var old = intersectionNames.put(name, intersection);
-        assert old == null;
+        return addIntersection(intersection);
+    }
+
+    public Intersection addIntersection(Intersection intersection){
+        intersectionNames.add(intersection);
         return intersection;
     }
 
@@ -28,51 +35,38 @@ public class Map {
         roads.add(road);
         roadEnds.put(road, to);
         roadStarts.put(road, from);
-        var old = connections.put(from + "@" + to, road);
-        assert old == null;
+
+        if (!outgoing.containsKey(from)){
+            outgoing.put(from, new ArrayList<>());
+        }
+        outgoing.get(from).add(road);
+
+        if (!incoming.containsKey(to)){
+            incoming.put(to, new ArrayList<>());
+        }
+        incoming.get(to).add(road);
+
         return road;
     }
 
-    public void addTurn(Road from, Road to, String turnDirection){
-        var middle = this.roadEnds.get(from);
-        var middle_check = this.roadStarts.get(to);
-        if (middle != middle_check){
+    public void addTurn(Road.Lane from, Road.Lane to, String turnDirection){
+        var middle = this.roadEnds.get(from.road());
+        var middle_check = this.roadStarts.get(to.road());
+        if (middle == null || middle != middle_check){
             throw new RuntimeException("Roads aren't connected at intersection");
         }
 
-        if (!middle.turns.containsKey(from)){
-            middle.turns.put(from, new ArrayList<>());
-        }
-        middle.turns.get(from).add(new Intersection.Turn(turnDirection, to));
-    }
-
-    public void addTurn(String from, String through, String to, String turnDirection){
-        var middle = intersectionNames.get(through);
-        var from_road = connections.get(from + "@" + through);
-        var to_road = connections.get(through + "@" + to);
-
-        if (!middle.turns.containsKey(from_road)){
-            middle.turns.put(from_road, new ArrayList<>());
-        }
-        middle.turns.get(from_road).add(new Intersection.Turn(turnDirection, to_road));
+        middle.addTurn(from, to, turnDirection);
     }
 
     public void init(Player player){
-        // testing
-        this.roads.get(0).lanes[0].add(player);
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
-        this.roads.get(0).lanes[0].add(new Vehicle());
+        this.roads.get(0).getLane(0).vehicles.add(player);
     }
 
     public void tick(double delta){
+        for(var intersection : intersectionNames){
+            intersection.tick(this, delta);
+        }
         for(var road : roads){
             road.tick(this, delta);
         }
@@ -82,25 +76,41 @@ public class Map {
         Graphics g = display.getGraphics();
 
         g.setColor(Color.RED);
-        for(var intersection : this.intersectionNames.values()){
-            g.fillOval((int)((x+intersection.x - 0.5)*zoom), (int)((y+intersection.y - 0.5)*zoom), (int)(1*zoom), (int)(1*zoom));
+        for(var intersection : this.intersectionNames){
+            g.fillOval((int)((x+intersection.getX() - 1)*zoom), (int)((y+intersection.getY() - 1)*zoom), (int)(2*zoom), (int)(2*zoom));
+        }
+        g.setColor(Color.WHITE);
+        for(var intersection : this.intersectionNames){
+            g.drawString(intersection.getName(), (int)((x+intersection.getX() - 1)*zoom), (int)((y+intersection.getY() - 1)*zoom));
         }
 
         for(var road : roads){
-            var start = this.roadStarts.get(road);
-            var end = this.roadEnds.get(road);
-            g.setColor(Color.GREEN);
-            g.drawLine((int)((start.x+x)*zoom), (int)((start.y+y)*zoom), (int)((end.x+x)*zoom), (int)((end.y+y)*zoom));
-
-            for(var vehicle : road.lanes[0]){
-                var position = carPosition(start, end, road, vehicle);
-                vehicle.draw(g, position[0], position[1], x, y, zoom);
-            }
+            road.draw(g, this, x, y, zoom);
         }
+
     }
 
-    double[] carPosition(Intersection from, Intersection to, Road road, Vehicle vehicle){
-        double percent = vehicle.getPosition() / road.length;
-        return new double[] {from.x * (1-percent) + to.x*(percent), from.y * (1-percent) + to.y*(percent)};
+    public double[] carPosition(Road road, Vehicle vehicle) {
+        return this.carPosition(this.roadStarts.get(road), this.roadEnds.get(road), road, vehicle);
+    }
+    public double[] carPosition(Intersection from, Intersection to, Road road, Vehicle vehicle){
+        double percent = vehicle.getPosition() / road.getLength();
+        return new double[] {from.getX() * (1-percent) + to.getX()*(percent), from.getY() * (1-percent) + to.getY()*(percent)};
+    }
+
+    public ArrayList<Road> incoming(Intersection intersection) {
+        return this.incoming.get(intersection);
+    }
+
+    public ArrayList<Road> outgoing(Intersection intersection) {
+        return this.outgoing.get(intersection);
+    }
+
+    public Intersection roadEnds(Road road) {
+        return this.roadEnds.get(road);
+    }
+
+    public Intersection roadStarts(Road road) {
+        return this.roadStarts.get(road);
     }
 }
