@@ -1,6 +1,6 @@
 package map;
 
-import io.Display;
+import io.View;
 import vehicle.Player;
 import vehicle.Vehicle;
 
@@ -20,7 +20,7 @@ public class Map {
 
 
 
-    public Intersection addIntersection(String name, double x, double y){
+    public Intersection addIntersection(String name, float x, float y){
         var intersection = new Intersection(name, x, y);
         return addIntersection(intersection);
     }
@@ -60,10 +60,10 @@ public class Map {
     }
 
     public void init(Player player){
-        this.roads.get(0).getLane(0).vehicles.add(player);
+        this.roads.get(0).getLane(0).addVehicle(player);
     }
 
-    public void tick(double delta){
+    public void tick(float delta){
         for(var intersection : intersectionNames){
             intersection.tick(this, delta);
         }
@@ -72,30 +72,29 @@ public class Map {
         }
     }
 
-    public void draw(Display display, double x, double y, double zoom){
-        Graphics g = display.getGraphics();
+    public void draw(View g){
 
         g.setColor(Color.RED);
         for(var intersection : this.intersectionNames){
-            g.fillOval((int)((x+intersection.getX() - 1)*zoom), (int)((y+intersection.getY() - 1)*zoom), (int)(2*zoom), (int)(2*zoom));
+            g.fillOval(intersection.getX(), intersection.getY(), 2, 2);
         }
         g.setColor(Color.WHITE);
         for(var intersection : this.intersectionNames){
-            g.drawString(intersection.getName(), (int)((x+intersection.getX() - 1)*zoom), (int)((y+intersection.getY() - 1)*zoom));
+            g.drawString(intersection.getName(), intersection.getX(), intersection.getY());
         }
 
         for(var road : roads){
-            road.draw(g, this, x, y, zoom);
+            road.draw(g, this);
         }
 
     }
 
-    public double[] carPosition(Road road, Vehicle vehicle) {
+    public float[] carPosition(Road road, Vehicle vehicle) {
         return this.carPosition(this.roadStarts.get(road), this.roadEnds.get(road), road, vehicle);
     }
-    public double[] carPosition(Intersection from, Intersection to, Road road, Vehicle vehicle){
-        double percent = vehicle.getPosition() / road.getLength();
-        return new double[] {from.getX() * (1-percent) + to.getX()*(percent), from.getY() * (1-percent) + to.getY()*(percent)};
+    public float[] carPosition(Intersection from, Intersection to, Road road, Vehicle vehicle){
+        float percent = vehicle.getDistanceAlongRoad() / road.getLength();
+        return new float[] {from.getX() * (1-percent) + to.getX()*(percent), from.getY() * (1-percent) + to.getY()*(percent)};
     }
 
     public ArrayList<Road> incoming(Intersection intersection) {

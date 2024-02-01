@@ -1,9 +1,7 @@
 package map;
 
-import vehicle.Vehicle;
-
 public class DrainIntersection extends Intersection{
-    public DrainIntersection(String name, double x, double y) {
+    public DrainIntersection(String name, float x, float y) {
         super(name, x, y);
     }
 
@@ -14,7 +12,7 @@ public class DrainIntersection extends Intersection{
         for(var road : incoming){
             for(var lane : road.getLanes()){
                 var removed = lane.removeEnd();
-                if (removed != null) removed.destroy();
+                if (removed != null) removed.removeFromRoad();
             }
         }
     }

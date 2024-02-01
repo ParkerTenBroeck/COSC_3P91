@@ -9,7 +9,7 @@ public class SourceIntersection extends Intersection{
 
     private final ArrayList<Vehicle> toAdd = new ArrayList<>();
 
-    public SourceIntersection(String name, double x, double y) {
+    public SourceIntersection(String name, float x, float y) {
         super(name, x, y);
     }
 

@@ -13,8 +13,8 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener {
         private boolean[] mousePressed = new boolean[4];
         private boolean[] mouseHeld = new boolean[4];
         private boolean[] mouseReleased = new boolean[4];
-        private double mouseX = 0.0;
-        private double mouseY = 0.0;
+        private float mouseX = 0.0f;
+        private float mouseY = 0.0f;
 
 
         @Override
@@ -48,11 +48,11 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener {
         return s2.keyReleased.contains(key);
     }
 
-    public double getMouseX() {
+    public float getMouseX() {
         return s2.mouseX;
     }
 
-    public double getMouseY() {
+    public float getMouseY() {
         return s2.mouseY;
     }
 

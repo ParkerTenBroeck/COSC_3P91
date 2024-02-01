@@ -7,14 +7,14 @@ import java.util.HashMap;
 
 public class Intersection {
 
-    protected final double x;
-    protected final double y;
+    protected final float x;
+    protected final float y;
     protected final String name;
 
     protected final HashMap<Road.Lane, ArrayList<Turn>> turns = new HashMap<>();
 
 
-    public Intersection(String name, double x, double y){
+    public Intersection(String name, float x, float y){
         this.name = name;
         this.x = x;
         this.y = y;
@@ -22,17 +22,17 @@ public class Intersection {
 
     public void tick(Map map, double delta){}
 
-    public double distance(Intersection other){
+    public float distance(Intersection other){
         var xdiff = this.x - other.x;
         var ydiff = this.y - other.y;
-        return Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+        return (float) Math.sqrt(xdiff*xdiff + ydiff*ydiff);
     }
 
-    public double getX() {
+    public float getX() {
         return x;
     }
 
-    public double getY() {
+    public float getY() {
         return y;
     }
 

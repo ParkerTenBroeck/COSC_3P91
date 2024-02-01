@@ -1,5 +1,6 @@
 package map;
 
+import io.View;
 import vehicle.Vehicle;
 
 import java.awt.*;
@@ -7,12 +8,12 @@ import java.util.ArrayList;
 
 public class Road {
 
-    private double speedLimit = 1.0;
-    private final double length;
+    private float speedLimit = 1.0f;
+    private final float length;
     private final Lane[] lanes;
 
 
-    public Road(int lanes, double length) {
+    public Road(int lanes, float length) {
         assert lanes > 1;
         this.length = length;
         this.lanes = new Lane[lanes];
@@ -21,73 +22,76 @@ public class Road {
         }
     }
 
-    public void tick(Map map, double delta){
+    public void tick(Map map, float delta){
         for(var lane : lanes){
             var end = length;
             for(int i = lane.vehicles.size() - 1; i >= 0; i --){
                 var vehicle = lane.vehicles.get(i);
                 vehicle.tick(map, this, delta);
-                var new_pos = vehicle.getPosition() + speedLimit * delta * vehicle.getSpeedPercentage();
-                new_pos = Double.min(end, new_pos);
+                var new_pos = vehicle.getDistanceAlongRoad() + speedLimit * delta * vehicle.getSpeedPercentage();
+                new_pos = Float.min(end, new_pos);
                 if (new_pos + 0.0001 > length){
                     var turns = map.roadEnds(this).getTurns(lane);
                     var turn = vehicle.chooseTurn(turns);
                     if (turn != null){
                         lane.vehicles.remove(lane.vehicles.size() - 1);
                         turn.lane.vehicles.add(0, vehicle);
-                        vehicle.setPosition(0);
+                        vehicle.setDistanceAlongRoad(0);
                         end = length;
                         continue;
                     }
                 }
-                vehicle.setPosition(new_pos);
-                end = new_pos - vehicle.getSize() - 0.05;
-                end = Double.max(end, 0);
+                vehicle.setDistanceAlongRoad(new_pos);
+                end = new_pos - vehicle.getSize() - 0.05f;
+                end = Float.max(end, 0);
             }
             lane.remainingSpace = end;
         }
     }
 
-    public void draw(Graphics g, Map map, double px, double py, double zoom){
+    public void draw(View g, Map map){
         var start = map.roadStarts(this);
         var end = map.roadEnds(this);
 
         var nx = end.getX() - start.getX();
-        var xs = nx * nx;
         var ny = end.getY() - start.getY();
+        var xs = nx * nx;
         var ys = ny * ny;
-        var len = Math.sqrt(xs + ys);
+        var len = (float)Math.sqrt(xs + ys);
+        nx /= len;
+        ny /= len;
 
-
-        var rx = px - ny/2/21;
-        var ry = py + nx/2/21;
+        var rx = -ny/3.0f;
+        var ry = nx/3.0f;
+        g.setColor(Color.LIGHT_GRAY);
+        g.drawLine(start.getX(), start.getY(), end.getX(), end.getY());
         for (var lane : lanes){
-            double p = lane.remainingSpace / this.length;
+            float p = lane.remainingSpace / this.length;
             g.setColor(Color.RED);
-            g.drawLine((int)((end.getX()*(p)+start.getX()*(1-p)+rx)*zoom), (int)((end.getY()*(p)+start.getY()*(1-p)+ry)*zoom), (int)((end.getX()+rx)*zoom), (int)((end.getY()+ry)*zoom));
+            g.drawLine(end.getX()*p+start.getX()*(1-p)+rx, end.getY()*p+start.getY()*(1-p)+ry, end.getX()+rx, end.getY()+ry);
             g.setColor(Color.GREEN);
-            g.drawLine((int)((start.getX()+rx)*zoom), (int)((start.getY()+ry)*zoom), (int)((end.getX()*(p)+start.getX()*(1-p)+rx)*zoom), (int)((end.getY()*(p)+start.getY()*(1-p)+ry)*zoom));
+            g.drawLine(start.getX()+rx, start.getY()+ry, end.getX()*(p)+start.getX()*(1-p)+rx, end.getY()*(p)+start.getY()*(1-p)+ry);
 
             for(var vehicle : lane.vehicles){
                 var position = map.carPosition(start, end, this, vehicle);
-
-                vehicle.draw(g, (position[0]+rx)*zoom, (position[1]+ry)*zoom, nx / len, ny / len, zoom);
+                vehicle.updatePosition(position[0]+rx, position[1]+ry);
+                vehicle.draw(g, (position[0]+rx), (position[1]+ry), nx, ny);
             }
 
-            rx -= ny/1.2/21;
-            ry += nx/1.2/21;
+            rx -= ny/1.7;
+            ry += nx/1.7;
         }
     }
 
-    public double getSpeedLimit(){
+    public float getSpeedLimit(){
         return this.speedLimit;
     }
 
-    public void setSpeedLimit(double speedLimit){
+    public void setSpeedLimit(float speedLimit){
         this.speedLimit = speedLimit;
     }
 
-    public double getSpace(int lane) {
+    public float getSpace(int lane) {
         return this.lanes[lane].remainingSpace;
     }
 
@@ -103,12 +107,12 @@ public class Road {
         return this.lanes;
     }
 
-    public double getLength() {
+    public float getLength() {
         return this.length;
     }
 
     public class Lane{
-        double remainingSpace;
+        float remainingSpace;
         ArrayList<Vehicle> vehicles = new ArrayList<>();
 
         private Lane(){
@@ -122,7 +126,7 @@ public class Road {
         public Vehicle removeEnd() {
             if(this.vehicles.isEmpty()) return null;
             var last = this.vehicles.remove(this.vehicles.size() - 1);
-            if (last.getPosition() + 0.0001 > length){
+            if (last.getDistanceAlongRoad() + 0.0001 > length){
                 return last;
             }else{
                 this.vehicles.add(last);
@@ -135,7 +139,9 @@ public class Road {
         }
 
         public void addVehicle(Vehicle vehicle) {
+            vehicle.putOnRoad(Road.this);
             this.vehicles.add(0, vehicle);
+            this.remainingSpace = 0;
         }
     }
 }

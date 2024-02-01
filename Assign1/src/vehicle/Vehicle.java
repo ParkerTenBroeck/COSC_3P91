@@ -1,5 +1,6 @@
 package vehicle;
 
+import io.View;
 import map.Intersection;
 import map.Map;
 import map.Road;
@@ -11,32 +12,36 @@ public class Vehicle {
 
     private static int count = 0;
     private final int m_count = count++;
-    private double health = 1.0;
-    protected double reputation = 1.0;
-    private double position = 0.0;
-    protected double speedPercentage = Math.random() * 0.2 + 1.0;
-    private final double size = Math.random() * 0.2 + 1.0;
+    private float health = 1.0f;
+    protected float reputation = 1.0f;
+    private float distanceAlongRoad = 0.0f;
+    private float lastX;
+    private float lastY;
+    private boolean onRoad;
+
+    protected float speedPercentage = (float) (Math.random() * 0.2 + 1.0);
+    private final float size = (float) (Math.random() * 0.2 + 1.0);
 
 
-    public double getReputation() { return this.reputation; }
+    public float getReputation() { return this.reputation; }
 
-    public double getHealth() { return this.health; }
+    public float getHealth() { return this.health; }
 
-    public double getSpeedPercentage() { return this.speedPercentage; }
+    public float getSpeedPercentage() { return this.speedPercentage; }
 
-    public double getSize() {
+    public float getSize() {
         return size;
     }
 
-    public double getPosition() {
-        return position;
+    public float getDistanceAlongRoad() {
+        return distanceAlongRoad;
     }
 
-    public void setPosition(double position){
-        this.position = position;
+    public void setDistanceAlongRoad(float distanceAlongRoad){
+        this.distanceAlongRoad = distanceAlongRoad;
     }
 
-    public void tick(Map map, Road road, double delta) {}
+    public void tick(Map map, Road road, float delta) {}
 
         public Intersection.Turn chooseTurn(ArrayList<Intersection.Turn> turns){
         if (turns == null || turns.isEmpty()) {
@@ -51,13 +56,35 @@ public class Vehicle {
         }
     }
 
-    public void destroy(){}
+    public void putOnRoad(Road rode){
+        this.onRoad = true;
+    }
+    public void removeFromRoad(){
+        this.onRoad = false;
+    }
 
-    public void draw(Graphics g, double x, double y, double nx, double ny, double zoom) {
+    public boolean isOnRoad(){
+        return this.onRoad;
+    }
+
+    public void draw(View g, float x, float y, float nx, float ny) {
         g.setColor(Color.BLUE);
-        g.fillOval((int)(x+(-0.3-nx*0.3)*zoom),(int)(y+(-0.3-ny*0.3)*zoom), (int)(0.6*zoom), (int)(0.6*zoom));
-        g.drawOval((int)(x+(-0.25-nx*getSize()+nx*0.25)*zoom),(int)(y+(-0.25-ny*getSize()+ny*0.25)*zoom), (int)(0.5*zoom), (int)(0.5*zoom));
+        g.fillOval(x-nx*0.3f,y-ny*0.3f, 0.6f, 0.6f);
+        g.drawOval(x-nx*getSize()+nx*0.25f,y-ny*getSize()+ny*0.25f, 0.5f, 0.5f);
         g.setColor(Color.WHITE);
-        g.drawString(m_count+"", (int)(x),(int)(y));
+        g.drawString(m_count+"", x,y);
+    }
+
+    public void updatePosition(float x, float y){
+        this.lastX = x;
+        this.lastY = y;
+    }
+
+    public float getLastX(){
+        return this.lastX;
+    }
+
+    public float getLastY(){
+        return this.lastY;
     }
 }

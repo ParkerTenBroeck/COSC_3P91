@@ -1,5 +1,6 @@
 package vehicle;
 
+import io.View;
 import io.Input;
 import map.Intersection;
 import map.Map;
@@ -11,57 +12,34 @@ import java.util.ArrayList;
 public class Player extends Vehicle{
 
     private final Input input;
-    private double lastX;
-    private double lastY;
-    private boolean alive = true;
 
     public Player(Input input){
         super();
-        this.speedPercentage = 1.0;
+        this.speedPercentage = 1.0f;
         this.input = input;
     }
 
-    public boolean isAlive(){
-        return this.alive;
-    }
 
-    public double getX(){
-        return this.lastX;
-    }
-
-    public double getY(){
-        return this.lastY;
-    }
 
     @Override
-    public void tick(Map map, Road road, double delta) {
-        var position = map.carPosition(road, this);
-        this.lastX = position[0];
-        this.lastY = position[1];
+    public void tick(Map map, Road road, float delta) {
         if (this.input.keyHeld('i')){
             this.speedPercentage += delta * 0.1;
         }
         if (this.input.keyHeld('k')){
             this.speedPercentage -= delta * 0.1;
         }
-        this.speedPercentage = Double.min(this.speedPercentage, 1.5);
-        this.speedPercentage = Double.max(this.speedPercentage, 0);
+        this.speedPercentage = Float.min(this.speedPercentage, 1.5f);
+        this.speedPercentage = Float.max(this.speedPercentage, 0);
     }
 
     @Override
-    public void destroy() {
-        this.alive = false;
-    }
-
-    public void revive() {
-        this.alive = true;
-    }
-
-    @Override
-    public void draw(Graphics g, double x, double y, double nx, double ny, double zoom) {
+    public void draw(View g, float x, float y, float nx, float ny) {
         g.setColor(Color.MAGENTA);
-        g.fillOval((int)(x+(-0.3-nx*0.3)*zoom),(int)(y+(-0.3-ny*0.3)*zoom), (int)(0.6*zoom), (int)(0.6*zoom));
-        g.drawOval((int)(x+(-0.25-nx*getSize()+nx*0.25)*zoom),(int)(y+(-0.25-ny*getSize()+ny*0.25)*zoom), (int)(0.5*zoom), (int)(0.5*zoom));
+        g.fillOval(x-nx*0.3f,y-ny*0.3f, 0.6f, 0.6f);
+        g.drawOval(x-nx*getSize()+nx*0.25f,y-ny*getSize()+ny*0.25f, 0.5f, 0.5f);
+        g.setColor(Color.WHITE);
+        g.drawString("Player", x,y);
     }
 
     @Override

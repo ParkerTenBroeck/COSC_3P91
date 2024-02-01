@@ -1,3 +1,4 @@
+import io.View;
 import io.Display;
 import io.Input;
 import map.DrainIntersection;
@@ -21,11 +22,12 @@ public class Main {
         map.addIntersection(is);
         map.addIntersection(id);
 
-        var sr = map.linkIntersection(is, i1, 1);
+        var sr = map.linkIntersection(is, i1, 3);
+        map.linkIntersection(i1, is, 3);
         var dr = map.linkIntersection(i3, id, 1);
 
         var r1 = map.linkIntersection(i1, i2, 1);
-        var r2 = map.linkIntersection(i2, i3, 1);
+        var r2 = map.linkIntersection(i2, i3, 2);
         var r3 = map.linkIntersection(i3, i4, 1);
         var r4 = map.linkIntersection(i4, i1, 1);
 
@@ -39,6 +41,8 @@ public class Main {
 
         map.addTurn(sr.getLane(0), r1.getLane(0), "Left");
         map.addTurn(sr.getLane(0), r8.getLane(0), "Right");
+        map.addTurn(sr.getLane(1), r8.getLane(0), "Right");
+        map.addTurn(sr.getLane(2), r8.getLane(0), "Right");
 
         map.addTurn(r2.getLane(0), dr.getLane(0), "Forward");
 
@@ -60,65 +64,75 @@ public class Main {
         map.addTurn(r6.getLane(0), r7.getLane(0), "Right");
         map.addTurn(r7.getLane(0), r1.getLane(0), "Right");
 
-        r1.setSpeedLimit(2.0);
+        r1.setSpeedLimit(2.0f);
 
         var input = new Input();
         var display = new Display(input);
 
+        var graphics = new View(display, input);
 
         var player = new Player(input);
         map.init(player);
 
-        double x = 20;
-        double y = 4;
-        double zoom = 21;
+        graphics.panX = 0;
+        graphics.panY = 0;
+        graphics.zoom = 21;
 
         while(true){
-            double tick = 0.1;
-            map.tick(tick);
+            float tick = 0.1f;
+            {
+                var num = 5;
+                var r_tick = tick/num;
+                for(int i = 0; i < num; i ++){
+                    map.tick(r_tick);
+                }
+            }
 
-            display.getGraphics().setColor(Color.BLACK);
-            display.getGraphics().fillRect(0,0, display.getWidth(), display.getHeight());
+            graphics.setColor(Color.BLACK);
+            graphics.clearScreen();
 
-            map.draw(display, x, y, zoom);
+            map.draw(graphics);
 
             if (input.keyHeld('d')){
-                x -= tick*1;
+                graphics.panX -= tick*2;
             }
             if (input.keyHeld('a')){
-                x += tick*1;
+                graphics.panX += tick*2;
             }
             if (input.keyHeld('w')){
-                y += tick*1;
+                graphics.panY += tick*2;
             }
             if (input.keyHeld('s')){
-                y -= tick*1;
+                graphics.panY -= tick*2;
             }
             if (input.keyHeld('q')){
-                zoom += tick*1;
+                graphics.zoom *= tick*10.5;
             }
             if (input.keyHeld('e')){
-                zoom -= tick*1;
+                graphics.zoom /= tick*10.5;
+            }
+            if (input.keyPressed('f')){
+                if (graphics.getFollowing() == null){
+                    graphics.setFollowing(player);
+                }else{
+                    graphics.setFollowing(null);
+                }
             }
             if (input.keyPressed('r')){
-                if (!player.isAlive()){
-                    player.revive();
+                if (!player.isOnRoad()){
                     is.toAdd(player);
                 }
             }
 
-            if (player.isAlive()){
-                x = -player.getX()+display.getWidth()/2.0/zoom;
-                y = -player.getY()+display.getHeight()/2.0/zoom;
-            }
+            graphics.setColor(Color.WHITE);
 
-            display.getGraphics().setColor(Color.WHITE);
-            display.getGraphics().drawString("X: " + x, 10,10);
-            display.getGraphics().drawString("Y: " + y, 10,20);
-            display.getGraphics().drawString("Zoom: " + zoom, 10,30);
+            graphics.drawOval(graphics.getScreenX(), graphics.getScreenY(), 2,2);
 
-            display.update();
-            input.update();
+            graphics.drawStringHud("X: " + graphics.panX, 10,10);
+            graphics.drawStringHud("Y: " + graphics.panY, 10,20);
+            graphics.drawStringHud("Zoom: " + graphics.zoom, 10,30);
+
+            graphics.update();
             try{
                 Thread.sleep(16);
             }catch (Exception ignore){
