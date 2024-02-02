@@ -51,6 +51,18 @@ public class View {
         this.display.getGraphics().setColor(color);
     }
 
+    public Stroke getStroke() {
+        return this.display.getGraphics().getStroke();
+    }
+
+    public void setStroke(float width){
+        this.display.getGraphics().setStroke(new BasicStroke(width*zoom));
+    }
+
+    public void setStroke(Stroke stroke){
+        this.display.getGraphics().setStroke(stroke);
+    }
+
     public void clearScreen() {
         this.display.getGraphics().fillRect(0,0, width, height);
     }

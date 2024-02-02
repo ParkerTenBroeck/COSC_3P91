@@ -1,5 +1,6 @@
 package traffic_sim.map;
 
+import traffic_sim.Simulation;
 import traffic_sim.io.View;
 import traffic_sim.vehicle.Vehicle;
 
@@ -12,6 +13,9 @@ public class Road {
     private final float length;
     private final Lane[] lanes;
 
+    private float normalX;
+    private float normalY;
+
 
     public Road(int lanes, float length) {
         assert lanes > 1;
@@ -22,9 +26,9 @@ public class Road {
         }
     }
 
-    public void tick(RoadMap map, float delta){
+    public void tick(Simulation _sim, RoadMap map, float delta){
         for(var lane : lanes){
-            var end = length;
+            var end = length + (lane.vehicles.isEmpty() ? 0.0f : lane.vehicles.get(lane.vehicles.size() - 1).getSize()/2);
             for(int i = lane.vehicles.size() - 1; i >= 0; i --){
                 var vehicle = lane.vehicles.get(i);
                 vehicle.tick(map, this, delta);
@@ -36,7 +40,7 @@ public class Road {
                     if (turn != null){
                         lane.vehicles.remove(lane.vehicles.size() - 1);
                         turn.getLane().vehicles.add(0, vehicle);
-                        vehicle.setDistanceAlongRoad(0);
+                        vehicle.setDistanceAlongRoad(vehicle.getSize() / 2);
                         end = length;
                         continue;
                     }
@@ -49,7 +53,7 @@ public class Road {
         }
     }
 
-    public void draw(View g, RoadMap map){
+    public void updateNormal(RoadMap map){
         var start = map.roadStarts(this);
         var end = map.roadEnds(this);
 
@@ -58,11 +62,25 @@ public class Road {
         var xs = nx * nx;
         var ys = ny * ny;
         var len = (float)Math.sqrt(xs + ys);
-        nx /= len;
-        ny /= len;
+        normalX = nx / len;
+        normalY = ny / len;
+    }
 
-        var rx = -ny/3.0f;
-        var ry = nx/3.0f;
+    public float getNormalX() {
+        return normalX;
+    }
+
+    public float getNormalY() {
+        return normalY;
+    }
+
+    public void draw(Simulation sim, RoadMap map){
+        var g = sim.getView();
+        var start = map.roadStarts(this);
+        var end = map.roadEnds(this);
+
+        var rx = -normalY/3.0f;
+        var ry = normalX/3.0f;
         g.setColor(Color.LIGHT_GRAY);
         g.drawLine(start.getX(), start.getY(), end.getX(), end.getY());
         for (var lane : lanes){
@@ -82,11 +100,11 @@ public class Road {
             for(var vehicle : lane.vehicles){
                 var position = map.carPosition(start, end, this, vehicle);
                 vehicle.updatePosition(position[0]+rx, position[1]+ry);
-                vehicle.draw(g, (position[0]+rx), (position[1]+ry), nx, ny);
+                vehicle.draw(sim, (position[0]+rx), (position[1]+ry), normalX, normalY);
             }
 
-            rx -= ny/1.7;
-            ry += nx/1.7;
+            rx -= normalY/1.7f;
+            ry += normalX/1.7f;
         }
     }
 
@@ -142,7 +160,7 @@ public class Road {
         }
 
         public boolean canFit(Vehicle vehicle) {
-            return this.remainingSpace > 0.01;
+            return this.remainingSpace > vehicle.getSize() / 2.0f;
         }
 
         public void addVehicle(Vehicle vehicle) {

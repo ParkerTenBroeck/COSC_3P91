@@ -1,5 +1,6 @@
 package traffic_sim.map;
 
+import traffic_sim.Simulation;
 import traffic_sim.io.View;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.vehicle.Vehicle;
@@ -46,6 +47,7 @@ public class RoadMap {
         }
         incoming.get(to).add(road);
 
+        road.updateNormal(this);
         return road;
     }
 
@@ -59,25 +61,21 @@ public class RoadMap {
         middle.addTurn(from, to, turnDirection);
     }
 
-    public void init(Vehicle player){
-        this.roads.get(0).getLane(0).addVehicle(player);
-    }
-
-    public void tick(float delta){
+    public void tick(Simulation sim, float delta){
         for(var intersection : intersectionNames){
-            intersection.tick(this, delta);
+            intersection.tick(sim, this, delta);
         }
         for(var road : roads){
-            road.tick(this, delta);
+            road.tick(sim, this, delta);
         }
     }
 
-    public void draw(View g){
+    public void draw(Simulation sim){
         for(var intersection : this.intersectionNames){
-            intersection.draw(g, this);
+            intersection.draw(sim, this);
         }
         for(var road : roads){
-            road.draw(g, this);
+            road.draw(sim, this);
         }
     }
 

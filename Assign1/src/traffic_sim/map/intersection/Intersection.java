@@ -1,5 +1,6 @@
 package traffic_sim.map.intersection;
 
+import traffic_sim.Simulation;
 import traffic_sim.io.View;
 import traffic_sim.map.RoadMap;
 import traffic_sim.map.Road;
@@ -24,7 +25,7 @@ public class Intersection {
         this.y = y;
     }
 
-    public void tick(RoadMap map, double delta){}
+    public void tick(Simulation sim, RoadMap map, double delta){}
 
     public float distance(Intersection other){
         var xdiff = this.x - other.x;
@@ -55,16 +56,17 @@ public class Intersection {
         return this.turns.get(lane);
     }
 
-    public void draw(View g, RoadMap map) {
-        g.setColor(Color.RED);
-        g.fillOval(this.getX(), this.getY(), 2, 2);
-        g.setColor(Color.WHITE);
-        g.drawString(this.getName(), this.getX(), this.getY());
+    public void draw(Simulation sim, RoadMap map) {
+        sim.getView().setColor(Color.RED);
+        sim.getView().fillOval(this.getX(), this.getY(), 2, 2);
+        sim.getView().setColor(Color.WHITE);
+        sim.getView().drawString(this.getName(), this.getX(), this.getY());
     }
 
     public static class Turn{
-        String name;
-        Road.Lane lane;
+        protected String name;
+        protected Road.Lane lane;
+        protected boolean enabled = true;
 
         public Turn(String name, Road.Lane road){
             this.name = name;
@@ -77,8 +79,12 @@ public class Intersection {
 
         public Road.Lane getLane() { return this.lane; };
 
-        public boolean canFit(Vehicle vehicle) {
-            return this.lane.canFit(vehicle);
+        public boolean canTurn(Vehicle vehicle) {
+            if (enabled){
+                return this.lane.canFit(vehicle);
+            }else{
+                return false;
+            }
         }
     }
 }

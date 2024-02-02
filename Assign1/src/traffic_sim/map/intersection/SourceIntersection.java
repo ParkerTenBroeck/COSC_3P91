@@ -1,5 +1,6 @@
 package traffic_sim.map.intersection;
 
+import traffic_sim.Simulation;
 import traffic_sim.map.RoadMap;
 import traffic_sim.vehicle.Car;
 import traffic_sim.vehicle.Vehicle;
@@ -15,7 +16,7 @@ public class SourceIntersection extends Intersection{
     }
 
     @Override
-    public void tick(RoadMap map, double delta) {
+    public void tick(Simulation sim, RoadMap map, double delta) {
         var outgoing = map.outgoing(this);
         if (outgoing == null) return;
         if (!outgoing.isEmpty()){

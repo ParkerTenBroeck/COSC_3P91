@@ -1,5 +1,6 @@
 package traffic_sim.map.intersection;
 
+import traffic_sim.Simulation;
 import traffic_sim.map.RoadMap;
 
 public class DrainIntersection extends Intersection{
@@ -8,7 +9,7 @@ public class DrainIntersection extends Intersection{
     }
 
     @Override
-    public void tick(RoadMap map, double delta) {
+    public void tick(Simulation sim, RoadMap map, double delta) {
         var incoming = map.incoming(this);
         if (incoming == null) return;
         for(var road : incoming){

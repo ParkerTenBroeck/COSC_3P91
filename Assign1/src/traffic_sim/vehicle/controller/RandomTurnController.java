@@ -17,7 +17,7 @@ public class RandomTurnController implements Controller{
             return null;
         }else{
             var random = (int)(Math.random() * turns.size());
-            if (turns.get(random).canFit(v)){
+            if (turns.get(random).canTurn(v)){
                 return turns.get(random);
             }else{
                 return null;

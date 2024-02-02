@@ -61,8 +61,8 @@ public class Display {
         this.graphics = this.image.getGraphics();
     }
 
-    public Graphics getGraphics(){
-        return this.graphics;
+    public Graphics2D getGraphics(){
+        return (Graphics2D) this.graphics;
     }
 
     public int getHeight(){

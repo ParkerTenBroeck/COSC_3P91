@@ -1,5 +1,6 @@
 package traffic_sim.vehicle;
 
+import traffic_sim.Simulation;
 import traffic_sim.io.View;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.map.RoadMap;
@@ -77,10 +78,10 @@ public abstract class Vehicle {
         return this.onRoad;
     }
 
-    public void draw(View g, float x, float y, float nx, float ny){
-        if (g.getDebug()){
-            g.setColor(Color.WHITE);
-            g.drawString(m_count+"", x,y);
+    public void draw(Simulation sim, float x, float y, float nx, float ny){
+        if (sim.getView().getDebug()){
+            sim.getView().setColor(Color.WHITE);
+            sim.getView().drawString(m_count+"", x,y);
         }
     }
 

@@ -17,8 +17,13 @@ public class Simulation implements Runnable{
     private float trueDelta = 0.1f;
 
     private boolean pause = false;
+    private float simulationMultiplier = 1.0f;
+    private final float maxDeltaTick = 0.1f/5f;
+    private int simTick = 0;
+    private long simNanos = 0;
 
-    private ArrayList<SimSystem> systems = new ArrayList<>();
+    private final ArrayList<SimSystem> systems = new ArrayList<>();
+    private float systemsTime;
 
     public Simulation(RoadMap map){
         this.map = map;
@@ -28,31 +33,59 @@ public class Simulation implements Runnable{
         this.view = new View(display, input);
 
         this.addSystem((sim, delta) -> {
-            if (delta == 0.0f){
-                map.tick(delta);
+            if (sim.getPaused()){
+                map.tick(sim, 0.0f);
             }else{
-                var num = 5;
+                delta *= simulationMultiplier;
+                var num = (int)Math.ceil(delta/maxDeltaTick);
                 var r_tick = delta/num;
                 for(int i = 0; i < num; i ++){
-                    map.tick(r_tick);
+                    map.tick(sim, r_tick);
+                    simTick++;
+                    simNanos += (long) (r_tick*1e9);
                 }
             }
         });
 
         this.addSystem((sim, _delta) -> {
+            this.view.setStroke(0.08f);
             view.setColor(Color.BLACK);
             view.clearScreen();
-            map.draw(view);
+            map.draw(sim);
 
-            view.setColor(Color.WHITE);
-            view.test();
+            if (this.view.getDebug()){
+                view.setColor(Color.WHITE);
 
-            view.drawStringHud("X: " + view.panX, 10,10);
-            view.drawStringHud("Y: " + view.panY, 10,20);
-            view.drawStringHud("Zoom: " + view.zoom, 10,30);
+                view.drawStringHud("X: " + view.panX, 10,10);
+                view.drawStringHud("Y: " + view.panY, 10,20);
+                view.drawStringHud("Zoom: " + view.zoom, 10,30);
+                view.drawStringHud("SimMultiplier: " + this.simulationMultiplier, 10,40);
+                view.drawStringHud("Paused: " + this.pause, 10,50);
+                view.drawStringHud("Tick: " + this.simTick, 10,60);
+                view.drawStringHud("SimTime: " + this.simNanos*1e-9 + "s", 10,70);
+                view.drawStringHud("FrameTime: " + this.trueDelta + "s", 10,80);
+                view.drawStringHud("SystemsTime: " + this.systemsTime + "s", 10,90);
+            }
 
             view.update();
         });
+    }
+
+
+    public float getSimulationMultiplier() {
+        return simulationMultiplier;
+    }
+
+    public void setSimulationMultiplier(float simulationMultiplier) {
+        this.simulationMultiplier = Math.max(simulationMultiplier, 0.0f);
+    }
+
+    public int getSimTick() {
+        return simTick;
+    }
+
+    public long getSimNanos() {
+        return simNanos;
     }
 
     public Input getInput() {
@@ -83,16 +116,18 @@ public class Simulation implements Runnable{
     public void run(){
         long start = System.nanoTime();
         while(true){
-            var delta = this.getPaused() ? 0.0f : 0.1f;
+            var delta = 0.1f;
             for(int i = 0; i < this.systems.size(); i ++){
                 this.systems.get(i).run(this, delta);
             }
 
+            var now = System.nanoTime();
+            this.systemsTime = (now - start) / 1_000_000_000f;
             try{
-                Thread.sleep(16);
+                Thread.sleep(16 - (now - start)/1_000_000);
             }catch (Exception ignore){
             }
-            var now = System.nanoTime();
+            now = System.nanoTime();
             this.trueDelta = (now - start) / 1_000_000_000f;
             start = now;
         }

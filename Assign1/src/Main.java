@@ -2,7 +2,9 @@ import traffic_sim.Simulation;
 import traffic_sim.map.intersection.DrainIntersection;
 import traffic_sim.map.RoadMap;
 import traffic_sim.map.intersection.SourceIntersection;
+import traffic_sim.map.intersection.TimedIntersection;
 import traffic_sim.vehicle.Car;
+import traffic_sim.vehicle.Truck;
 import traffic_sim.vehicle.controller.PlayerController;
 
 import java.awt.*;
@@ -10,7 +12,7 @@ import java.awt.*;
 public class Main {
     public static void main(String[] args) {
         var map = new RoadMap();
-        var i1 = map.addIntersection("1", 0,0);
+        var i1 = map.addIntersection(new TimedIntersection("1", 0,0));
         var i2 = map.addIntersection("2", 10,0);
         var i3 = map.addIntersection("3", 10,10);
         var i4 = map.addIntersection("4", 0,10);
@@ -21,8 +23,8 @@ public class Main {
         map.addIntersection(is);
         map.addIntersection(id);
 
-        var sr = map.linkIntersection(is, i1, 3);
-        map.linkIntersection(i1, is, 3);
+        var sr = map.linkIntersection(is, i1, 2);
+        map.linkIntersection(i1, is, 2);
         var dr = map.linkIntersection(i3, id, 1);
 
         var r1 = map.linkIntersection(i1, i2, 1);
@@ -41,7 +43,6 @@ public class Main {
         map.addTurn(sr.getLane(0), r1.getLane(0), "Left");
         map.addTurn(sr.getLane(0), r8.getLane(0), "Right");
         map.addTurn(sr.getLane(1), r8.getLane(0), "Right");
-        map.addTurn(sr.getLane(2), r8.getLane(0), "Right");
 
         map.addTurn(r2.getLane(0), dr.getLane(0), "Forward");
 
@@ -68,7 +69,8 @@ public class Main {
         var simulation = new Simulation(map);
 
         var player = new Car(new PlayerController(simulation.getInput()), Color.MAGENTA);
-        map.init(player);
+        is.toAdd(player);
+        is.toAdd(new Truck());
 
         simulation.getView().panX = 0;
         simulation.getView().panY = 0;
@@ -98,6 +100,21 @@ public class Main {
             }
             if (sim.getInput().keyPressed('v')){
                 sim.getView().setDebug(!sim.getView().getDebug());
+            }
+            if (sim.getInput().keyPressed('t')){
+                is.toAdd(new Truck());
+            }
+            if (sim.getInput().keyPressed('1')){
+                sim.setSimulationMultiplier(1.0f);
+            }
+            if (sim.getInput().keyHeld('-')){
+                sim.setSimulationMultiplier(sim.getSimulationMultiplier() - 0.01f);
+            }
+            if (sim.getInput().keyHeld('=')){
+                sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 0.01f);
+            }
+            if (sim.getInput().keyHeld('+')){
+                sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 100.0f);
             }
 
             if (sim.getInput().keyPressed('f')){
