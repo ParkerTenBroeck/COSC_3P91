@@ -1,7 +1,6 @@
 package traffic_sim.vehicle;
 
 import traffic_sim.Simulation;
-import traffic_sim.io.View;
 import traffic_sim.vehicle.controller.Controller;
 import traffic_sim.vehicle.controller.RandomTurnController;
 

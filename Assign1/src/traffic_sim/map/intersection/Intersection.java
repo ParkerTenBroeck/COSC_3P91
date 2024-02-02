@@ -1,7 +1,6 @@
 package traffic_sim.map.intersection;
 
 import traffic_sim.Simulation;
-import traffic_sim.io.View;
 import traffic_sim.map.RoadMap;
 import traffic_sim.map.Road;
 import traffic_sim.vehicle.Vehicle;
