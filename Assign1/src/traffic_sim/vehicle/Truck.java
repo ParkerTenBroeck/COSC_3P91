@@ -28,18 +28,18 @@ public class Truck extends Vehicle{
     }
 
     @Override
-    public void tick(RoadMap map, Road.Lane lane, float delta) {
+    public void tick(Simulation sim, Road.Lane lane, float delta) {
         slow = !lane.leftmost;
-        super.tick(map, lane, delta);
+        super.tick(sim, lane, delta);
     }
 
     @Override
     public float getSpeedMultiplier() {
-        return this.slow ? 0.00001f : super.getSpeedMultiplier();
+        return this.slow ? 0.01f : super.getSpeedMultiplier();
     }
 
     @Override
-    public Road.LaneChangeDecision changeLane(RoadMap map, Road.Lane lane) {
+    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane) {
         if (!lane.leftmost){
             return Road.LaneChangeDecision.NudgeLeft;
         }else{

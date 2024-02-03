@@ -52,19 +52,19 @@ public abstract class Vehicle {
         this.distanceAlongRoad = distanceAlongRoad;
     }
 
-    public void tick(RoadMap map, Road.Lane lane, float delta) {
-        this.distanceAlongRoad += lane.road().getSpeedLimit() * delta * this.speedMultiplier;
+    public void tick(Simulation sim, Road.Lane lane, float delta) {
+        this.distanceAlongRoad += lane.road().getSpeedLimit() * delta * this.getSpeedMultiplier();
         this.distanceAlongRoad = Math.min(lane.remainingSpace(), this.distanceAlongRoad);
-        if(controller != null) controller.tick(this, map, lane, delta);
+        if(controller != null) controller.tick(this, sim, lane, delta);
     }
 
-    public Intersection.Turn chooseTurn(ArrayList<Intersection.Turn> turns){
-        if(controller != null) return controller.chooseTurn(this, turns);
+    public Intersection.Turn chooseTurn(Simulation sim, ArrayList<Intersection.Turn> turns){
+        if(controller != null) return controller.chooseTurn(this, sim, turns);
         return null;
     }
 
-    public Road.LaneChangeDecision changeLane(RoadMap map, Road.Lane lane){
-        if(controller != null) return controller.laneChange(this, map, lane);
+    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane){
+        if(controller != null) return controller.laneChange(this, sim, lane);
         return  Road.LaneChangeDecision.Nothing;
     }
 
@@ -80,7 +80,7 @@ public abstract class Vehicle {
     }
 
     public void draw(Simulation sim, float x, float y, float nx, float ny){
-        if (sim.getView().getDebug()){
+        if (sim.getDebug()){
             sim.getView().setColor(Color.WHITE);
             sim.getView().drawString(m_count+"", x,y);
         }

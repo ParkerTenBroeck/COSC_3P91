@@ -1,6 +1,7 @@
 package traffic_sim.map;
 
 import traffic_sim.Simulation;
+import traffic_sim.io.Display;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.vehicle.Vehicle;
 
@@ -64,7 +65,7 @@ public class RoadMap {
             intersection.tick(sim, this, delta);
         }
         for(var road : roads){
-            road.tick(sim, this, delta);
+            road.tick(sim, delta);
         }
     }
 

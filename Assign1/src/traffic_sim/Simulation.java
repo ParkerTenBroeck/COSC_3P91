@@ -9,14 +9,15 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class Simulation implements Runnable{
-    private Display display;
-    private Input input;
-    private View view;
+    private final Display display;
+    private final Input input;
+    private final View view;
     private RoadMap map;
 
     private float trueDelta = 0.1f;
 
     private boolean pause = false;
+    private boolean debug = true;
     private float simulationMultiplier = 1.0f;
     private final float maxDeltaTick = 0.1f/5f;
     private long targetFrameTime = 16666667;
@@ -49,12 +50,11 @@ public class Simulation implements Runnable{
         });
 
         this.addSystem((sim, _delta) -> {
-            this.view.setStroke(0.08f);
-            view.setColor(Color.BLACK);
-            view.clearScreen();
+            this.view.setDefaultStroke(0.08f);
+            view.clear();
             map.draw(sim);
 
-            if (this.view.getDebug()){
+            if (this.getDebug()){
                 view.setColor(Color.WHITE);
 
                 view.drawStringHud("X: " + view.panX, 10,10);
@@ -105,6 +105,13 @@ public class Simulation implements Runnable{
     public boolean getPaused(){
         return this.pause;
     }
+    public void setPaused(boolean paused) {
+        this.pause = paused;
+    }
+
+    public boolean getDebug() { return this.debug; }
+
+    public void setDebug(boolean debug) { this.debug = debug; }
 
     public void addSystem(SimSystem runnable){
         this.systems.add(runnable);
@@ -113,6 +120,8 @@ public class Simulation implements Runnable{
     public float getTrueDelta(){
         return trueDelta;
     }
+
+    public RoadMap getMap() { return this.map; };
 
     @Override
     public void run(){
@@ -135,9 +144,7 @@ public class Simulation implements Runnable{
         }
     }
 
-    public void setPaused(boolean paused) {
-        this.pause = paused;
-    }
+
 
     public interface SimSystem {
         void run(Simulation sim, float delta);

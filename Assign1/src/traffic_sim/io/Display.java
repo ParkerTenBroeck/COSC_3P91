@@ -3,12 +3,27 @@ package traffic_sim.io;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public class Display {
 
 
-    private BufferedImage image;
-    private Graphics graphics;
+
+
+    public enum Layer{
+        Hud(4),
+        TopLevel(3),
+        Cars(2),
+        Intersections(1),
+        Roads(0);
+        private final int index;
+        Layer(int index){
+            this.index = index;
+        }
+    }
+
+    private BufferedImage[] layers = new BufferedImage[Layer.Hud.index];
+    private Graphics[] graphics = new Graphics[Layer.Hud.index];
     private final JFrame frame;
     private final JPanel panel;
 
@@ -18,7 +33,8 @@ public class Display {
         int WINDOW_Y = 600;
 
         frame = new JFrame("Traffic Simulator");
-        image = new BufferedImage(WINDOW_X, WINDOW_Y, 1);
+        for(int i = 0; i < layers.length; i ++)
+            layers[i] = new BufferedImage(WINDOW_X, WINDOW_Y, 2);
 
         var insets = frame.getInsets();
         var frameHeight = insets.top + insets.bottom + WINDOW_Y;
@@ -34,7 +50,8 @@ public class Display {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.drawImage(image, 0, 0, null);
+                for(int i = 0; i < layers.length; i ++)
+                    g.drawImage(layers[i], 0, 0, null);
             }
         };
         panel.setBorder(BorderFactory.createEmptyBorder(insets.top, insets.left, insets.bottom, insets.right));
@@ -56,21 +73,38 @@ public class Display {
         this.update();
     }
 
-    public void update(){
-        this.frame.repaint();
-        this.graphics = this.image.getGraphics();
+    public void clear() {
+        for(int i = 0; i < layers.length; i ++){
+            if (i == 0)
+                ((Graphics2D)this.graphics[i]).setBackground(new Color(0,0,0,255));
+            else
+                ((Graphics2D)this.graphics[i]).setBackground(new Color(0,0,0,0));
+            this.graphics[i].clearRect(0,0,getWidth(), getHeight());
+        }
     }
 
-    public Graphics2D getGraphics(){
-        return (Graphics2D) this.graphics;
+    public void setDefaultStroke(Stroke stroke) {
+        for(int i = 0; i < layers.length; i ++){
+            ((Graphics2D)this.graphics[i]).setStroke(stroke);
+        }
+    }
+
+    public void update(){
+        this.frame.repaint();
+        for(int i = 0; i < layers.length; i ++)
+            this.graphics[i] = this.layers[i].getGraphics();
+    }
+
+    public Graphics2D getGraphics(Layer layer){
+        return (Graphics2D) this.graphics[layer.index];
     }
 
     public int getHeight(){
-        return this.image.getHeight();
+        return this.layers[0].getHeight();
     }
 
     public int getWidth(){
-        return this.image.getWidth();
+        return this.layers[0].getWidth();
     }
 
 

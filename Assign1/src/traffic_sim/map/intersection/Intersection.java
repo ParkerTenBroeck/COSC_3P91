@@ -1,6 +1,7 @@
 package traffic_sim.map.intersection;
 
 import traffic_sim.Simulation;
+import traffic_sim.io.Display;
 import traffic_sim.map.RoadMap;
 import traffic_sim.map.Road;
 import traffic_sim.vehicle.Vehicle;
@@ -56,6 +57,7 @@ public class Intersection {
     }
 
     public void draw(Simulation sim, RoadMap map) {
+        sim.getView().setLayer(Display.Layer.Intersections);
         sim.getView().setColor(Color.RED);
         sim.getView().fillOval(this.getX(), this.getY(), 2, 2);
         sim.getView().setColor(Color.WHITE);

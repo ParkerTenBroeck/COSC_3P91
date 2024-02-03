@@ -1,6 +1,7 @@
 package traffic_sim.map;
 
 import traffic_sim.Simulation;
+import traffic_sim.io.Display;
 import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
@@ -70,22 +71,22 @@ public class Road {
         }
     }
 
-    public void tick(Simulation sim, RoadMap map, float delta){
+    public void tick(Simulation sim, float delta){
 
         for(int l = 0; l < lanes.length; l ++) {
             var current_lane = lanes[l];
             if(!current_lane.vehicles.isEmpty()){
                 var vehicle = current_lane.vehicles.get(0);
                 if (vehicle.getDistanceAlongRoad() + 0.0001 + vehicle.getSize()/2 > length){
-                    var turns = map.roadEnds(this).getTurns(current_lane);
-                    var turn = vehicle.chooseTurn(turns);
+                    var turns = sim.getMap().roadEnds(this).getTurns(current_lane);
+                    var turn = vehicle.chooseTurn(sim, turns);
                     if (turn != null){
                         current_lane.vehicles.remove(0);
                         turn.getLane().vehicles.add(turn.getLane().vehicles.size(), vehicle);
                         vehicle.setDistanceAlongRoad(vehicle.getSize()/2);
                         // road was already updated so we need to run the update on le car
                         if (turn.getLane().road().tick == sim.getSimTick())
-                            vehicle.tick(map, turn.getLane(), delta);
+                            vehicle.tick(sim, turn.getLane(), delta);
                     }
                 }
             }
@@ -124,7 +125,7 @@ public class Road {
                         .vehicles.get(indexes[furthest_lane]);
 
                 boolean update = false;
-                var lane_change = vehicle.changeLane(map, lanes[furthest_lane]);
+                var lane_change = vehicle.changeLane(sim, lanes[furthest_lane]);
                 var new_lane = furthest_lane+lane_change.laneOffset;
                 boolean can_merge = false;
                 if(new_lane >= 0 && new_lane < lanes.length && lane_change.laneOffset != 0){
@@ -156,7 +157,7 @@ public class Road {
 
                 if (update){
                     lanes[furthest_lane].remainingSpace = Math.max(lanes[furthest_lane].remainingSpace, vehicle.getDistanceAlongRoad());
-                    vehicle.tick(map, lanes[furthest_lane], delta);
+                    vehicle.tick(sim, lanes[furthest_lane], delta);
                     lanes[furthest_lane].remainingSpace = Math.max(0.0f, vehicle.getDistanceAlongRoadBack());
                     indexes[furthest_lane]++;
                 }
@@ -198,12 +199,15 @@ public class Road {
 
         var rx = -normalY/3.0f;
         var ry = normalX/3.0f;
+
+        g.setLayer(Display.Layer.Roads);
         g.setColor(Color.LIGHT_GRAY);
         g.drawLine(start.getX(), start.getY(), end.getX(), end.getY());
         for (var lane : lanes){
 
 
-            if (g.getDebug()){
+            g.setLayer(Display.Layer.Roads);
+            if (sim.getDebug()){
                 float p = lane.remainingSpace / this.length;
                 g.setColor(Color.RED);
                 g.drawLine(end.getX()*p+start.getX()*(1-p)+rx, end.getY()*p+start.getY()*(1-p)+ry, end.getX()+rx, end.getY()+ry);
@@ -214,6 +218,7 @@ public class Road {
                 g.drawLine(start.getX()+rx, start.getY()+ry, end.getX()+rx, end.getY()+ry);
             }
 
+            g.setLayer(Display.Layer.Cars);
             for(var vehicle : lane.vehicles){
                 var position = map.carPosition(start, end, this, vehicle);
                 vehicle.updatePosition(position[0]+rx, position[1]+ry);

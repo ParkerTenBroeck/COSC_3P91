@@ -1,5 +1,6 @@
 package traffic_sim.vehicle.controller;
 
+import traffic_sim.Simulation;
 import traffic_sim.io.Input;
 import traffic_sim.map.RoadMap;
 import traffic_sim.map.Road;
@@ -15,7 +16,7 @@ public class PlayerController implements Controller{
         this.input = input;
     }
     @Override
-    public void tick(Vehicle v, RoadMap map, Road.Lane road, float delta) {
+    public void tick(Vehicle v, Simulation sim, Road.Lane road, float delta) {
         if (this.input.keyHeld('i')){
 
             v.setSpeedMultiplier(v.getSpeedMultiplier() + delta * 0.1f);
@@ -28,7 +29,7 @@ public class PlayerController implements Controller{
     }
 
     @Override
-    public Intersection.Turn chooseTurn(Vehicle v, ArrayList<Intersection.Turn> turns) {
+    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, ArrayList<Intersection.Turn> turns) {
         if (turns == null || turns.isEmpty()) {
             return null;
         }else{
@@ -42,7 +43,7 @@ public class PlayerController implements Controller{
     }
 
     @Override
-    public  Road.LaneChangeDecision laneChange(Vehicle v, RoadMap map, Road.Lane road) {
+    public  Road.LaneChangeDecision laneChange(Vehicle v, Simulation sim, Road.Lane road) {
         if (input.keyHeld('y')){
             return  Road.LaneChangeDecision.NudgeRight;
         }else{

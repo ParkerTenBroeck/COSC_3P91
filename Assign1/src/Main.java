@@ -100,7 +100,7 @@ public class Main {
                 sim.setPaused(!sim.getPaused());
             }
             if (sim.getInput().keyPressed('v')){
-                sim.getView().setDebug(!sim.getView().getDebug());
+                sim.setDebug(!sim.getDebug());
             }
             if (sim.getInput().keyPressed('t')){
                 is.toAdd(new Truck());

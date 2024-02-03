@@ -1,6 +1,7 @@
 package traffic_sim.map.intersection;
 
 import traffic_sim.Simulation;
+import traffic_sim.io.Display;
 import traffic_sim.map.RoadMap;
 
 import java.awt.*;
@@ -40,6 +41,7 @@ public class TimedIntersection extends Intersection {
     @Override
     public void draw(Simulation sim, RoadMap map) {
         super.draw(sim, map);
+        sim.getView().setLayer(Display.Layer.TopLevel);
         sim.getView().setColor(Color.GREEN);
         float xn = (float) Math.sin(sim.getSimNanos() / 10000000000.0);
         float yn = (float) Math.cos(sim.getSimNanos() / 10000000000.0);
