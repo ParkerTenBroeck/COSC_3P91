@@ -23,22 +23,22 @@ public class Main {
         map.addIntersection(is);
         map.addIntersection(id);
 
-        var sr = map.linkIntersection(is, i1, 2);
-        map.linkIntersection(i1, is, 2);
-        var dr = map.linkIntersection(i3, id, 1);
+        var sr = map.linkIntersection(is, i1, "", 2);
+        map.linkIntersection(i1, is, "", 2);
+        var dr = map.linkIntersection(i3, id, "", 1);
 
-        var r1 = map.linkIntersection(i1, i2, 1);
-        var r2 = map.linkIntersection(i2, i3, 2);
-        var r3 = map.linkIntersection(i3, i4, 1);
-        var r4 = map.linkIntersection(i4, i1, 1);
+        var r1 = map.linkIntersection(i1, i2, "", 1);
+        var r2 = map.linkIntersection(i2, i3, "", 2);
+        var r3 = map.linkIntersection(i3, i4, "", 1);
+        var r4 = map.linkIntersection(i4, i1, "", 1);
 
-        var r5 = map.linkIntersection(i4, i5, 1);
+        var r5 = map.linkIntersection(i4, i5, "", 1);
 
-        var r6 = map.linkIntersection(i5, i6, 1);
-        var r7 = map.linkIntersection(i6, i1, 1);
+        var r6 = map.linkIntersection(i5, i6, "", 1);
+        var r7 = map.linkIntersection(i6, i1, "", 1);
 
-        var r8 = map.linkIntersection(i1, i6, 1);
-        var r9 = map.linkIntersection(i6, i4, 1);
+        var r8 = map.linkIntersection(i1, i6, "", 1);
+        var r9 = map.linkIntersection(i6, i4, "", 1);
 
         map.addTurn(sr.getLane(0), r1.getLane(0), "Left");
         map.addTurn(sr.getLane(0), r8.getLane(0), "Right");

@@ -7,8 +7,9 @@ import traffic_sim.vehicle.Vehicle;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class Road {
+public final class Road {
 
+    private final String name;
     private float speedLimit = 1.0f;
     private final float length;
     private final Lane[] lanes;
@@ -19,7 +20,8 @@ public class Road {
     private long tick;
 
 
-    public Road(int lanes, float length) {
+    protected Road(String name, int lanes, float length) {
+        this.name = name;
         assert lanes > 1;
         this.length = length;
         this.lanes = new Lane[lanes];
@@ -228,6 +230,10 @@ public class Road {
             rx -= normalY/1.7f;
             ry += normalX/1.7f;
         }
+    }
+
+    public String getName(){
+        return this.name;
     }
 
     public float getSpeedLimit(){

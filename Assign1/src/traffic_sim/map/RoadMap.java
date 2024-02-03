@@ -30,8 +30,8 @@ public class RoadMap {
         return intersection;
     }
 
-    public Road linkIntersection(Intersection from, Intersection to, int lanes){
-        var road = new Road(lanes, from.distance(to));
+    public Road linkIntersection(Intersection from, Intersection to, String name, int lanes){
+        var road = new Road(name, lanes, from.distance(to));
         roads.add(road);
         roadEnds.put(road, to);
         roadStarts.put(road, from);
