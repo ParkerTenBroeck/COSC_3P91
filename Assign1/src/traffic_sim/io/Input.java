@@ -3,7 +3,9 @@ package traffic_sim.io;
 import java.awt.event.*;
 import java.util.HashSet;
 
-public class Input implements KeyListener, MouseListener, MouseMotionListener {
+public class Input implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
+
+
 
 
     private static class Storage implements Cloneable{
@@ -137,12 +139,16 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener {
     @Override
     public void mouseReleased(MouseEvent e) {
         s1.mouseHeld[e.getButton()] = false;
-        s1.mouseReleased[e.getButton()] = false;
+        s1.mouseReleased[e.getButton()] = true;
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+//        e.
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
     }
 
     @Override

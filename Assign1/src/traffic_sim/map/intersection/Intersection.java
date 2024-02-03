@@ -12,8 +12,8 @@ import java.util.HashMap;
 
 public class Intersection {
 
-    protected final float x;
-    protected final float y;
+    protected float x;
+    protected float y;
     protected final String name;
 
     protected final HashMap<Road.Lane, ArrayList<Turn>> turns = new HashMap<>();
@@ -52,8 +52,23 @@ public class Intersection {
         this.turns.get(from).add(new Intersection.Turn(turnDirection, to));
     }
 
+    public void updatePosition(RoadMap map, float x, float y){
+        this.x = x;
+        this.y = y;
+        for(var road : map.outgoing(this)){
+            road.changedPosition(map);
+        }
+        for(var road : map.incoming(this)){
+            road.changedPosition(map);
+        }
+    }
+
     public ArrayList<Turn> getTurns(Road.Lane lane) {
         return this.turns.get(lane);
+    }
+
+    public HashMap<Road.Lane, ArrayList<Turn>> getAllTurns() {
+        return this.turns;
     }
 
     public void draw(Simulation sim, RoadMap map) {

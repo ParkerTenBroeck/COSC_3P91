@@ -7,6 +7,7 @@ import traffic_sim.map.RoadMap;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class Simulation implements Runnable{
     private final Display display;
@@ -20,7 +21,7 @@ public class Simulation implements Runnable{
     private boolean debug = true;
     private float simulationMultiplier = 1.0f;
     private final float maxDeltaTick = 0.1f/5f;
-    private long targetFrameTime = 16666667;
+    private long targetFrameTime = 33333333;//16666667;
     private int simTick = 0;
     private long simNanos = 0;
 
@@ -34,42 +35,72 @@ public class Simulation implements Runnable{
 
         this.view = new View(display, input);
 
-        this.addSystem((sim, delta) -> {
-            if (sim.getPaused()){
-                map.tick(sim, 0.0f);
-            }else{
-                delta *= simulationMultiplier;
-                var num = (int)Math.ceil(delta/maxDeltaTick);
-                var r_tick = delta/num;
-                for(int i = 0; i < num; i ++){
-                    map.tick(sim, r_tick);
-                    simTick++;
-                    simNanos += (long) (r_tick*1e9);
+        this.addSystem(new SimSystem(1) {
+            @Override
+            public void init(Simulation sim) {}
+
+            @Override
+            public void run(Simulation sim, float delta) {
+                sim.input.update();
+                sim.view.setDefaultStroke(0.08f);
+                view.clear();
+            }
+        });
+
+        this.addSystem(new SimSystem(50) {
+            @Override
+            public void init(Simulation sim) {}
+
+            @Override
+            public void run(Simulation sim, float delta) {
+                if (sim.getPaused()){
+                    map.tick(sim, 0.0f);
+                }else{
+                    delta *= simulationMultiplier;
+                    var num = (int)Math.ceil(delta/maxDeltaTick);
+                    var r_tick = delta/num;
+                    for(int i = 0; i < num; i ++){
+                        map.tick(sim, r_tick);
+                        simTick++;
+                        simNanos += (long) (r_tick*1e9);
+                    }
                 }
             }
         });
 
-        this.addSystem((sim, _delta) -> {
-            this.view.setDefaultStroke(0.08f);
-            view.clear();
-            map.draw(sim);
+        this.addSystem(new SimSystem(1000) {
+            @Override
+            public void init(Simulation sim) {}
 
-            if (this.getDebug()){
-                view.setColor(Color.WHITE);
+            @Override
+            public void run(Simulation sim, float delta) {
+                map.draw(sim);
 
-                view.drawStringHud("X: " + view.panX, 10,10);
-                view.drawStringHud("Y: " + view.panY, 10,20);
-                view.drawStringHud("Zoom: " + view.zoom, 10,30);
-                view.drawStringHud("SimMultiplier: " + this.simulationMultiplier, 10,40);
-                view.drawStringHud("Paused: " + this.pause, 10,50);
-                view.drawStringHud("Tick: " + this.simTick, 10,60);
-                view.drawStringHud("SimTime: " + this.simNanos*1e-9 + "s", 10,70);
-                view.drawStringHud("FrameTime: " + this.trueDelta + "s", 10,80);
-                view.drawStringHud("SystemsTime: " + this.systemsTime + "s", 10,90);
-                view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(_delta*simulationMultiplier/maxDeltaTick)*1f/this.trueDelta, 10,100);
+                if (sim.getDebug()){
+                    view.setColor(Color.WHITE);
+
+                    view.drawStringHud("X: " + view.panX, 10,10);
+                    view.drawStringHud("Y: " + view.panY, 10,20);
+                    view.drawStringHud("Zoom: " + view.zoom, 10,30);
+                    view.drawStringHud("SimMultiplier: " + sim.simulationMultiplier, 10,40);
+                    view.drawStringHud("Paused: " + sim.pause, 10,50);
+                    view.drawStringHud("Tick: " + sim.simTick, 10,60);
+                    view.drawStringHud("SimTime: " + sim.simNanos*1e-9 + "s", 10,70);
+                    view.drawStringHud("FrameTime: " + sim.trueDelta + "s", 10,80);
+                    view.drawStringHud("SystemsTime: " + sim.systemsTime + "s", 10,90);
+                    view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(delta*simulationMultiplier/maxDeltaTick)*1f/sim.trueDelta, 10,100);
+                }
             }
+        });
 
-            view.update();
+        this.addSystem(new SimSystem(2000) {
+            @Override
+            public void init(Simulation sim) {}
+
+            @Override
+            public void run(Simulation sim, float delta) {
+                view.update();
+            }
         });
     }
 
@@ -115,6 +146,8 @@ public class Simulation implements Runnable{
 
     public void addSystem(SimSystem runnable){
         this.systems.add(runnable);
+        this.systems.sort(Comparator.comparingInt(simSystem -> simSystem.priority)
+        );
     }
 
     public float getTrueDelta(){
@@ -146,7 +179,13 @@ public class Simulation implements Runnable{
 
 
 
-    public interface SimSystem {
-        void run(Simulation sim, float delta);
+    public abstract static class SimSystem {
+        public final int priority;
+        public SimSystem(int priority){
+            this.priority = priority;
+        }
+
+        public abstract void init(Simulation sim);
+        public abstract void run(Simulation sim, float delta);
     }
 }

@@ -1,0 +1,42 @@
+# type \t  id  \t   name  	   x  \t   \y   \t  kind \t ...
+intersection	10	1	0.0	0.0	Timed
+intersection	20	2	10.0	0.0	Default
+intersection	30	3	10.0	10.0	Default
+intersection	40	4	0.0	10.0	Default
+intersection	50	5	0.0	20.0	Default
+intersection	60	6	-10.0	10.0	Default
+intersection	Source0	Source	0.0	-10.0	Source
+intersection	Drain0	Drain	10.0	20.0	Drain
+
+# type \t  id  \t  name \t lanes  \t  inter_id_from \t inter_id_to
+road	0		2	Source0	10
+road	1		2	10	Source0
+road	2		1	30	Drain0
+road	3		1	10	20
+road	4		2	20	30
+road	5		1	30	40
+road	6		1	40	10
+road	7		1	40	50
+road	8		1	50	60
+road	9		1	60	10
+road	10		1	10	60
+road	11		1	60	40
+
+# type \t  from_road_id \t from_road_lane \t name \t to_road_id \t to_road_lane
+turn	0	0	Left	3	0
+turn	0	0	Right	10	0
+turn	0	1	Right	10	0
+turn	9	0	Right	3	0
+turn	6	0	Left	10	0
+turn	6	0	Right	3	0
+turn	3	0	Right	4	0
+turn	4	0	Forward	2	0
+turn	4	0	Right	5	0
+turn	11	0	Left	6	0
+turn	11	0	Right	7	0
+turn	5	0	Right	6	0
+turn	5	0	Left	7	0
+turn	7	0	Right	8	0
+turn	8	0	Right	11	0
+turn	8	0	Right	9	0
+turn	10	0	Left	11	0

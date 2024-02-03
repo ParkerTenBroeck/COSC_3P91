@@ -73,7 +73,6 @@ public class View {
 
     public void update(){
         this.display.update();
-        this.input.update();
 
         this.height = this.display.getHeight();
         this.width = this.display.getWidth();

@@ -2,6 +2,7 @@ package traffic_sim.map;
 
 import traffic_sim.Simulation;
 import traffic_sim.io.Display;
+import traffic_sim.map.intersection.Intersection;
 import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
@@ -11,8 +12,8 @@ public final class Road {
 
     private final String name;
     private float speedLimit = 1.0f;
-    private final float length;
-    private final Lane[] lanes;
+    private float length;
+    private Lane[] lanes;
 
     private float normalX;
     private float normalY;
@@ -20,14 +21,27 @@ public final class Road {
     private long tick;
 
 
-    protected Road(String name, int lanes, float length) {
+    protected Road(String name, int lanes, Intersection from, Intersection to) {
         this.name = name;
-        assert lanes > 1;
-        this.length = length;
         this.lanes = new Lane[lanes];
         for(int i = 0; i < this.lanes.length; i ++){
-            this.lanes[i] = new Lane(i==0, i==this.lanes.length-1);
+            this.lanes[i] = new Lane(i, i==0, i==this.lanes.length-1);
         }
+        this.changedPosition(from, to);
+    }
+
+    public void addLanes(int numNew) {
+        var newLanes = new Lane[numNew + lanes.length];
+        for(int i = 0; i < newLanes.length; i ++){
+            newLanes[i] = new Lane(i, i==0, i==this.lanes.length-1);
+            if (i < lanes.length){
+                newLanes[i].vehicles.addAll(lanes[i].vehicles);
+            }
+        }
+
+
+
+        this.lanes = newLanes;
     }
 
 
@@ -173,10 +187,12 @@ public final class Road {
         }
     }
 
-    public void updateNormal(RoadMap map){
+    public void changedPosition(RoadMap map){
         var start = map.roadStarts(this);
         var end = map.roadEnds(this);
-
+        this.changedPosition(start, end);
+    }
+    public void changedPosition(Intersection start, Intersection end){
         var nx = end.getX() - start.getX();
         var ny = end.getY() - start.getY();
         var xs = nx * nx;
@@ -184,6 +200,12 @@ public final class Road {
         var len = (float)Math.sqrt(xs + ys);
         normalX = nx / len;
         normalY = ny / len;
+        this.length = len;
+        for(var lane : lanes){
+            for(var vehicle : lane.vehicles){
+                vehicle.setDistanceAlongRoad(Math.min(this.length, vehicle.getDistanceAlongRoad()));
+            }
+        }
     }
 
     public float getNormalX() {
@@ -265,13 +287,15 @@ public final class Road {
     }
 
     public final class Lane{
+        private final int lane;
         private float remainingSpace;
         private ArrayList<Vehicle> vehicles = new ArrayList<>();
-        public final boolean leftmost;
-        public final boolean rightmost;
+        public boolean leftmost;
+        public boolean rightmost;
 
-        private Lane(boolean leftmost, boolean rightmost){
+        private Lane(int lane, boolean leftmost, boolean rightmost){
             this.remainingSpace = length;
+            this.lane = lane;
             this.rightmost = rightmost;
             this.leftmost = leftmost;
         }
@@ -303,6 +327,10 @@ public final class Road {
 
         public float remainingSpace() {
             return this.remainingSpace;
+        }
+
+        public int getLane() {
+            return this.lane;
         }
     }
 }

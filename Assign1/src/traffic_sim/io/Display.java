@@ -3,12 +3,8 @@ package traffic_sim.io;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
 public class Display {
-
-
-
 
     public enum Layer{
         Hud(4),
@@ -22,15 +18,15 @@ public class Display {
         }
     }
 
-    private BufferedImage[] layers = new BufferedImage[Layer.Hud.index];
-    private Graphics[] graphics = new Graphics[Layer.Hud.index];
+    private BufferedImage[] layers = new BufferedImage[Layer.Hud.index+1];
+    private Graphics[] graphics = new Graphics[Layer.Hud.index+1];
     private final JFrame frame;
     private final JPanel panel;
 
     public Display(Input input) {
 
-        int WINDOW_X = 1000;
-        int WINDOW_Y = 600;
+        int WINDOW_X = 1920;
+        int WINDOW_Y = 1080;
 
         frame = new JFrame("Traffic Simulator");
         for(int i = 0; i < layers.length; i ++)
