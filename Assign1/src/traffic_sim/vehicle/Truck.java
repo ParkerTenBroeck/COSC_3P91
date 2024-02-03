@@ -1,6 +1,9 @@
 package traffic_sim.vehicle;
 
 import traffic_sim.Simulation;
+
+import traffic_sim.map.Road;
+import traffic_sim.map.RoadMap;
 import traffic_sim.vehicle.controller.Controller;
 import traffic_sim.vehicle.controller.RandomTurnController;
 
@@ -8,6 +11,7 @@ import java.awt.*;
 
 public class Truck extends Vehicle{
     private final Color color;
+    private boolean slow = false;
 
     public Truck() {
         this(new RandomTurnController(), Color.CYAN);
@@ -21,6 +25,26 @@ public class Truck extends Vehicle{
         super(controller, (float) (Math.random() * 1 + 3.0));
         super.speedMultiplier = (float) (Math.random() * 0.4 + 0.4-0.2);
         this.color = color;
+    }
+
+    @Override
+    public void tick(RoadMap map, Road.Lane lane, float delta) {
+        slow = !lane.leftmost;
+        super.tick(map, lane, delta);
+    }
+
+    @Override
+    public float getSpeedMultiplier() {
+        return this.slow ? 0.00001f : super.getSpeedMultiplier();
+    }
+
+    @Override
+    public Road.LaneChangeDecision changeLane(RoadMap map, Road.Lane lane) {
+        if (!lane.leftmost){
+            return Road.LaneChangeDecision.NudgeLeft;
+        }else{
+            return Road.LaneChangeDecision.Nothing;
+        }
     }
 
     @Override

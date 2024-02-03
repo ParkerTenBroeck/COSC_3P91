@@ -15,40 +15,158 @@ public class Road {
     private float normalX;
     private float normalY;
 
+    private long tick;
+
 
     public Road(int lanes, float length) {
         assert lanes > 1;
         this.length = length;
         this.lanes = new Lane[lanes];
         for(int i = 0; i < this.lanes.length; i ++){
-            this.lanes[i] = new Lane();
+            this.lanes[i] = new Lane(i==0, i==this.lanes.length-1);
         }
     }
 
-    public void tick(Simulation _sim, RoadMap map, float delta){
-        for(var lane : lanes){
-            var end = length + (lane.vehicles.isEmpty() ? 0.0f : lane.vehicles.get(lane.vehicles.size() - 1).getSize()/2);
-            for(int i = lane.vehicles.size() - 1; i >= 0; i --){
-                var vehicle = lane.vehicles.get(i);
-                vehicle.tick(map, this, delta);
-                var new_pos = vehicle.getDistanceAlongRoad() + speedLimit * delta * vehicle.getSpeedMultiplier();
-                new_pos = Float.min(end, new_pos);
-                if (new_pos + 0.0001 > length){
-                    var turns = map.roadEnds(this).getTurns(lane);
+
+    public static class Surroundings {
+
+        Vehicle leftFront;
+        double leftSpaceToFront;
+        Vehicle leftBack;
+        double leftSpaceToBack;
+        Lane left;
+
+
+        Lane current;
+        Vehicle front;
+        double spaceToFront;
+        Vehicle back;
+        double spaceToBack;
+
+        Lane right;
+        Vehicle rightFront;
+        double rightSpaceToFront;
+        Vehicle rightBack;
+        double rightSpaceToBack;
+    }
+
+    public enum LaneChangeDecision{
+        ForceLeft(false, true, -1),
+        NudgeLeft(true, false, -1),
+        WaitLeft(false, false, -1),
+        Nothing(false, false, 0),
+        WaitRight(false, false, 1),
+        NudgeRight(true, false, 1),
+        ForceRight(false, true, 1);
+
+        boolean nudge;
+        boolean force;
+        int laneOffset;
+
+        LaneChangeDecision(boolean nudge, boolean force, int laneOffset){
+            this.force = force;
+            this.nudge = nudge;
+            this.laneOffset = laneOffset;
+        }
+    }
+
+    public void tick(Simulation sim, RoadMap map, float delta){
+
+        for(int l = 0; l < lanes.length; l ++) {
+            var current_lane = lanes[l];
+            if(!current_lane.vehicles.isEmpty()){
+                var vehicle = current_lane.vehicles.get(0);
+                if (vehicle.getDistanceAlongRoad() + 0.0001 + vehicle.getSize()/2 > length){
+                    var turns = map.roadEnds(this).getTurns(current_lane);
                     var turn = vehicle.chooseTurn(turns);
                     if (turn != null){
-                        lane.vehicles.remove(lane.vehicles.size() - 1);
-                        turn.getLane().vehicles.add(0, vehicle);
-                        vehicle.setDistanceAlongRoad(vehicle.getSize() / 2);
-                        end = length;
-                        continue;
+                        current_lane.vehicles.remove(0);
+                        turn.getLane().vehicles.add(turn.getLane().vehicles.size(), vehicle);
+                        vehicle.setDistanceAlongRoad(vehicle.getSize()/2);
+                        // road was already updated so we need to run the update on le car
+                        if (turn.getLane().road().tick == sim.getSimTick())
+                            vehicle.tick(map, turn.getLane(), delta);
                     }
                 }
-                vehicle.setDistanceAlongRoad(new_pos);
-                end = new_pos - vehicle.getSize() - 0.05f;
-                end = Float.max(end, 0);
             }
-            lane.remainingSpace = end;
+
+            if (!current_lane.vehicles.isEmpty()){
+                current_lane.remainingSpace = this.length + current_lane.vehicles.get(0).getSize()/2.0f;
+            }else{
+                current_lane.remainingSpace = this.length;
+            }
+        }
+
+
+        this.tick = sim.getSimTick();
+        var surroundings = new Surroundings();
+        var indexes = new int[this.lanes.length];
+
+
+        boolean has_next;
+        do{
+            float furthest = Float.NEGATIVE_INFINITY;
+            int furthest_lane = 0;
+
+            has_next = false;
+            for(int l = 0; l < lanes.length; l ++){
+                if (indexes[l] >= lanes[l].vehicles.size())
+                    continue;
+                var vehicle = lanes[l].vehicles.get(indexes[l]);
+                if (vehicle.getDistanceAlongRoad() > furthest){
+                    furthest = vehicle.getDistanceAlongRoad();
+                    furthest_lane = l;
+                    has_next = true;
+                }
+            }
+            if (has_next){
+                var vehicle = lanes[furthest_lane]
+                        .vehicles.get(indexes[furthest_lane]);
+
+                boolean update = false;
+                var lane_change = vehicle.changeLane(map, lanes[furthest_lane]);
+                var new_lane = furthest_lane+lane_change.laneOffset;
+                boolean can_merge = false;
+                if(new_lane >= 0 && new_lane < lanes.length && lane_change.laneOffset != 0){
+                    if (vehicle.getDistanceAlongRoad() < lanes[new_lane].remainingSpace){
+                        if (indexes[new_lane]<lanes[new_lane].vehicles.size()){
+                            can_merge = vehicle.getDistanceAlongRoadBack() > lanes[new_lane].vehicles.get(indexes[new_lane]).getDistanceAlongRoad();
+                        }else{
+                            can_merge = true;
+                        }
+                    }
+                    if(can_merge){
+                        lanes[furthest_lane].vehicles.remove(indexes[furthest_lane]);
+                        lanes[new_lane].vehicles.add(indexes[new_lane], vehicle);
+                    }else{
+                        if (lane_change.nudge)
+                            lanes[new_lane].remainingSpace = vehicle.getDistanceAlongRoadBack();
+
+                        if (lane_change.force){
+                            lanes[furthest_lane].vehicles.remove(indexes[furthest_lane]);
+                            lanes[new_lane].vehicles.add(indexes[new_lane], vehicle);
+                        }else{
+
+                        }
+                        update = true;
+                    }
+                }else{
+                    update = true;
+                }
+
+                if (update){
+                    lanes[furthest_lane].remainingSpace = Math.max(lanes[furthest_lane].remainingSpace, vehicle.getDistanceAlongRoad());
+                    vehicle.tick(map, lanes[furthest_lane], delta);
+                    lanes[furthest_lane].remainingSpace = Math.max(0.0f, vehicle.getDistanceAlongRoadBack());
+                    indexes[furthest_lane]++;
+                }
+            }
+
+        }while(has_next);
+
+        for(var lane : lanes){
+            lane.remainingSpace = Math.min(this.length, lane.remainingSpace);
+            lane.remainingSpace = Math.max(0, lane.remainingSpace);
         }
     }
 
@@ -135,12 +253,16 @@ public class Road {
         return this.length;
     }
 
-    public class Lane{
-        float remainingSpace;
-        ArrayList<Vehicle> vehicles = new ArrayList<>();
+    public final class Lane{
+        private float remainingSpace;
+        private ArrayList<Vehicle> vehicles = new ArrayList<>();
+        public final boolean leftmost;
+        public final boolean rightmost;
 
-        private Lane(){
+        private Lane(boolean leftmost, boolean rightmost){
             this.remainingSpace = length;
+            this.rightmost = rightmost;
+            this.leftmost = leftmost;
         }
 
         public Road road() {
@@ -149,23 +271,27 @@ public class Road {
 
         public Vehicle removeEnd() {
             if(this.vehicles.isEmpty()) return null;
-            var last = this.vehicles.remove(this.vehicles.size() - 1);
+            var last = this.vehicles.remove(0);
             if (last.getDistanceAlongRoad() + 0.0001 > length){
                 return last;
             }else{
-                this.vehicles.add(last);
+                this.vehicles.add(0,last);
             }
             return null;
         }
 
         public boolean canFit(Vehicle vehicle) {
-            return this.remainingSpace > vehicle.getSize() / 2.0f;
+            return this.remainingSpace > vehicle.getSize()/2;
         }
 
         public void addVehicle(Vehicle vehicle) {
             vehicle.putInLane(this);
-            this.vehicles.add(0, vehicle);
+            this.vehicles.add(this.vehicles.size(), vehicle);
             this.remainingSpace = 0;
+        }
+
+        public float remainingSpace() {
+            return this.remainingSpace;
         }
     }
 }

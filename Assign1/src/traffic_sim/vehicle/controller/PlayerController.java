@@ -15,7 +15,7 @@ public class PlayerController implements Controller{
         this.input = input;
     }
     @Override
-    public void tick(Vehicle v, RoadMap map, Road road, float delta) {
+    public void tick(Vehicle v, RoadMap map, Road.Lane road, float delta) {
         if (this.input.keyHeld('i')){
 
             v.setSpeedMultiplier(v.getSpeedMultiplier() + delta * 0.1f);
@@ -42,7 +42,11 @@ public class PlayerController implements Controller{
     }
 
     @Override
-    public int laneChange(Vehicle v, RoadMap map, Road.Lane road) {
-        return 0;
+    public  Road.LaneChangeDecision laneChange(Vehicle v, RoadMap map, Road.Lane road) {
+        if (input.keyHeld('y')){
+            return  Road.LaneChangeDecision.NudgeRight;
+        }else{
+            return  Road.LaneChangeDecision.Nothing;
+        }
     }
 }

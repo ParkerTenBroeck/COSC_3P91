@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class RandomTurnController implements Controller{
     @Override
-    public void tick(Vehicle v, RoadMap map, Road road, float delta) {}
+    public void tick(Vehicle v, RoadMap map, Road.Lane road, float delta) {}
 
     @Override
     public Intersection.Turn chooseTurn(Vehicle v, ArrayList<Intersection.Turn> turns) {
@@ -26,7 +26,7 @@ public class RandomTurnController implements Controller{
     }
 
     @Override
-    public int laneChange(Vehicle v, RoadMap map, Road.Lane road) {
-        return 0;
+    public  Road.LaneChangeDecision laneChange(Vehicle v, RoadMap map, Road.Lane road) {
+        return  Road.LaneChangeDecision.Nothing;
     }
 }
