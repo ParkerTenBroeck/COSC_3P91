@@ -19,6 +19,7 @@ public class Simulation implements Runnable{
     private boolean pause = false;
     private float simulationMultiplier = 1.0f;
     private final float maxDeltaTick = 0.1f/5f;
+    private long targetFrameTime = 16666667;
     private int simTick = 0;
     private long simNanos = 0;
 
@@ -65,6 +66,7 @@ public class Simulation implements Runnable{
                 view.drawStringHud("SimTime: " + this.simNanos*1e-9 + "s", 10,70);
                 view.drawStringHud("FrameTime: " + this.trueDelta + "s", 10,80);
                 view.drawStringHud("SystemsTime: " + this.systemsTime + "s", 10,90);
+                view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(_delta*simulationMultiplier/maxDeltaTick)*1f/this.trueDelta, 10,100);
             }
 
             view.update();
@@ -124,7 +126,7 @@ public class Simulation implements Runnable{
             var now = System.nanoTime();
             this.systemsTime = (now - start) / 1_000_000_000f;
             try{
-                Thread.sleep(16 - (now - start)/1_000_000);
+                Thread.sleep((targetFrameTime - (now - start))/1_000_000, (int) ((targetFrameTime - (now - start))%1_000_000));
             }catch (Exception ignore){
             }
             now = System.nanoTime();

@@ -69,6 +69,7 @@ public class Main {
         var simulation = new Simulation(map);
 
         var player = new Car(new PlayerController(simulation.getInput()), Color.MAGENTA);
+        player.setSpeedMultiplier(0.1f);
         is.toAdd(player);
         is.toAdd(new Truck());
 

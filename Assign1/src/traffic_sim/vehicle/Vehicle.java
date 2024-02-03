@@ -53,8 +53,10 @@ public abstract class Vehicle {
         this.distanceAlongRoad = distanceAlongRoad;
     }
 
-    public void tick(RoadMap map, Road road, float delta) {
-        if(controller != null) controller.tick(this, map, road, delta);
+    public void tick(RoadMap map, Road.Lane lane, float delta) {
+        this.distanceAlongRoad += lane.road().getSpeedLimit() * delta * this.speedMultiplier;
+        this.distanceAlongRoad = Math.min(lane.remainingSpace(), this.distanceAlongRoad);
+        if(controller != null) controller.tick(this, map, lane, delta);
     }
 
     public Intersection.Turn chooseTurn(ArrayList<Intersection.Turn> turns){
@@ -62,9 +64,9 @@ public abstract class Vehicle {
         return null;
     }
 
-    public int changeLane(RoadMap map, Road.Lane lane){
+    public Road.LaneChangeDecision changeLane(RoadMap map, Road.Lane lane){
         if(controller != null) return controller.laneChange(this, map, lane);
-        return 0;
+        return  Road.LaneChangeDecision.Nothing;
     }
 
     public void putInLane(Road.Lane rode){
@@ -96,5 +98,9 @@ public abstract class Vehicle {
 
     public float getLastY(){
         return this.lastY;
+    }
+
+    public float getDistanceAlongRoadBack() {
+        return this.distanceAlongRoad - this.size;
     }
 }

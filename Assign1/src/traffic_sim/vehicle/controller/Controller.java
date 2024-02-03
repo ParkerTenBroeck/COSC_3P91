@@ -8,7 +8,7 @@ import traffic_sim.vehicle.Vehicle;
 import java.util.ArrayList;
 
 public interface Controller {
-    void tick(Vehicle v, RoadMap map, Road road, float delta);
+    void tick(Vehicle v, RoadMap map, Road.Lane road, float delta);
     Intersection.Turn chooseTurn(Vehicle v, ArrayList<Intersection.Turn> turns);
-    int laneChange(Vehicle v, RoadMap map, Road.Lane road);
+    Road.LaneChangeDecision laneChange(Vehicle v, RoadMap map, Road.Lane road);
 }
