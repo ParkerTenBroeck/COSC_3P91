@@ -12,13 +12,10 @@ import traffic_sim.vehicle.controller.PlayerController;
 
 import java.awt.*;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Scanner;
-import traffic_sim.Simulation.SimSystem;
 
 
-/*UML_RAW_OUTER hide Main*/
+/*UML_HIDE*/
 public class Main {
     public static void main(String[] args) throws Exception {
         var map = new RoadMap();
@@ -76,8 +73,8 @@ public class Main {
 
 //        map.write(new FileWriter("bruh.txt"));
 
-        map = new RoadMap();
-        map.read(new Scanner(new File("bruh.txt")));
+//        map = new RoadMap();
+//        map.read(new Scanner(new File("bruh.txt")));
 
         r1.setSpeedLimit(2.0f);
 
@@ -101,22 +98,22 @@ public class Main {
             @Override
             public void run(Simulation sim, float delta) {
                 if (sim.getInput().keyHeld('D')){
-                    sim.getView().panX -= sim.getTrueDelta()*7;
+                    sim.getView().panX -= sim.getFrameDelta()*7;
                 }
                 if (sim.getInput().keyHeld('A')){
-                    sim.getView().panX += sim.getTrueDelta()*7;
+                    sim.getView().panX += sim.getFrameDelta()*7;
                 }
                 if (sim.getInput().keyHeld('W')){
-                    sim.getView().panY += sim.getTrueDelta()*7;
+                    sim.getView().panY += sim.getFrameDelta()*7;
                 }
                 if (sim.getInput().keyHeld('S')){
-                    sim.getView().panY -= sim.getTrueDelta()*7;
+                    sim.getView().panY -= sim.getFrameDelta()*7;
                 }
                 if (sim.getInput().keyHeld('Q')){
-                    sim.getView().zoom += sim.getTrueDelta()*sim.getView().zoom*2;
+                    sim.getView().zoom += sim.getFrameDelta()*sim.getView().zoom*2;
                 }
                 if (sim.getInput().keyHeld('E')){
-                    sim.getView().zoom -= sim.getTrueDelta()*sim.getView().zoom*2;
+                    sim.getView().zoom -= sim.getFrameDelta()*sim.getView().zoom*2;
                 }
                 if (sim.getInput().keyPressed(' ')){
                     sim.setPaused(!sim.getPaused());
@@ -142,8 +139,8 @@ public class Main {
                 if(sim.getInput().mousePressed(Input.MouseKey.Left) | sim.getInput().mousePressed(Input.MouseKey.Right)){
 
                     this.held = null;
-                    var x = sim.getView().getScreenX();
-                    var y = sim.getView().getScreenY();
+                    var x = sim.getView().getMouseMapX();
+                    var y = sim.getView().getMouseMapY();
                     for(var intersection : sim.getMap().getIntersections()){
                         var xd = Math.abs(x - intersection.getX());
                         var yd = Math.abs(y - intersection.getY());
@@ -153,16 +150,16 @@ public class Main {
                     }
                 }
                 if (sim.getInput().mousePressed(Input.MouseKey.Middle)){
-                    sim.getMap().addIntersection("", sim.getView().getScreenX(), sim.getView().getScreenY());
+                    sim.getMap().addIntersection("", sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
                 }
                 if(sim.getInput().mouseHeld(Input.MouseKey.Left)) {
                     if(held != null){
-                        this.held.updatePosition(sim.getMap(),  sim.getView().getScreenX(), sim.getView().getScreenY());
+                        this.held.updatePosition(sim.getMap(),  sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
                     }
                 }
                 if (sim.getInput().mouseReleased(Input.MouseKey.Right)){
-                    var x = sim.getView().getScreenX();
-                    var y = sim.getView().getScreenY();
+                    var x = sim.getView().getMouseMapX();
+                    var y = sim.getView().getMouseMapY();
                     Intersection other = null;
                     for(var intersection : sim.getMap().getIntersections()){
                         var xd = Math.abs(x - intersection.getX());
@@ -186,7 +183,7 @@ public class Main {
                     sim.getView().setColor(Color.YELLOW);
                     sim.getView().drawOval(held.getX(), held.getY(), 3f, 3f);
                     if(sim.getInput().mouseHeld(Input.MouseKey.Right)){
-                        sim.getView().drawLine(held.getX(), held.getY(), sim.getView().getScreenX(), sim.getView().getScreenY());
+                        sim.getView().drawLine(held.getX(), held.getY(), sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
                     }
                 }
 

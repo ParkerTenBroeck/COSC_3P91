@@ -9,6 +9,9 @@ import traffic_sim.vehicle.Vehicle;
 
 import java.util.ArrayList;
 
+/**
+ * A controller that allows for a player to control a vehicle with user input
+ */
 public class PlayerController implements Controller{
     private final Input input;
 
@@ -16,7 +19,7 @@ public class PlayerController implements Controller{
         this.input = input;
     }
     @Override
-    public void tick(Vehicle v, Simulation sim, Road.Lane road, float delta) {
+    public void tick(Vehicle v, Simulation sim, Road.Lane lane, float delta) {
         if (this.input.keyHeld('i')){
 
             v.setSpeedMultiplier(v.getSpeedMultiplier() + delta * 0.1f);
@@ -43,7 +46,7 @@ public class PlayerController implements Controller{
     }
 
     @Override
-    public  Road.LaneChangeDecision laneChange(Vehicle v, Simulation sim, Road.Lane road) {
+    public  Road.LaneChangeDecision laneChange(Vehicle v, Simulation sim, Road.Lane lane, int left_vehicle_back_index, int right_vehicle_back_index) {
         if (input.keyHeld('y')){
             return  Road.LaneChangeDecision.NudgeRight;
         }else{

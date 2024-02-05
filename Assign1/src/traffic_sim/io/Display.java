@@ -4,6 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+/**
+ * A window that displays the items drawn to the screen.
+ */
 public class Display {
 
     public enum Layer{
@@ -25,8 +28,8 @@ public class Display {
 
     public Display(Input input) {
 
-        int WINDOW_X = 1920;
-        int WINDOW_Y = 1080;
+        int WINDOW_X = 720;
+        int WINDOW_Y = 480;
 
         frame = new JFrame("Traffic Simulator");
         for(int i = 0; i < layers.length; i ++)
@@ -69,7 +72,10 @@ public class Display {
         this.update();
     }
 
-    public void clear() {
+    /**
+     * Clears all layers in the Display
+     */
+    public void clearAll() {
         for(int i = 0; i < layers.length; i ++){
             if (i == 0)
                 ((Graphics2D)this.graphics[i]).setBackground(new Color(0,0,0,255));
@@ -79,26 +85,42 @@ public class Display {
         }
     }
 
+    /**
+     * @param stroke    Sets the default stroke for all layers
+     */
     public void setDefaultStroke(Stroke stroke) {
         for(int i = 0; i < layers.length; i ++){
             ((Graphics2D)this.graphics[i]).setStroke(stroke);
         }
     }
 
+    /**
+     * Actually draw the layers to the screen
+     */
     public void update(){
         this.frame.repaint();
         for(int i = 0; i < layers.length; i ++)
             this.graphics[i] = this.layers[i].getGraphics();
     }
 
+    /**
+     * @param layer The layer of the graphics we want to get
+     * @return      The graphics object for the layer
+     */
     public Graphics2D getGraphics(Layer layer){
         return (Graphics2D) this.graphics[layer.index];
     }
 
+    /**
+     * @return  The height in pixels of the Display
+     */
     public int getHeight(){
         return this.layers[0].getHeight();
     }
 
+    /**
+     * @return  The width in pixels of the Display
+     */
     public int getWidth(){
         return this.layers[0].getWidth();
     }

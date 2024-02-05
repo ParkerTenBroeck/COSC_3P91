@@ -2,15 +2,18 @@ package traffic_sim.vehicle;
 
 import traffic_sim.Simulation;
 import traffic_sim.vehicle.controller.Controller;
-import traffic_sim.vehicle.controller.RandomTurnController;
+import traffic_sim.vehicle.controller.RandomController;
 
 import java.awt.*;
 
+/**
+ * A Car Vehicle.
+ */
 public class Car extends Vehicle{
     private final Color color;
 
     public Car() {
-        this(new RandomTurnController(), Color.BLUE);
+        this(new RandomController(), Color.BLUE);
     }
 
     public Car(Controller controller) {
@@ -24,11 +27,11 @@ public class Car extends Vehicle{
     }
 
     @Override
-    public void draw(Simulation sim, float x, float y, float nx, float ny) {
+    public void draw(Simulation sim, float x, float y, float dx, float dy) {
         var g = sim.getView();
         g.setColor(this.color);
-        g.fillOval(x-nx*0.3f,y-ny*0.3f, 0.6f, 0.6f);
-        g.drawOval(x-nx*getSize()+nx*0.25f,y-ny*getSize()+ny*0.25f, 0.5f, 0.5f);
-        super.draw(sim,x,y,nx,ny);
+        g.fillOval(x- dx *0.3f,y- dy *0.3f, 0.6f, 0.6f);
+        g.drawOval(x- dx *getSize()+ dx *0.25f,y- dy *getSize()+ dy *0.25f, 0.5f, 0.5f);
+        super.draw(sim,x,y, dx, dy);
     }
 }

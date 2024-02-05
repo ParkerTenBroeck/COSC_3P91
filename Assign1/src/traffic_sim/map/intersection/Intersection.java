@@ -10,6 +10,9 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * An Intersection that exists at some coordinate X,Y. It also holds a name and the turns it can take.
+ */
 public class Intersection {
 
     protected float x;
@@ -26,26 +29,52 @@ public class Intersection {
         this.y = y;
     }
 
-    public void tick(Simulation sim, RoadMap map, double delta){}
+    /** Ticks the Intersection, This will be ran every simulation tick
+     *
+     * @param sim   The simulation
+     * @param delta The simulation delta in seconds
+     */
+    public void tick(Simulation sim, double delta){}
 
+
+    /** Calculates the distance between this intersection and another intersection
+     *
+     * @param other The other Intersection
+     * @return  The calculated distance
+     */
     public float distance(Intersection other){
         var xdiff = this.x - other.x;
         var ydiff = this.y - other.y;
         return (float) Math.sqrt(xdiff*xdiff + ydiff*ydiff);
     }
 
+    /**
+     * @return  The X coord of this intersection
+     */
     public float getX() {
         return x;
     }
 
+    /**
+     * @return  The Y coord of this intersection
+     */
     public float getY() {
         return y;
     }
 
+    /**
+     * @return  The name of this intersection
+     */
     public String getName() {
         return name;
     }
 
+    /** Adds a turning option from an incoming lane to an outgoing lane with a name to specify direction.
+     *
+     * @param from  The incoming lane
+     * @param to    The outgoing lane
+     * @param turnDirection The direction/name of the turn
+     */
     public void addTurn(Road.Lane from, Road.Lane to, String turnDirection) {
         if (!this.turns.containsKey(from)){
             this.turns.put(from, new ArrayList<>());
@@ -53,26 +82,45 @@ public class Intersection {
         this.turns.get(from).add(new Intersection.Turn(turnDirection, to));
     }
 
+    /** Updates the intersections position also updating all the connecting road positions
+     *
+     * @param map   The map this intersection is apart of
+     * @param x     The new X coord
+     * @param y     The nre Y coord
+     */
     public void updatePosition(RoadMap map, float x, float y){
         this.x = x;
         this.y = y;
         for(var road : map.outgoing(this)){
-            road.changedPosition(map);
+            road.updatePosition(map);
         }
         for(var road : map.incoming(this)){
-            road.changedPosition(map);
+            road.updatePosition(map);
         }
     }
 
+    /** Gets a list of all valid turns from an incoming lane
+     *
+     * @param lane  The lane we wish to turn from
+     * @return      The list of valid turns we can take
+     */
     public ArrayList<Turn> getTurns(Road.Lane lane) {
         return this.turns.get(lane);
     }
 
+    /** Gets a collection of all the valid turns every incoming lane in this intersection can take
+     *
+     * @return  The collection of turns
+     */
     public HashMap<Road.Lane, ArrayList<Turn>> getAllTurns() {
         return this.turns;
     }
 
-    public void draw(Simulation sim, RoadMap map) {
+    /** Draws this intersection to the display
+     *
+     * @param sim   The simulation this intersection is apart of
+     */
+    public void draw(Simulation sim) {
         sim.getView().setLayer(Display.Layer.Intersections);
         sim.getView().setColor(Color.RED);
         sim.getView().fillOval(this.getX(), this.getY(), 2, 2);
@@ -91,12 +139,22 @@ public class Intersection {
             this.lane = road;
         }
 
+        /**
+         * @return  The name of this turn
+         */
         public String getName() {
             return this.name;
         }
 
+        /**
+         * @return  The lane this turn will turn onto
+         */
         public Road.Lane getLane() { return this.lane; };
 
+        /**
+         * @param vehicle   The vehicle that wants to turn
+         * @return          If the vehicle can turn into this lane
+         */
         public boolean canTurn(Vehicle vehicle) {
             if (enabled){
                 return this.lane.canFit(vehicle);

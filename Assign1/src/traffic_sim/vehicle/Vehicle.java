@@ -2,16 +2,15 @@ package traffic_sim.vehicle;
 
 import traffic_sim.Simulation;
 import traffic_sim.map.intersection.Intersection;
-import traffic_sim.map.RoadMap;
 import traffic_sim.map.Road;
 import traffic_sim.vehicle.controller.Controller;
 
-import java.awt.*;
 import java.util.ArrayList;
 
+/**
+ * A form of transportation that can use Raods, Change lanes, and make turns.
+ */
 public abstract class Vehicle {
-    private static int count = 0;
-    protected final int m_count = count++;
 
     private float health = 1.0f;
     protected float reputation = 1.0f;
@@ -30,77 +29,169 @@ public abstract class Vehicle {
         this.controller = controller;
     }
 
+    /**
+     * @param controller    The new controller to control this vehicle
+     */
     public void setController(Controller controller){
         this.controller = controller;
     }
+
+    /**
+     * @return the current reputation of this vehicle
+     */
     public float getReputation() { return this.reputation; }
 
+    /**
+     * @param reputation    The value we want to update this vehicles reputation to
+     */
+    public void setReputation(float reputation) { this.reputation = reputation; }
+
+    /**
+     * @return the current health of this vehicle
+     */
     public float getHealth() { return this.health; }
+
+    /**
+     * @param health the new value of health we want
+     */
+    public void setHealth(float health) { this.health = health; }
+
+    /**
+     * @return  if this vehicle is alive (health > 0)
+     */
     public boolean isAlive() { return this.health > 0; }
 
+    /**
+     * @return  The speed multiplier for this vehicle. a multiplier of 1.0 means it always goes the speed limit exactly
+     */
     public float getSpeedMultiplier() { return this.speedMultiplier; }
+
+    /**
+     * @param speedMultiplier   The new value for the speed multiplier
+     */
     public void setSpeedMultiplier(float speedMultiplier) { this.speedMultiplier = speedMultiplier; }
 
+    /**
+     * @return the size (length) of this vehicle
+     */
     public float getSize() {
         return size;
     }
 
+    /**
+     * @return  A value that represents how far along the road the front of this vehicle is. is normally in the range 0 to road.length where road is the parent road
+     */
     public float getDistanceAlongRoad() {
         return distanceAlongRoad;
     }
 
+    /**
+     * @return  A value that represents how far along the road the back of this vehicle is. is normally in the range 0 to road.length where road is the parent road
+     */
+    public float getDistanceAlongRoadBack() {
+        return this.distanceAlongRoad - this.size;
+    }
+
+    /**
+     * @param distanceAlongRoad The new distance along the road this vehicle should be
+     */
     public void setDistanceAlongRoad(float distanceAlongRoad){
         this.distanceAlongRoad = distanceAlongRoad;
     }
 
+    /** This gets ran every simulation tick and is responsible for ticking the controller and updating the vehicles
+     * position
+     *
+     * @param sim the simulation this vehicle is apart of
+     * @param lane  the lane this vehicle is on
+     * @param delta the simulation time delta in seconds
+     */
     public void tick(Simulation sim, Road.Lane lane, float delta) {
         this.distanceAlongRoad += lane.road().getSpeedLimit() * delta * this.getSpeedMultiplier();
         this.distanceAlongRoad = Math.min(lane.remainingSpace(), this.distanceAlongRoad);
         if(controller != null) controller.tick(this, sim, lane, delta);
     }
 
+    /** Gets called every time this vehicle can make a turn, return null of no turn should be made
+     *
+     * @param sim   the simulation this vehicle is apart of
+     * @param turns The turns available for this vehicle to make
+     * @return  The turn this vehicle has decided on, null if none
+     */
     public Intersection.Turn chooseTurn(Simulation sim, ArrayList<Intersection.Turn> turns){
         if(controller != null) return controller.chooseTurn(this, sim, turns);
         return null;
     }
 
-    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane){
-        if(controller != null) return controller.laneChange(this, sim, lane);
+    /** This is called every tick to ask if a Vehicle should change lanes
+     *
+     * @param sim   The simulation the vehicle is apart of
+     * @param lane  The lane the vehicle is on
+     * @param left_vehicle_back_index   The index of the vehicle in the left lane that is behind this vehicle, -1 if the lane doesn't exist, > num of vehicles in lane if there is no vehicle behind
+     * @param right_vehicle_back_index  The index of the vehicle in the right lane that is behind this vehicle, -1 if the lane doesn't exist, > num of vehicles in lane if there is no vehicle behind
+     * @return  The lane change decision
+     */
+    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane, int left_vehicle_back_index, int right_vehicle_back_index){
+        if(controller != null) return controller.laneChange(this, sim, lane, left_vehicle_back_index, right_vehicle_back_index);
         return  Road.LaneChangeDecision.Nothing;
     }
 
-    public void putInLane(Road.Lane rode){
+
+    /** Gets called when a vehicle gets put on a new lane
+     *
+     * @param lane the lane this vehicle was put on
+     */
+    public void putInLane(Road.Lane lane){
         this.onRoad = true;
     }
+
+    /**
+     * gets called when a vehicle is removed entirely from a road and not put back on
+     */
     public void removeFromRoad(){
         this.onRoad = false;
     }
 
+    /**
+     * @return  if this vehicle is currently on a road
+     */
     public boolean isOnRoad(){
         return this.onRoad;
     }
 
-    public void draw(Simulation sim, float x, float y, float nx, float ny){
-        if (sim.getDebug()){
-            sim.getView().setColor(Color.WHITE);
-            sim.getView().drawString(m_count+"", x,y);
-        }
+    /**
+     *
+     * @param sim   the simulation this vehicle is apart of
+     * @param x     the X component of this vehicles position
+     * @param y     the Y component of this vehicles position
+     * @param dx    the
+     * @param dy
+     */
+    public void draw(Simulation sim, float x, float y, float dx, float dy){
+
     }
 
+    /** Updates the cached position of this vehicle to the given values, position is in map space
+     *
+     * @param x the X component of the position
+     * @param y the Y component of the position
+     */
     public void updatePosition(float x, float y){
         this.lastX = x;
         this.lastY = y;
     }
 
+    /**
+     * @return  the most recently calculated X position of this vehicle in map space
+     */
     public float getLastX(){
         return this.lastX;
     }
 
+    /**
+     * @return  the most recently calculated Y position of this vehicle in map space
+     */
     public float getLastY(){
         return this.lastY;
-    }
-
-    public float getDistanceAlongRoadBack() {
-        return this.distanceAlongRoad - this.size;
     }
 }

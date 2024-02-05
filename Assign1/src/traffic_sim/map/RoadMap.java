@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-
+/**
+ * A map of connected Intersection and Roads
+ */
 public class RoadMap {
     /*UML_RAW_OUTER RoadMap "1" *-- "n" Road: map contains many roads*/
     private final ArrayList<Road> roads = new ArrayList<>();
@@ -29,12 +31,23 @@ public class RoadMap {
     private final HashMap<Intersection, ArrayList<Road>> incoming = new HashMap<>();
 
 
-
+    /** Adds a default intersection at the provided coords with the provided name
+     *
+     * @param name  The name of the intersection
+     * @param x     The X component of the coord
+     * @param y     the Y component of the coord
+     * @return      The created intersection
+     */
     public Intersection addIntersection(String name, float x, float y){
         var intersection = new Intersection(name, x, y);
         return addIntersection(intersection);
     }
 
+    /** Adds the provided intersection to the RoadMap
+     *
+     * @param intersection The intersection to add
+     * @return      The intersection provided
+     */
     public Intersection addIntersection(Intersection intersection){
         intersections.add(intersection);
         outgoing.put(intersection, new ArrayList<>());
@@ -42,6 +55,12 @@ public class RoadMap {
         return intersection;
     }
 
+    /** Gets the Road linking the intersections from and to (in that direction) returns null if there is none
+     *
+     * @param from  The starting intersection
+     * @param to    The ending intersection
+     * @return      The Road connecting them (if anu)
+     */
     public Road getLinked(Intersection from, Intersection to){
         for(var incoming : incoming.get(to)){
             for(var outgoing : outgoing.get(from)){
@@ -52,6 +71,15 @@ public class RoadMap {
         return null;
     }
 
+    /** Links two intersections (directionally) with a road, The two intersections must not already have a Road connecting
+     * them
+     *
+     * @param from  The starting intersection of the road
+     * @param to    The ending intersection of the road
+     * @param name  The name of the road
+     * @param lanes How many lanes should the road have to start out with
+     * @return The Road linking the two provided intersections
+     */
     public Road linkIntersection(Intersection from, Intersection to, String name, int lanes){
 
         if(this.getLinked(from, to) != null)
@@ -65,10 +93,17 @@ public class RoadMap {
         outgoing.get(from).add(road);
         incoming.get(to).add(road);
 
-        road.changedPosition(this);
+        road.updatePosition(from, to);
         return road;
     }
 
+    /** Adds a turn between the two provided lanes, The lanes must be an incoming and outgoing lane respectively
+     * both apart of the same intersection
+     *
+     * @param from  The lane to turn off of
+     * @param to    The lane to turn on to
+     * @param turnDirection The name of the turn
+     */
     public void addTurn(Road.Lane from, Road.Lane to, String turnDirection){
         var middle = this.roadEnds.get(from.road());
         var middle_check = this.roadStarts.get(to.road());
@@ -79,50 +114,104 @@ public class RoadMap {
         middle.addTurn(from, to, turnDirection);
     }
 
+    /** A simulation tick for the entire map
+     *
+     * @param sim   The simulation this map is apart of
+     * @param delta The simulation delta in seconds
+     */
     public void tick(Simulation sim, float delta){
         for(var intersection : intersections){
-            intersection.tick(sim, this, delta);
+            intersection.tick(sim, delta);
         }
         for(var road : roads){
             road.tick(sim, delta);
         }
     }
 
+    /** Draws this map to the display
+     *
+     * @param sim   The simulation this map is apart of
+     */
     public void draw(Simulation sim){
         for(var intersection : this.intersections){
-            intersection.draw(sim, this);
+            intersection.draw(sim);
         }
         for(var road : roads){
-            road.draw(sim, this);
+            road.draw(sim);
         }
     }
 
-    public float[] carPosition(Road road, Vehicle vehicle) {
-        return this.carPosition(this.roadStarts.get(road), this.roadEnds.get(road), road, vehicle);
+    /** Calculates the provided vehicles position in map space and return its x,y coords
+     *
+     * @param road      The road the vehicle is on
+     * @param vehicle   The vehicle itself
+     * @return          The X,Y coords respectivly
+     */
+    public float[] vehiclePosition(Road road, Vehicle vehicle) {
+        return this.vehiclePosition(this.roadStarts.get(road), this.roadEnds.get(road), road, vehicle);
     }
 
-    public float[] carPosition(Intersection from, Intersection to, Road road, Vehicle vehicle){
-        float percent = vehicle.getDistanceAlongRoad() / road.getLength();
+    /** Calculates the provided vehicles position in map space and return its x,y coords
+     *
+     * @param from  The starting Intersection of the provided road
+     * @param to    The ending Intersection of the provided road
+     * @param road      The road the vehicle is on
+     * @param vehicle   The vehicle itself
+     * @return          The X,Y coords respectivly
+     */
+    public float[] vehiclePosition(Intersection from, Intersection to, Road road, Vehicle vehicle){
+        float percent = vehicle.getDistanceAlongRoad() / road.getRoadLength();
         return new float[] {from.getX() * (1-percent) + to.getX()*(percent), from.getY() * (1-percent) + to.getY()*(percent)};
     }
 
+    /** Gets the incoming roads for the provided intersection
+     *
+     * @param intersection  The intersection we want to find incoming roads for
+     * @return   A list containing all incoming roads for the provided intersection
+     */
     public ArrayList<Road> incoming(Intersection intersection) {
         return this.incoming.get(intersection);
     }
 
+    /** Gets the outgoing roads for the provided intersection
+     *
+     * @param intersection  The intersection we want to find outgoing roads for
+     * @return   A list containing all outgoing roads for the provided intersection
+     */
     public ArrayList<Road> outgoing(Intersection intersection) {
         return this.outgoing.get(intersection);
     }
 
+    /** Gets the ending intersection for the provided road
+     *
+     * @param road  The road we want to find the ending Intersection for
+     * @return  The intersection the provided road ends at
+     */
     public Intersection roadEnds(Road road) {
         return this.roadEnds.get(road);
     }
 
+    /** Gets the starting intersection for the provided road
+     *
+     * @param road  The road we want to find the starting Intersection for
+     * @return  The intersection the provided road starts at
+     */
     public Intersection roadStarts(Road road) {
         return this.roadStarts.get(road);
     }
 
-    /*UML_HIDE*/
+    /**
+     * @return A list of all intersections in this map
+     */
+    public ArrayList<Intersection> getIntersections() {
+        return this.intersections;
+    }
+
+    /** Writes the this map (not including vehicles) to the output stream
+     *
+     * @param out   The place we want to output to
+     * @throws IOException
+     */
     public void write(OutputStreamWriter out) throws IOException {
         out.write("# type \\t  id  \\t   name  \t   x  \\t   \\y   \\t  kind \\t ...\n");
         var encountered = new HashMap<String, Integer>();
@@ -206,7 +295,10 @@ public class RoadMap {
         out.flush();
     }
 
-    /*UML_HIDE*/
+    /** Reads the map from the input provided filling out this map with its contents
+     *
+     * @param in    The place we want to read from
+     */
     public void read(Scanner in) {
         var intersection_id_map = new HashMap<String, Intersection>();
         var road_id_map = new HashMap<String, Road>();
@@ -253,9 +345,5 @@ public class RoadMap {
                 }
             }
         }
-    }
-
-    public ArrayList<Intersection> getIntersections() {
-        return this.intersections;
     }
 }

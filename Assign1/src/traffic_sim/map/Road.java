@@ -8,6 +8,9 @@ import traffic_sim.vehicle.Vehicle;
 import java.awt.*;
 import java.util.ArrayList;
 
+/**
+ * A Edge on a graph that connects two Intersections in a single direction
+ */
 public final class Road {
 
     private final String name;
@@ -16,8 +19,8 @@ public final class Road {
     /*UML_RAW_OUTER Road "1" *-- "1..n" Lane: A Road will consist of one or more lanes*/
     private Lane[] lanes;
 
-    private float normalX;
-    private float normalY;
+    private float directionX;
+    private float directionY;
 
     private long tick;
 
@@ -28,9 +31,13 @@ public final class Road {
         for(int i = 0; i < this.lanes.length; i ++){
             this.lanes[i] = new Lane(i, i==0, i==this.lanes.length-1);
         }
-        this.changedPosition(from, to);
+        this.updatePosition(from, to);
     }
 
+    /** Adds some number of additional lanes. numNew must be non negative
+     *
+     * @param numNew    The number of new lanes to add
+     */
     public void addLanes(int numNew) {
         var newLanes = new Lane[numNew + lanes.length];
         for(int i = 0; i < newLanes.length; i ++){
@@ -39,34 +46,9 @@ public final class Road {
                 newLanes[i].vehicles.addAll(lanes[i].vehicles);
             }
         }
-
-
-
         this.lanes = newLanes;
     }
 
-
-    public static class Surroundings {
-
-        Vehicle leftFront;
-        double leftSpaceToFront;
-        Vehicle leftBack;
-        double leftSpaceToBack;
-        Lane left;
-
-
-        Lane current;
-        Vehicle front;
-        double spaceToFront;
-        Vehicle back;
-        double spaceToBack;
-
-        Lane right;
-        Vehicle rightFront;
-        double rightSpaceToFront;
-        Vehicle rightBack;
-        double rightSpaceToBack;
-    }
 
     public enum LaneChangeDecision{
         ForceLeft(false, true, -1),
@@ -77,9 +59,9 @@ public final class Road {
         NudgeRight(true, false, 1),
         ForceRight(false, true, 1);
 
-        boolean nudge;
-        boolean force;
-        int laneOffset;
+        private boolean nudge;
+        private boolean force;
+        private int laneOffset;
 
         LaneChangeDecision(boolean nudge, boolean force, int laneOffset){
             this.force = force;
@@ -88,8 +70,12 @@ public final class Road {
         }
     }
 
+    /** This function is ran every simulation tick and updates all Vehicles on it.
+     *
+     * @param sim   The simulation this road is apart of
+     * @param delta The simulation delta time in seconds
+     */
     public void tick(Simulation sim, float delta){
-
         for(int l = 0; l < lanes.length; l ++) {
             var current_lane = lanes[l];
             if(!current_lane.vehicles.isEmpty()){
@@ -117,7 +103,6 @@ public final class Road {
 
 
         this.tick = sim.getSimTick();
-        var surroundings = new Surroundings();
         var indexes = new int[this.lanes.length];
 
 
@@ -142,7 +127,7 @@ public final class Road {
                         .vehicles.get(indexes[furthest_lane]);
 
                 boolean update = false;
-                var lane_change = vehicle.changeLane(sim, lanes[furthest_lane]);
+                var lane_change = vehicle.changeLane(sim, lanes[furthest_lane], furthest_lane>1?indexes[furthest_lane-1]:-1, furthest_lane<indexes.length-1?indexes[furthest_lane+1]:-1);
                 var new_lane = furthest_lane+lane_change.laneOffset;
                 boolean can_merge = false;
                 if(new_lane >= 0 && new_lane < lanes.length && lane_change.laneOffset != 0){
@@ -156,6 +141,7 @@ public final class Road {
                     if(can_merge){
                         lanes[furthest_lane].vehicles.remove(indexes[furthest_lane]);
                         lanes[new_lane].vehicles.add(indexes[new_lane], vehicle);
+                        vehicle.putInLane(lanes[new_lane]);
                     }else{
                         if (lane_change.nudge)
                             lanes[new_lane].remainingSpace = vehicle.getDistanceAlongRoadBack();
@@ -163,6 +149,7 @@ public final class Road {
                         if (lane_change.force){
                             lanes[furthest_lane].vehicles.remove(indexes[furthest_lane]);
                             lanes[new_lane].vehicles.add(indexes[new_lane], vehicle);
+                            vehicle.putInLane(lanes[new_lane]);
                         }else{
 
                         }
@@ -188,19 +175,30 @@ public final class Road {
         }
     }
 
-    public void changedPosition(RoadMap map){
+
+    /** Recalculates the position/angle/direction/length of this road according to its from and to intersection
+     *
+     * @param map   the map this road is apart of
+     */
+    public void updatePosition(RoadMap map){
         var start = map.roadStarts(this);
         var end = map.roadEnds(this);
-        this.changedPosition(start, end);
+        this.updatePosition(start, end);
     }
-    public void changedPosition(Intersection start, Intersection end){
+
+    /** Recalculates the position/angle/direction/length of this road according to its from and to intersection
+     *
+     * @param start The intersection this road starts at
+     * @param end   The intersection this road ends at
+     */
+    public void updatePosition(Intersection start, Intersection end){
         var nx = end.getX() - start.getX();
         var ny = end.getY() - start.getY();
         var xs = nx * nx;
         var ys = ny * ny;
         var len = (float)Math.sqrt(xs + ys);
-        normalX = nx / len;
-        normalY = ny / len;
+        directionX = nx / len;
+        directionY = ny / len;
         this.length = len;
         for(var lane : lanes){
             for(var vehicle : lane.vehicles){
@@ -209,21 +207,31 @@ public final class Road {
         }
     }
 
-    public float getNormalX() {
-        return normalX;
+    /**
+     * @return  The X component of the direction vector for this road
+     */
+    public float getDirectionX() {
+        return directionX;
     }
 
-    public float getNormalY() {
-        return normalY;
+    /**
+     * @return  The Y component of the normal direction for this road
+     */
+    public float getDirectionY() {
+        return directionY;
     }
 
-    public void draw(Simulation sim, RoadMap map){
+    /** Draws the road, and the vehicles on it to the display
+     *
+     * @param sim   The simulation this road is apart of
+     */
+    public void draw(Simulation sim){
         var g = sim.getView();
-        var start = map.roadStarts(this);
-        var end = map.roadEnds(this);
+        var start = sim.getMap().roadStarts(this);
+        var end = sim.getMap().roadEnds(this);
 
-        var rx = -normalY/3.0f;
-        var ry = normalX/3.0f;
+        var rx = -directionY /3.0f;
+        var ry = directionX /3.0f;
 
         g.setLayer(Display.Layer.Roads);
         g.setColor(Color.LIGHT_GRAY);
@@ -245,47 +253,79 @@ public final class Road {
 
             g.setLayer(Display.Layer.Cars);
             for(var vehicle : lane.vehicles){
-                var position = map.carPosition(start, end, this, vehicle);
+                var position = sim.getMap().vehiclePosition(start, end, this, vehicle);
                 vehicle.updatePosition(position[0]+rx, position[1]+ry);
-                vehicle.draw(sim, (position[0]+rx), (position[1]+ry), normalX, normalY);
+                vehicle.draw(sim, (position[0]+rx), (position[1]+ry), directionX, directionY);
             }
 
-            rx -= normalY/1.7f;
-            ry += normalX/1.7f;
+            rx -= directionY /1.7f;
+            ry += directionX /1.7f;
         }
     }
 
+    /**
+     * @return  The name of this road
+     */
     public String getName(){
         return this.name;
     }
 
+
+    /**
+     * @return  The speed limit of this road
+     */
     public float getSpeedLimit(){
         return this.speedLimit;
     }
+
+    /** Updates the speed limit of this road. The provided speed must be a positive value
+     *
+     * @param speedLimit  The new speed limit
+     */
 
     public void setSpeedLimit(float speedLimit){
         this.speedLimit = speedLimit;
     }
 
-    public float getSpace(int lane) {
+
+    /** Gets the remaining space at the start of the lane.
+     *
+     * @param lane  The lane we want to find remaining space in
+     * @return      The remaining space left in the specified lane
+     */
+    public float getRemainingSpace(int lane) {
         return this.lanes[lane].remainingSpace;
     }
 
+    /**
+     * @param lane  The lane number 0 is left most
+     * @return  The lane associated with the specified lane number
+     */
     public Lane getLane(int lane) {
         return this.lanes[lane];
     }
-    
+
+    /**
+     * @return  The number of lanes on this road
+     */
     public int getNumLanes(){
         return this.lanes.length;
     }
-    
+
+    /**
+     * @return  The length of this road
+     */
+    public float getRoadLength(){
+        return this.length;
+    }
+
+    /**
+     * @return  A list of all the lanes this road has
+     */
     public Lane[] getLanes() {
         return this.lanes;
     }
 
-    public float getLength() {
-        return this.length;
-    }
 
     public final class Lane{
         private final int lane;
@@ -302,11 +342,52 @@ public final class Road {
             this.leftmost = leftmost;
         }
 
+        /**
+         * @return  The lane to the left of this one, null if there is none
+         */
+        public Lane leftLane(){
+            if (this.leftmost){
+                return null;
+            }else{
+                return lanes[this.lane - 1];
+            }
+        }
+
+        /**
+         * @return  The lane to the right of this one, null if there is none
+         */
+        public Lane rightLane(){
+            if (this.rightmost){
+                return null;
+            }else{
+                return lanes[this.lane + 1];
+            }
+        }
+
+        /**
+         * @param index The index of the vehicle
+         * @return  The Vehicle at the specified index, or null if none exists
+         */
+        public Vehicle vehicleAt(int index){
+            if (this.vehicles.size() < index && index >= 0){
+                return this.vehicles.get(index);
+            }else{
+                return null;
+            }
+        }
+
+        /**
+         * @return  The Road that contains this lane
+         */
         public Road road() {
             return Road.this;
         }
 
-        public Vehicle removeEnd() {
+        /** Removes the last vehicle on this road (closes to the outgoing end) and returns it if it exists
+         *
+         * @return  the Vehicle of one was removed, null if no vehicle was removed
+         */
+        public Vehicle removeLastVehicle() {
             if(this.vehicles.isEmpty()) return null;
             var last = this.vehicles.remove(0);
             if (last.getDistanceAlongRoad() + 0.0001 > length){
@@ -317,20 +398,35 @@ public final class Road {
             return null;
         }
 
+        /** Checks if the provided vehicle can fit on the road
+         *
+         * @param vehicle   The vehicle to check
+         * @return          If it can fit or not
+         */
         public boolean canFit(Vehicle vehicle) {
             return this.remainingSpace > vehicle.getSize()/2;
         }
 
+        /** Adds the provided Vehicle to the back (closest to incoming end of road) of this road
+         *
+         * @param vehicle   the Vehicle to add
+         */
         public void addVehicle(Vehicle vehicle) {
             vehicle.putInLane(this);
             this.vehicles.add(this.vehicles.size(), vehicle);
             this.remainingSpace = 0;
         }
 
+        /**
+         * @return  The ramining space from the last most vehicle to the incoming end of the road
+         */
         public float remainingSpace() {
             return this.remainingSpace;
         }
 
+        /**
+         * @return  The lane number of this lane
+         */
         public int getLane() {
             return this.lane;
         }
