@@ -188,14 +188,14 @@ public class Main {
                 }
 
 
-                if (sim.getInput().keyPressed('f')){
+                if (sim.getInput().keyPressed('F')){
                     if (sim.getView().getFollowing() == null){
                         sim.getView().setFollowing(player);
                     }else{
                         sim.getView().setFollowing(null);
                     }
                 }
-                if (sim.getInput().keyPressed('r')){
+                if (sim.getInput().keyPressed('R')){
                     if (!player.isOnRoad()){
                         is.toAdd(player);
                     }
