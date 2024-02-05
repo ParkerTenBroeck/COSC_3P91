@@ -16,6 +16,7 @@ public class Intersection {
     protected float y;
     protected final String name;
 
+    /*UML_RAW_OUTER Lane "1" o-- "n" Turn: A Lane can have many, one or no turns that it can take*/
     protected final HashMap<Road.Lane, ArrayList<Turn>> turns = new HashMap<>();
 
 
@@ -79,6 +80,7 @@ public class Intersection {
         sim.getView().drawString(this.getName(), this.getX(), this.getY());
     }
 
+    /*UML_RAW_OUTER Turn "n" o-- "1" Lane: A turn contains a single Lane it can turn onto\n and a Lane can have many turns onto it*/
     public static class Turn{
         protected String name;
         protected Road.Lane lane;

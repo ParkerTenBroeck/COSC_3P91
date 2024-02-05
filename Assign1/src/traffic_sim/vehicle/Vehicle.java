@@ -19,6 +19,7 @@ public abstract class Vehicle {
     private float lastX;
     private float lastY;
     private boolean onRoad;
+    /*UML_RAW_OUTER Vehicle "1" *-- "0..1" Controller: Each Vehicle can potentially have one Controller*/
     private Controller controller;
 
     protected float speedMultiplier;

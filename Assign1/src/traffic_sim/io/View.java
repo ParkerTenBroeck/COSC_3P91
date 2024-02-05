@@ -5,7 +5,9 @@ import traffic_sim.vehicle.Vehicle;
 import java.awt.*;
 
 public class View {
+    /*UML_RAW_OUTER View "1" *-- "1" Display: View contains a single Display*/
     private final Display display;
+    /*UML_RAW_OUTER View "1" *-- "1" Display: View has one source of Input*/
     private final Input input;
 
     public float panX;
@@ -13,13 +15,15 @@ public class View {
     private int height;
     private int width;
     public float zoom;
+
+    /*UML_RAW_OUTER View o-- "0..1" Vehicle: View can potentially follow a Vehicle*/
     private Vehicle follow;
 
     private Display.Layer layer = Display.Layer.Hud;
 
-    public View(Display display, Input input){
-        this.display = display;
-        this.input = input;
+    public View(){
+        this.input = new Input();
+        this.display = new Display(input);
         update();
     }
 
@@ -103,4 +107,9 @@ public class View {
     public void setDefaultStroke(float width) {
         this.display.setDefaultStroke(new BasicStroke(width*zoom));
     }
+
+    public Input getInput() {
+        return this.input;
+    }
+
 }

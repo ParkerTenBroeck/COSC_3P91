@@ -13,13 +13,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
+
 public class RoadMap {
+    /*UML_RAW_OUTER RoadMap "1" *-- "n" Road: map contains many roads*/
     private final ArrayList<Road> roads = new ArrayList<>();
+    /*UML_RAW_OUTER RoadMap "1" *-- "n" Intersection: map contains many intersections*/
     private final ArrayList<Intersection> intersections = new ArrayList<>();
 
 
+    /*UML_RAW_OUTER Intersection "2" *-- "1" Road: road connecting two intersections (one way)*/
     private final HashMap<Road, Intersection> roadEnds = new HashMap<>();
     private final HashMap<Road, Intersection> roadStarts = new HashMap<>();
+    /*UML_RAW_OUTER Intersection "1" o-- "n" Road: outgoing/incoming roads*/
     private final HashMap<Intersection, ArrayList<Road>> outgoing = new HashMap<>();
     private final HashMap<Intersection, ArrayList<Road>> incoming = new HashMap<>();
 
@@ -117,6 +122,7 @@ public class RoadMap {
         return this.roadStarts.get(road);
     }
 
+    /*UML_HIDE*/
     public void write(OutputStreamWriter out) throws IOException {
         out.write("# type \\t  id  \\t   name  \t   x  \\t   \\y   \\t  kind \\t ...\n");
         var encountered = new HashMap<String, Integer>();
@@ -200,6 +206,7 @@ public class RoadMap {
         out.flush();
     }
 
+    /*UML_HIDE*/
     public void read(Scanner in) {
         var intersection_id_map = new HashMap<String, Intersection>();
         var road_id_map = new HashMap<String, Road>();

@@ -9,10 +9,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+/*UML_RAW_OUTER hide Runnable*/
 public class Simulation implements Runnable{
-    private final Display display;
-    private final Input input;
+    /*UML_RAW_OUTER Simulation "1" *-- "1" View: simulation contains a view into the world*/
     private final View view;
+    /*UML_RAW_OUTER Simulation "1" *-- "1" RoadMap: simulation contains a map*/
     private RoadMap map;
 
     private float trueDelta = 0.1f;
@@ -25,15 +26,14 @@ public class Simulation implements Runnable{
     private int simTick = 0;
     private long simNanos = 0;
 
+    /*UML_RAW_OUTER Simulation "1" *-- "n" SimSystem: simulation contains many systems*/
     private final ArrayList<SimSystem> systems = new ArrayList<>();
     private float systemsTime;
 
     public Simulation(RoadMap map){
         this.map = map;
-        this.input = new Input();
-        this.display = new Display(input);
 
-        this.view = new View(display, input);
+        this.view = new View();
 
         this.addSystem(new SimSystem(1) {
             @Override
@@ -41,7 +41,7 @@ public class Simulation implements Runnable{
 
             @Override
             public void run(Simulation sim, float delta) {
-                sim.input.update();
+                sim.view.getInput().update();
                 sim.view.setDefaultStroke(0.08f);
                 view.clear();
             }
@@ -122,11 +122,7 @@ public class Simulation implements Runnable{
     }
 
     public Input getInput() {
-        return this.input;
-    }
-
-    public Display getDisplay(){
-        return this.display;
+        return this.view.getInput();
     }
 
     public View getView(){
@@ -154,7 +150,7 @@ public class Simulation implements Runnable{
         return trueDelta;
     }
 
-    public RoadMap getMap() { return this.map; };
+    public RoadMap getMap() { return this.map; }
 
     @Override
     public void run(){

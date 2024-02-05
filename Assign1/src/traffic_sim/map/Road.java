@@ -13,6 +13,7 @@ public final class Road {
     private final String name;
     private float speedLimit = 1.0f;
     private float length;
+    /*UML_RAW_OUTER Road "1" *-- "1..n" Lane: A Road will consist of one or more lanes*/
     private Lane[] lanes;
 
     private float normalX;
@@ -289,6 +290,7 @@ public final class Road {
     public final class Lane{
         private final int lane;
         private float remainingSpace;
+        /*UML_RAW_OUTER Lane "1" o-- "n" Vehicle: A lane will have cars on it*/
         private ArrayList<Vehicle> vehicles = new ArrayList<>();
         public boolean leftmost;
         public boolean rightmost;

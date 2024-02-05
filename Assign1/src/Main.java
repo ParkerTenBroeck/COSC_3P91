@@ -15,7 +15,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
+import traffic_sim.Simulation.SimSystem;
 
+
+/*UML_RAW_OUTER hide Main*/
 public class Main {
     public static void main(String[] args) throws Exception {
         var map = new RoadMap();
@@ -71,7 +74,7 @@ public class Main {
         map.addTurn(r6.getLane(0), r7.getLane(0), "Right");
         map.addTurn(r7.getLane(0), r1.getLane(0), "Right");
 
-        map.write(new FileWriter("bruh.txt"));
+//        map.write(new FileWriter("bruh.txt"));
 
         map = new RoadMap();
         map.read(new Scanner(new File("bruh.txt")));
@@ -97,31 +100,31 @@ public class Main {
 
             @Override
             public void run(Simulation sim, float delta) {
-                if (sim.getInput().keyHeld('d')){
+                if (sim.getInput().keyHeld('D')){
                     sim.getView().panX -= sim.getTrueDelta()*7;
                 }
-                if (sim.getInput().keyHeld('a')){
+                if (sim.getInput().keyHeld('A')){
                     sim.getView().panX += sim.getTrueDelta()*7;
                 }
-                if (sim.getInput().keyHeld('w')){
+                if (sim.getInput().keyHeld('W')){
                     sim.getView().panY += sim.getTrueDelta()*7;
                 }
-                if (sim.getInput().keyHeld('s')){
+                if (sim.getInput().keyHeld('S')){
                     sim.getView().panY -= sim.getTrueDelta()*7;
                 }
-                if (sim.getInput().keyHeld('q')){
+                if (sim.getInput().keyHeld('Q')){
                     sim.getView().zoom += sim.getTrueDelta()*sim.getView().zoom*2;
                 }
-                if (sim.getInput().keyHeld('e')){
+                if (sim.getInput().keyHeld('E')){
                     sim.getView().zoom -= sim.getTrueDelta()*sim.getView().zoom*2;
                 }
                 if (sim.getInput().keyPressed(' ')){
                     sim.setPaused(!sim.getPaused());
                 }
-                if (sim.getInput().keyPressed('v')){
+                if (sim.getInput().keyPressed('V')){
                     sim.setDebug(!sim.getDebug());
                 }
-                if (sim.getInput().keyPressed('t')){
+                if (sim.getInput().keyPressed('T')){
                     is.toAdd(new Truck());
                 }
                 if (sim.getInput().keyPressed('1')){
@@ -133,7 +136,7 @@ public class Main {
                 if (sim.getInput().keyHeld('=')){
                     sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 0.01f);
                 }
-                if (sim.getInput().keyHeld('+')){
+                if (sim.getInput().keyHeld('=') && sim.getInput().keyHeld(16)){
                     sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 100.0f);
                 }
                 if(sim.getInput().mousePressed(Input.MouseKey.Left) | sim.getInput().mousePressed(Input.MouseKey.Right)){
