@@ -41,9 +41,12 @@ public final class Road {
     public void addLanes(int numNew) {
         var newLanes = new Lane[numNew + lanes.length];
         for(int i = 0; i < newLanes.length; i ++){
-            newLanes[i] = new Lane(i, i==0, i==this.lanes.length-1);
             if (i < lanes.length){
-                newLanes[i].vehicles.addAll(lanes[i].vehicles);
+                newLanes[i] = this.lanes[i];
+                newLanes[i].leftmost = i==0;
+                newLanes[i].rightmost = i==newLanes.length-1;
+            }else{
+                newLanes[i] = new Lane(i, i==0, i==newLanes.length-1);
             }
         }
         this.lanes = newLanes;
@@ -59,9 +62,9 @@ public final class Road {
         NudgeRight(true, false, 1),
         ForceRight(false, true, 1);
 
-        private boolean nudge;
-        private boolean force;
-        private int laneOffset;
+        public final boolean nudge;
+        public final boolean force;
+        public final int laneOffset;
 
         LaneChangeDecision(boolean nudge, boolean force, int laneOffset){
             this.force = force;
@@ -76,20 +79,24 @@ public final class Road {
      * @param delta The simulation delta time in seconds
      */
     public void tick(Simulation sim, float delta){
+        // go through each lane checking if the last vehicle is ready to turn, prompting it to do so if it is
         for(int l = 0; l < lanes.length; l ++) {
             var current_lane = lanes[l];
             if(!current_lane.vehicles.isEmpty()){
                 var vehicle = current_lane.vehicles.get(0);
                 if (vehicle.getDistanceAlongRoad() + 0.0001 + vehicle.getSize()/2 > length){
-                    var turns = sim.getMap().roadEnds(this).getTurns(current_lane);
-                    var turn = vehicle.chooseTurn(sim, turns);
+                    var intersection = sim.getMap().roadEnds(this);
+                    var turns = intersection.getTurns(current_lane);
+                    var turn = vehicle.chooseTurn(sim, intersection, turns);
                     if (turn != null){
+                        sim.getGambleHandler().chooseTurn(vehicle, current_lane, turn);
                         current_lane.vehicles.remove(0);
                         turn.getLane().vehicles.add(turn.getLane().vehicles.size(), vehicle);
                         vehicle.setDistanceAlongRoad(vehicle.getSize()/2);
+                        vehicle.putInLane(turn.getLane());
                         // road was already updated so we need to run the update on le car
                         if (turn.getLane().road().tick == sim.getSimTick())
-                            vehicle.tick(sim, turn.getLane(), delta);
+                            turn.getLane().tickVehicle(sim, vehicle, 0, false, delta);
                     }
                 }
             }
@@ -106,6 +113,7 @@ public final class Road {
         var indexes = new int[this.lanes.length];
 
 
+        // iterate through all the vehicles on this road from furthest to farthest from the front
         boolean has_next;
         do{
             float furthest = Float.NEGATIVE_INFINITY;
@@ -126,11 +134,14 @@ public final class Road {
                 var vehicle = lanes[furthest_lane]
                         .vehicles.get(indexes[furthest_lane]);
 
-                boolean update = false;
-                var lane_change = vehicle.changeLane(sim, lanes[furthest_lane], furthest_lane>1?indexes[furthest_lane-1]:-1, furthest_lane<indexes.length-1?indexes[furthest_lane+1]:-1);
+                var lane_change = vehicle.changeLane(sim, lanes[furthest_lane], indexes[furthest_lane], furthest_lane>1?indexes[furthest_lane-1]:-1, furthest_lane<indexes.length-1?indexes[furthest_lane+1]:-1);
                 var new_lane = furthest_lane+lane_change.laneOffset;
                 boolean can_merge = false;
-                if(new_lane >= 0 && new_lane < lanes.length && lane_change.laneOffset != 0){
+
+                // checks for lane changes
+                if (lane_change.laneOffset == 0){
+                    /* empty for a reason */
+                }else if(new_lane >= 0 && new_lane < lanes.length){
                     if (vehicle.getDistanceAlongRoad() < lanes[new_lane].remainingSpace){
                         if (indexes[new_lane]<lanes[new_lane].vehicles.size()){
                             can_merge = vehicle.getDistanceAlongRoadBack() > lanes[new_lane].vehicles.get(indexes[new_lane]).getDistanceAlongRoad();
@@ -140,31 +151,34 @@ public final class Road {
                     }
                     if(can_merge){
                         lanes[furthest_lane].vehicles.remove(indexes[furthest_lane]);
-                        lanes[new_lane].vehicles.add(indexes[new_lane], vehicle);
+                        var new_index = Math.min(indexes[new_lane], lanes[new_lane].vehicles.size());
+                        lanes[new_lane].vehicles.add(new_index, vehicle);
+                        indexes[new_lane] = new_index+1;
                         vehicle.putInLane(lanes[new_lane]);
+                        lanes[new_lane].tickVehicle(sim, vehicle, new_index, true, delta);
+                        sim.getGambleHandler().laneChange(vehicle, lanes[new_lane], new_index, can_merge, lane_change);
+                        continue;
                     }else{
                         if (lane_change.nudge)
                             lanes[new_lane].remainingSpace = vehicle.getDistanceAlongRoadBack();
 
                         if (lane_change.force){
                             lanes[furthest_lane].vehicles.remove(indexes[furthest_lane]);
-                            lanes[new_lane].vehicles.add(indexes[new_lane], vehicle);
+                            var new_index = Math.min(indexes[new_lane], lanes[new_lane].vehicles.size());
+                            lanes[new_lane].vehicles.add(new_index, vehicle);
+                            indexes[new_lane] = new_index+1;
                             vehicle.putInLane(lanes[new_lane]);
-                        }else{
-
+                            lanes[new_lane].tickVehicle(sim, vehicle, new_index, true, delta);
+                            sim.getGambleHandler().laneChange(vehicle, lanes[new_lane], new_index, can_merge, lane_change);
+                            continue;
                         }
-                        update = true;
                     }
                 }else{
-                    update = true;
+                    sim.getGambleHandler().turnedIntoNonExistedLane(vehicle, lanes[furthest_lane], delta);
                 }
 
-                if (update){
-                    lanes[furthest_lane].remainingSpace = Math.max(lanes[furthest_lane].remainingSpace, vehicle.getDistanceAlongRoad());
-                    vehicle.tick(sim, lanes[furthest_lane], delta);
-                    lanes[furthest_lane].remainingSpace = Math.max(0.0f, vehicle.getDistanceAlongRoadBack());
-                    indexes[furthest_lane]++;
-                }
+                lanes[furthest_lane].tickVehicle(sim, vehicle, indexes[furthest_lane], false, delta);
+                indexes[furthest_lane]++;
             }
 
         }while(has_next);
@@ -369,7 +383,7 @@ public final class Road {
          * @return  The Vehicle at the specified index, or null if none exists
          */
         public Vehicle vehicleAt(int index){
-            if (this.vehicles.size() < index && index >= 0){
+            if (this.vehicles.size() > index && index >= 0){
                 return this.vehicles.get(index);
             }else{
                 return null;
@@ -396,6 +410,14 @@ public final class Road {
                 this.vehicles.add(0,last);
             }
             return null;
+        }
+
+        /**
+         * @return  The first (farthest to the back) vehicle on the lane
+         */
+        public Vehicle getFirstVehicle(){
+            if(this.vehicles.isEmpty()) return null;
+            return this.vehicles.get(this.vehicles.size() - 1);
         }
 
         /** Checks if the provided vehicle can fit on the road
@@ -429,6 +451,39 @@ public final class Road {
          */
         public int getLane() {
             return this.lane;
+        }
+
+        /**
+         * Gets the distance of the next closest thing in front of the vehicle
+         *
+         * @param laneIndex The index of the current vehicle
+         * @return  The distance to the next vehicle or end of road
+         */
+        public float distanceToNext(int laneIndex) {
+            if(laneIndex-1 >= 0 && laneIndex < this.vehicles.size()){
+                return this.vehicles.get(laneIndex - 1).getDistanceAlongRoadBack() - this.vehicles.get(laneIndex).getDistanceAlongRoad();
+            }else if(this.vehicles.isEmpty()){
+                return length;
+            }else if (laneIndex-1 < 0){
+                return this.vehicleAt(0).getDistanceAlongRoad();
+            }else{
+                return length - this.vehicleAt(this.vehicles.size()-1).getDistanceAlongRoadBack();
+            }
+        }
+
+        /**
+         * Tick a vehicle on this road
+         * @param sim       The simulation
+         * @param vehicle   The vehicle to tick
+         * @param index     The index of the vehicle
+         * @param changedLanes  if the vehicle changed lanes
+         * @param delta         The delta time of the simulation
+         */
+        public void tickVehicle(Simulation sim, Vehicle vehicle, int index, boolean changedLanes, float delta) {
+            this.remainingSpace = Math.max(this.remainingSpace, vehicle.getDistanceAlongRoad());
+            vehicle.tick(sim, this, index, changedLanes, delta);
+            this.remainingSpace = Math.max(0.0f, vehicle.getDistanceAlongRoadBack());
+
         }
     }
 }

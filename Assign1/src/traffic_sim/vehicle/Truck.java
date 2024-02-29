@@ -30,9 +30,8 @@ public class Truck extends Vehicle{
     }
 
     @Override
-    public void tick(Simulation sim, Road.Lane lane, float delta) {
-//        slow = !lane.leftmost;
-        super.tick(sim, lane, delta);
+    public void tick(Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
+        super.tick(sim, lane, laneIndex, changedLanes, delta);
     }
 
     @Override
@@ -42,7 +41,7 @@ public class Truck extends Vehicle{
 
 
     @Override
-    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane, int left_vehicle_back_index, int right_vehicle_back_index) {
+    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane, int current_index, int left_vehicle_back_index, int right_vehicle_back_index) {
         if (!lane.leftmost){
             return Road.LaneChangeDecision.WaitLeft;
         }else{

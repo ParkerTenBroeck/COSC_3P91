@@ -1,10 +1,12 @@
 package traffic_sim.vehicle;
 
 import traffic_sim.Simulation;
+import traffic_sim.io.Display;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.map.Road;
 import traffic_sim.vehicle.controller.Controller;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 /**
@@ -44,7 +46,9 @@ public abstract class Vehicle {
     /**
      * @param reputation    The value we want to update this vehicles reputation to
      */
-    public void setReputation(float reputation) { this.reputation = reputation; }
+    public void setReputation(float reputation) {
+        this.reputation = Math.max(0, reputation);
+    }
 
     /**
      * @return the current health of this vehicle
@@ -54,7 +58,9 @@ public abstract class Vehicle {
     /**
      * @param health the new value of health we want
      */
-    public void setHealth(float health) { this.health = health; }
+    public void setHealth(float health) {
+        this.health = Math.max(0, health);
+    }
 
     /**
      * @return  if this vehicle is alive (health > 0)
@@ -106,10 +112,10 @@ public abstract class Vehicle {
      * @param lane  the lane this vehicle is on
      * @param delta the simulation time delta in seconds
      */
-    public void tick(Simulation sim, Road.Lane lane, float delta) {
+    public void tick(Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
         this.distanceAlongRoad += lane.road().getSpeedLimit() * delta * this.getSpeedMultiplier();
-        this.distanceAlongRoad = Math.min(lane.remainingSpace(), this.distanceAlongRoad);
-        if(controller != null) controller.tick(this, sim, lane, delta);
+        this.distanceAlongRoad = Math.min(lane.remainingSpace()-0.25f, this.distanceAlongRoad);
+        if(controller != null) controller.tick(this, sim, lane, laneIndex, changedLanes, delta);
     }
 
     /** Gets called every time this vehicle can make a turn, return null of no turn should be made
@@ -118,21 +124,23 @@ public abstract class Vehicle {
      * @param turns The turns available for this vehicle to make
      * @return  The turn this vehicle has decided on, null if none
      */
-    public Intersection.Turn chooseTurn(Simulation sim, ArrayList<Intersection.Turn> turns){
-        if(controller != null) return controller.chooseTurn(this, sim, turns);
+    public Intersection.Turn chooseTurn(Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns){
+        if(controller != null) return controller.chooseTurn(this, sim, intersection, turns);
         return null;
     }
 
-    /** This is called every tick to ask if a Vehicle should change lanes
+    /**
+     * This is called every tick to ask if a Vehicle should change lanes
      *
-     * @param sim   The simulation the vehicle is apart of
-     * @param lane  The lane the vehicle is on
-     * @param left_vehicle_back_index   The index of the vehicle in the left lane that is behind this vehicle, -1 if the lane doesn't exist, > num of vehicles in lane if there is no vehicle behind
-     * @param right_vehicle_back_index  The index of the vehicle in the right lane that is behind this vehicle, -1 if the lane doesn't exist, > num of vehicles in lane if there is no vehicle behind
-     * @return  The lane change decision
+     * @param sim                      The simulation the vehicle is apart of
+     * @param lane                     The lane the vehicle is on
+     * @param current_index
+     * @param left_vehicle_back_index  The index of the vehicle in the left lane that is behind this vehicle, -1 if the lane doesn't exist, > num of vehicles in lane if there is no vehicle behind
+     * @param right_vehicle_back_index The index of the vehicle in the right lane that is behind this vehicle, -1 if the lane doesn't exist, > num of vehicles in lane if there is no vehicle behind
+     * @return The lane change decision
      */
-    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane, int left_vehicle_back_index, int right_vehicle_back_index){
-        if(controller != null) return controller.laneChange(this, sim, lane, left_vehicle_back_index, right_vehicle_back_index);
+    public Road.LaneChangeDecision changeLane(Simulation sim, Road.Lane lane, int current_index, int left_vehicle_back_index, int right_vehicle_back_index){
+        if(controller != null) return controller.laneChange(this, sim, lane, current_index, left_vehicle_back_index, right_vehicle_back_index);
         return  Road.LaneChangeDecision.Nothing;
     }
 
@@ -142,6 +150,7 @@ public abstract class Vehicle {
      * @param lane the lane this vehicle was put on
      */
     public void putInLane(Road.Lane lane){
+        if(controller != null) controller.putInLane(this, lane);
         this.onRoad = true;
     }
 
@@ -160,15 +169,22 @@ public abstract class Vehicle {
     }
 
     /**
+     * Draws the vehicle to the screen
      *
      * @param sim   the simulation this vehicle is apart of
      * @param x     the X component of this vehicles position
      * @param y     the Y component of this vehicles position
-     * @param dx    the
-     * @param dy
+     * @param dx    the directional vector x component
+     * @param dy    the directional vector y component
      */
     public void draw(Simulation sim, float x, float y, float dx, float dy){
-
+        if(sim.getDebug()){
+            sim.getView().setLayer(Display.Layer.Hud);
+            sim.getView().setColor(Color.WHITE);
+            sim.getView().drawString("h" + this.getHealth(), x, y+-10/sim.getView().zoom);
+            sim.getView().drawString("r" + this.getReputation(), x, y+-20/sim.getView().zoom);
+        }
+        if(this.controller!=null)this.controller.draw(sim, x, y, dx, dy);
     }
 
     /** Updates the cached position of this vehicle to the given values, position is in map space

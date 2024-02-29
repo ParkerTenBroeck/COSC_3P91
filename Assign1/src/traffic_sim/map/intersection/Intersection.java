@@ -162,5 +162,12 @@ public class Intersection {
                 return false;
             }
         }
+
+        /**
+         * @return  If this turn was enabled or not
+         */
+        public boolean enabled() {
+            return enabled;
+        }
     }
 }

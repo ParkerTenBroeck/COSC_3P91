@@ -1,6 +1,9 @@
 package traffic_sim;
 
+import traffic_sim.gamble.DefaultGambleHandler;
+import traffic_sim.gamble.GambleHandler;
 import traffic_sim.io.Input;
+import traffic_sim.io.TextDisplay;
 import traffic_sim.io.View;
 import traffic_sim.map.RoadMap;
 
@@ -20,7 +23,7 @@ public class Simulation implements Runnable{
     private boolean pause = false;
     private boolean debug = true;
     private float simulationMultiplier = 1.0f;
-    private final float maxDeltaTick = 0.1f/5f;
+    private final float maxDeltaTick = 0.1f/1f;
     private long targetFrameTime = 33333333;//16666667;
     private int simTick = 0;
     private long simNanos = 0;
@@ -29,80 +32,72 @@ public class Simulation implements Runnable{
     private final ArrayList<SimSystem> systems = new ArrayList<>();
     private float systemsTime;
 
+
+    private GambleHandler gambleHandler = new DefaultGambleHandler();
+
     /**
      * @param map  the map the simulation should use
      */
-    public Simulation(RoadMap map){
+    public Simulation(RoadMap map, View view){
         this.map = map;
-        this.view = new View();
+        this.view = view;
 
-        this.addSystem(new SimSystem(1) {
-            @Override
-            public void init(Simulation sim) {}
+        this.addSystem(SimSystem.simple(1, (sim, delta) -> {
+            sim.view.getInput().update();
+            sim.view.setDefaultStroke(0.08f);
+            sim.view.clearAll();
+        }));
 
-            @Override
-            public void run(Simulation sim, float delta) {
-                sim.view.getInput().update();
-                sim.view.setDefaultStroke(0.08f);
-                view.clearAll();
-            }
-        });
-
-        this.addSystem(new SimSystem(50) {
-            @Override
-            public void init(Simulation sim) {}
-
-            @Override
-            public void run(Simulation sim, float delta) {
-                if (sim.getPaused()){
-                    map.tick(sim, 0.0f);
-                }else{
-                    delta *= simulationMultiplier;
-                    var num = (int)Math.ceil(delta/maxDeltaTick);
-                    var r_tick = delta/num;
-                    for(int i = 0; i < num; i ++){
-                        map.tick(sim, r_tick);
-                        simTick++;
-                        simNanos += (long) (r_tick*1e9);
-                    }
+        this.addSystem(SimSystem.simple(50, (sim, delta) -> {
+            if (sim.getPaused()){
+                map.tick(sim, 0.0f);
+            }else{
+                delta *= sim.simulationMultiplier;
+                var num = (int)Math.ceil(delta/sim.maxDeltaTick);
+                var r_tick = delta/num;
+                for(int i = 0; i < num; i ++){
+                    sim.tick(r_tick);
                 }
             }
-        });
+        }));
 
-        this.addSystem(new SimSystem(1000) {
-            @Override
-            public void init(Simulation sim) {}
+        this.addSystem(SimSystem.simple(1000, (sim, delta) -> {
+            sim.map.draw(sim);
 
-            @Override
-            public void run(Simulation sim, float delta) {
-                map.draw(sim);
+            if (sim.getDebug()){
+                sim.view.setColor(Color.WHITE);
 
-                if (sim.getDebug()){
-                    view.setColor(Color.WHITE);
-
-                    view.drawStringHud("X: " + view.panX, 10,10);
-                    view.drawStringHud("Y: " + view.panY, 10,20);
-                    view.drawStringHud("Zoom: " + view.zoom, 10,30);
-                    view.drawStringHud("SimMultiplier: " + sim.simulationMultiplier, 10,40);
-                    view.drawStringHud("Paused: " + sim.pause, 10,50);
-                    view.drawStringHud("Tick: " + sim.simTick, 10,60);
-                    view.drawStringHud("SimTime: " + sim.simNanos*1e-9 + "s", 10,70);
-                    view.drawStringHud("FrameTime: " + sim.frameDelta + "s", 10,80);
-                    view.drawStringHud("SystemsTime: " + sim.systemsTime + "s", 10,90);
-                    view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(delta*simulationMultiplier/maxDeltaTick)*1f/sim.frameDelta, 10,100);
-                }
+                sim.view.drawStringHud("X: " + sim.view.panX, 10,10);
+                sim.view.drawStringHud("Y: " + sim.view.panY, 10,20);
+                sim.view.drawStringHud("Zoom: " + sim.view.zoom, 10,30);
+                sim.view.drawStringHud("SimMultiplier: " + sim.simulationMultiplier, 10,40);
+                sim.view.drawStringHud("Paused: " + sim.pause, 10,50);
+                sim.view.drawStringHud("Tick: " + sim.simTick, 10,60);
+                sim.view.drawStringHud("SimTime: " + sim.simNanos*1e-9 + "s", 10,70);
+                sim.view.drawStringHud("FrameTime: " + sim.frameDelta + "s", 10,80);
+                sim.view.drawStringHud("SystemsTime: " + sim.systemsTime + "s", 10,90);
+                sim.view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(delta*sim.simulationMultiplier/sim.maxDeltaTick)*1f/sim.frameDelta, 10,100);
             }
-        });
+        }));
 
-        this.addSystem(new SimSystem(2000) {
-            @Override
-            public void init(Simulation sim) {}
+        this.addSystem(SimSystem.simple(2000, (sim, delta) -> sim.view.update()));
+    }
 
-            @Override
-            public void run(Simulation sim, float delta) {
-                view.update();
-            }
-        });
+    public Simulation(RoadMap map, TextDisplay display, boolean show_gui){
+        this(map, show_gui?new View():null);
+        this.systems.removeIf((s) -> s.priority == 50);
+
+        if(!show_gui){
+            this.systems.removeIf((s) -> s.priority == 50 || s.priority == 2000 || s.priority == 1 || s.priority == 1000);
+        }
+
+        display.attach(this);
+    }
+    
+    public void tick(float delta){
+        this.map.tick(this, delta);
+        this.simTick++;
+        this.simNanos += (long) (delta*1e9);
     }
 
 
@@ -226,9 +221,20 @@ public class Simulation implements Runnable{
         }
     }
 
+    public GambleHandler getGambleHandler() {
+        return this.gambleHandler;
+    }
+    
+    public void setGambleHandler(GambleHandler handler){
+        this.gambleHandler = handler;
+    }
 
 
-    public abstract static class SimSystem {
+    public interface RunSystem{
+        void run(Simulation sim, float delta);
+    }
+
+    public abstract static class SimSystem implements RunSystem {
         /**
          * The lower priority Systems get ran before the higher priority systems
          */
@@ -237,7 +243,20 @@ public class Simulation implements Runnable{
             this.priority = priority;
         }
 
+        public static SimSystem simple(int priority, RunSystem runSystem){
+            return new SimSystem(priority) {
+                @Override
+                public void init(Simulation sim) {}
+
+                @Override
+                public void run(Simulation sim, float delta) {
+                    runSystem.run(sim, delta);
+                }
+            };
+        }
+
         public abstract void init(Simulation sim);
+        @Override
         public abstract void run(Simulation sim, float delta);
     }
 }

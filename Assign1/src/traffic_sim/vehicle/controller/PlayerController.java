@@ -15,7 +15,6 @@ import java.util.ArrayList;
  */
 public class PlayerController implements Controller{
     private final Input input;
-
     private int menu_index = 0;
     private Intersection.Turn choice = null;
 
@@ -23,7 +22,7 @@ public class PlayerController implements Controller{
         this.input = input;
     }
     @Override
-    public void tick(Vehicle v, Simulation sim, Road.Lane lane, float delta) {
+    public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
         if (this.input.keyHeld('K')){
             v.setSpeedMultiplier(v.getSpeedMultiplier() - delta * 1f);
         }
@@ -39,8 +38,10 @@ public class PlayerController implements Controller{
     }
 
     @Override
-    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, ArrayList<Intersection.Turn> turns) {
-
+    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns) {
+        if (turns == null){
+            return null;
+        }
         if (this.input.keyPressed('K')){
             this.menu_index += 1;
         }
@@ -74,6 +75,7 @@ public class PlayerController implements Controller{
 
         var offset = 0;
         sim.getView().setLayer(Display.Layer.Hud);
+
         for(int i = 0; i < turns.size(); i ++){
             if (this.menu_index == i) {
                 if (turns.get(i).canTurn(v)) {
@@ -88,7 +90,8 @@ public class PlayerController implements Controller{
                     sim.getView().setColor(Color.RED);
                 }
             }
-            sim.getView().drawString(turns.get(i).getName(), v.getLastX()-40/sim.getView().zoom, v.getLastY() + offset/sim.getView().zoom);
+//            sim.getView().drawBox();
+//            sim.getView().drawString(turns.get(i).getName(), v.getLastX()-40/sim.getView().zoom, v.getLastY() + offset/sim.getView().zoom);
             offset += 15;
         }
 
@@ -96,7 +99,7 @@ public class PlayerController implements Controller{
     }
 
     @Override
-    public  Road.LaneChangeDecision laneChange(Vehicle v, Simulation sim, Road.Lane lane, int left_vehicle_back_index, int right_vehicle_back_index) {
+    public  Road.LaneChangeDecision laneChange(Vehicle v, Simulation sim, Road.Lane lane, int current_index, int left_vehicle_back_index, int right_vehicle_back_index) {
         if (input.keyHeld('J')){
             if (input.keyHeld(16)){
                 return  Road.LaneChangeDecision.NudgeLeft;

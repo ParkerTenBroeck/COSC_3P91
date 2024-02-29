@@ -1,6 +1,8 @@
 package traffic_sim.map;
 
 import traffic_sim.Simulation;
+import traffic_sim.excpetions.CustomIntersectionLoadException;
+import traffic_sim.excpetions.MapBuildingException;
 import traffic_sim.map.intersection.DrainIntersection;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.map.intersection.SourceIntersection;
@@ -9,6 +11,7 @@ import traffic_sim.vehicle.Vehicle;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -23,6 +26,12 @@ public class RoadMap {
     private final ArrayList<Intersection> intersections = new ArrayList<>();
 
 
+    private final HashMap<String, Intersection> idToIntersection = new HashMap<>();
+    private final HashMap<Intersection, String> intersectionToId = new HashMap<>();
+    private final HashMap<String, Road> idToRoad = new HashMap<>();
+    private final HashMap<Road, String> roadToId = new HashMap<>();
+
+
     /*UML_RAW_OUTER Intersection "2" *-- "1" Road: road connecting two intersections (one way)*/
     private final HashMap<Road, Intersection> roadEnds = new HashMap<>();
     private final HashMap<Road, Intersection> roadStarts = new HashMap<>();
@@ -31,6 +40,14 @@ public class RoadMap {
     private final HashMap<Intersection, ArrayList<Road>> incoming = new HashMap<>();
 
 
+    public Intersection getIntersectionById(String id) {
+        return this.idToIntersection.get(id);
+    }
+
+    public Road getRoadById(String id){
+        return this.idToRoad.get(id);
+    }
+
     /** Adds a default intersection at the provided coords with the provided name
      *
      * @param name  The name of the intersection
@@ -38,9 +55,9 @@ public class RoadMap {
      * @param y     the Y component of the coord
      * @return      The created intersection
      */
-    public Intersection addIntersection(String name, float x, float y){
+    public Intersection addIntersection(String id, String name, float x, float y) throws MapBuildingException{
         var intersection = new Intersection(name, x, y);
-        return addIntersection(intersection);
+        return addIntersection(id, intersection);
     }
 
     /** Adds the provided intersection to the RoadMap
@@ -48,10 +65,18 @@ public class RoadMap {
      * @param intersection The intersection to add
      * @return      The intersection provided
      */
-    public Intersection addIntersection(Intersection intersection){
+    public Intersection addIntersection(String id, Intersection intersection) throws MapBuildingException{
+        if(id == null) id = "I"+this.idToIntersection.size();
+        if(this.idToIntersection.containsKey(id))
+            throw new MapBuildingException.IntersectionIDClash("Intersection ID already exists");
+
         intersections.add(intersection);
         outgoing.put(intersection, new ArrayList<>());
         incoming.put(intersection, new ArrayList<>());
+
+        idToIntersection.put(id, intersection);
+        intersectionToId.put(intersection, id);
+
         return intersection;
     }
 
@@ -80,10 +105,14 @@ public class RoadMap {
      * @param lanes How many lanes should the road have to start out with
      * @return The Road linking the two provided intersections
      */
-    public Road linkIntersection(Intersection from, Intersection to, String name, int lanes){
+    public Road linkIntersection(Intersection from, Intersection to, String id, String name, int lanes) throws MapBuildingException{
+
+        if(id == null) id = "R"+this.idToRoad.size();
+        if(this.idToRoad.containsKey(id))
+            throw new MapBuildingException.RoadIDClash("Road ID already exists: " + id);
 
         if(this.getLinked(from, to) != null)
-            throw  new RuntimeException("Roads already linked");
+            throw new MapBuildingException.InvalidRoadLink("Intersections already linked with Road segment, existing: " + roadToId.get(this.getLinked(from, to)) + " new: " + id);
 
         var road = new Road(name, lanes, from, to);
         roads.add(road);
@@ -92,6 +121,9 @@ public class RoadMap {
 
         outgoing.get(from).add(road);
         incoming.get(to).add(road);
+
+        idToRoad.put(id, road);
+        roadToId.put(road, id);
 
         road.updatePosition(from, to);
         return road;
@@ -104,11 +136,11 @@ public class RoadMap {
      * @param to    The lane to turn on to
      * @param turnDirection The name of the turn
      */
-    public void addTurn(Road.Lane from, Road.Lane to, String turnDirection){
+    public void addTurn(Road.Lane from, Road.Lane to, String turnDirection) throws MapBuildingException{
         var middle = this.roadEnds.get(from.road());
         var middle_check = this.roadStarts.get(to.road());
         if (middle == null || middle != middle_check){
-            throw new RuntimeException("Roads aren't connected at intersection");
+            throw new MapBuildingException.InvalidTurn("Roads aren't connected at intersection");
         }
 
         middle.addTurn(from, to, turnDirection);
@@ -210,24 +242,15 @@ public class RoadMap {
     /** Writes the this map (not including vehicles) to the output stream
      *
      * @param out   The place we want to output to
-     * @throws IOException
+     * @throws IOException if writing to the file goes wrong an io exception will be thrown
      */
     public void write(OutputStreamWriter out) throws IOException {
         out.write("# type \\t  id  \\t   name  \t   x  \\t   \\y   \\t  kind \\t ...\n");
-        var encountered = new HashMap<String, Integer>();
-        var intersection_id_map = new HashMap<Intersection, String>();
+
         for(var intersection : intersections){
             out.write("intersection\t");
-            int num;
-            if (encountered.containsKey(intersection.getName())){
-                num = encountered.get(intersection.getName())+1;
-                encountered.put(intersection.getName(), num);
-            }else{
-                num = 0;
-                encountered.put(intersection.getName(), 0);
-            }
-            out.write(intersection.getName()+num);
-            intersection_id_map.put(intersection, intersection.getName()+num);
+            // id
+            out.write(intersectionToId.get(intersection));
             out.write("\t");
             out.write(intersection.getName());
             out.write("\t");
@@ -248,29 +271,20 @@ public class RoadMap {
         }
         out.write('\n');
 
-        encountered.clear();
-        var road_id_map = new HashMap<Road, String>();
         out.write("# type \\t  id  \\t  name \\t lanes  \\t  inter_id_from \\t inter_id_to\n");
         for(var road : roads){
             out.write("road\t");
-            int num;
-            if (encountered.containsKey(road.getName())){
-                num = encountered.get(road.getName())+1;
-                encountered.put(road.getName(), num);
-            }else{
-                num = 0;
-                encountered.put(road.getName(), 0);
-            }
-            out.write(road.getName()+num);
-            road_id_map.put(road, road.getName()+num);
+
+            out.write(roadToId.get(road));
+
             out.write("\t");
             out.write(road.getName());
             out.write("\t");
             out.write(road.getNumLanes()+"");
             out.write("\t");
-            out.write(intersection_id_map.get(this.roadStarts.get(road)));
+            out.write(intersectionToId.get(this.roadStarts.get(road)));
             out.write("\t");
-            out.write(intersection_id_map.get(this.roadEnds.get(road)));
+            out.write(intersectionToId.get(this.roadEnds.get(road)));
             out.write('\n');
         }
         out.write('\n');
@@ -282,10 +296,10 @@ public class RoadMap {
             for(var turns : intersection.getAllTurns().entrySet()){
                 for(var turn : turns.getValue()){
                     out.write("turn\t");
-                    out.write(road_id_map.get(turns.getKey().road()));
+                    out.write(roadToId.get(turns.getKey().road()));
                     out.write("\t"+turns.getKey().getLane()+"\t");
                     out.write(turn.getName()+"\t");
-                    out.write(road_id_map.get(turn.getLane().road()));
+                    out.write(roadToId.get(turn.getLane().road()));
                     out.write("\t"+turn.getLane().getLane());
                     out.write('\n');
                 }
@@ -297,11 +311,10 @@ public class RoadMap {
 
     /** Reads the map from the input provided filling out this map with its contents
      *
-     * @param in    The place we want to read from
+     * @param readable    The place we want to read from
      */
-    public void read(Scanner in) {
-        var intersection_id_map = new HashMap<String, Intersection>();
-        var road_id_map = new HashMap<String, Road>();
+    public void read(Readable readable) throws MapBuildingException, CustomIntersectionLoadException {
+        var in = new Scanner(readable);
         while(in.hasNext()){
             var line = in.nextLine().trim();
 
@@ -320,30 +333,66 @@ public class RoadMap {
                         case "Source" -> intersection = new SourceIntersection(name, x, y);
                         case "Drain" -> intersection = new DrainIntersection(name, x, y);
                         case "Timed" -> intersection = new TimedIntersection(name, x, y);
+                        case "Custom" -> {
+                            var c_split = split[5].split("\t", 2);
+                            try{
+                                intersection = constructIntersectionFromClass(Class.forName(c_split[0].trim()), name, x, y,c_split[1].trim());
+                            }catch (ClassNotFoundException e) {
+                                throw new CustomIntersectionLoadException(e, "Failed to find custom class name: " + c_split[0].trim());
+                            }
+
+                        }
                     }
-                    intersection_id_map.put(split[0], intersection);
-                    this.addIntersection(intersection);
+
+                    this.addIntersection(split[0], intersection);
                 }
                 case "road" -> {
                     split = split[1].split("\t", 5);
                     var id = split[0];
                     var name = split[1];
                     int lanes = Integer.parseInt(split[2]);
-                    var from = intersection_id_map.get(split[3]);
-                    var to = intersection_id_map.get(split[4]);
-                    var road = this.linkIntersection(from, to, name, lanes);
-                    road_id_map.put(id, road);
+                    var from = idToIntersection.get(split[3]);
+                    var to = idToIntersection.get(split[4]);
+                    this.linkIntersection(from, to, id, name, lanes);
                 }
                 case "turn" -> {
                     split = split[1].split("\t", 5);
-                    var from = road_id_map.get(split[0]);
+                    var from = idToRoad.get(split[0]);
                     var from_lane = Integer.parseInt(split[1]);
                     var name = split[2];
-                    var to = road_id_map.get(split[3]);
+                    var to = idToRoad.get(split[3]);
                     var to_lane = Integer.parseInt(split[4]);
                     this.addTurn(from.getLane(from_lane), to.getLane(to_lane), name);
                 }
             }
         }
+    }
+    private static Intersection constructIntersectionFromClass(Class<?> clazz, String name, float x, float y, String arg) throws CustomIntersectionLoadException{
+        try{
+            var construct = clazz.getConstructor(String.class, float.class, float.class, String.class);
+            var value = construct.newInstance(name, x, y, arg);
+            if (value instanceof Intersection intersection){
+                return intersection;
+            }else{
+                throw new CustomIntersectionLoadException(new ClassCastException(), "Loaded class is not an intersection");
+            }
+        }catch (NoSuchMethodException ignore){
+
+        }catch (InvocationTargetException | RuntimeException | IllegalAccessException | InstantiationException e) {
+            throw new CustomIntersectionLoadException(e, "Failed to run custom intersection constructor");
+        }
+
+        try{
+            var construct = clazz.getConstructor(String.class, float.class, float.class);
+            var value = construct.newInstance(name, x, y);
+            if (value instanceof Intersection intersection){
+                return intersection;
+            }else{
+                throw new CustomIntersectionLoadException(new ClassCastException(), "Loaded class is not an intersection");
+            }
+        }catch (NoSuchMethodException | InvocationTargetException | RuntimeException | IllegalAccessException | InstantiationException e) {
+            throw new CustomIntersectionLoadException(e, "Failed to run custom intersection constructor");
+        }
+
     }
 }
