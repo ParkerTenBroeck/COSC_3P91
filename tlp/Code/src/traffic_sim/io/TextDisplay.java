@@ -34,22 +34,29 @@ public class TextDisplay implements Controller {
         if(turns == null) return null;
 
         System.out.println("At Intersection: '" + intersection.getName() + "'");
-        System.out.println("Select Turn, Enter name of turn to select or nothing to wait");
-        for(var turn : turns){
-            System.out.println(turn.getName() + " " + (turn.enabled()?"Enabled":"Disabled") + " " + (turn.getLane().canFit(v)?"Can Fit":"Can't Fit"));
-        }
+        System.out.println("Select Turn, Enter name of turn or index to select or enter nothing to wait");
+
+        boolean first = true;
         while(true){
+            if(!first)
+                System.out.println("Invalid turn, please select a valid turn");
+            first = false;
+
+            for(int i = 0; i < turns.size(); i ++){
+                var turn = turns.get(i);
+                System.out.println("turn ("+i+") '"+turn.getName() + "' onto '" + turn.getLane().road().getName() + "': " + (turn.enabled()?"Enabled":"Disabled") + " " + (turn.getLane().canFit(v)?"Can Fit":"Can't Fit"));
+            }
+
             var input = new Scanner(System.in).nextLine().trim();
             if (input.isEmpty()) return null;
 
-            for(var turn : turns){
-                System.out.println("'"+turn.getName() + "': " + (turn.enabled()?"Enabled":"Disabled") + " " + (turn.getLane().canFit(v)?"Can Fit":"Can't Fit"));
-            }
+            try{
+                return turns.get(Integer.parseInt(input));
+            }catch (Exception ignore){}
 
             for(var turn : turns){
                 if (turn.getName().equalsIgnoreCase(input))return turn;
             }
-            System.out.println("Invalid turn, please select a valid turn");
         }
     }
 
@@ -76,7 +83,7 @@ public class TextDisplay implements Controller {
         System.out.println("Speed Multiplier: " + v.getSpeedMultiplier());
         System.out.println("Health: " + v.getHealth());
         System.out.println("Reputation: " + v.getReputation());
-        System.out.println("Road: '" + lane.road().getName()+"'");
+        System.out.println("Road: '" + lane.road().getName()+"' lane " + lane.getLane());
 
         System.out.println("Lane change? (nothing for no change) ForceLeft, NudgeLeft, WaitLeft, WaitRight, NudgeRight, ForceRight, SpeedUp, SlowDown");
         var input = new Scanner(System.in).nextLine().trim();

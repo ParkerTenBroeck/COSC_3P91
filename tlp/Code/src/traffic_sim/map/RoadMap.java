@@ -40,12 +40,41 @@ public class RoadMap {
     private final HashMap<Intersection, ArrayList<Road>> incoming = new HashMap<>();
 
 
+    /**
+     * Gets the intersection associated with the ID, null if none exists
+     *
+     * @param id    The id of the desired road
+     * @return  The found intersection or null
+     */
     public Intersection getIntersectionById(String id) {
         return this.idToIntersection.get(id);
     }
 
+
+    /**
+     * @param intersection  The intersection whos ID we want to find
+     * @return          The ID of the provided intersection
+     */
+    public String getIntersectionId(Intersection intersection) {
+        return this.intersectionToId.get(intersection);
+    }
+
+    /**
+     * Gets the road associated with the ID, null if none exists
+     *
+     * @param id    The id of the desired road
+     * @return  The found road or null
+     */
     public Road getRoadById(String id){
         return this.idToRoad.get(id);
+    }
+
+    /**
+     * @param road  The road whos ID we want to find
+     * @return      The ID of the provided road
+     */
+    public String getRoadId(Road road){
+        return this.roadToId.get(road);
     }
 
     /** Adds a default intersection at the provided coords with the provided name
@@ -239,6 +268,48 @@ public class RoadMap {
         return this.intersections;
     }
 
+    /**
+     *
+     * @return  a list of all the roads in this map
+     */
+    public ArrayList<Road> getRoads() {
+        return this.roads;
+    }
+
+
+    /**
+     * Automatically generate turns for roads with the most appropriate name. Clears all existing turns.
+     */
+    public void autoLinkTurns() throws MapBuildingException {
+        for(var intersection : this.getIntersections()){
+            intersection.getAllTurns().clear();
+            for(var incoming_road : this.incoming(intersection))
+                for(var outgoing_road : this.outgoing(intersection))
+                    if(outgoing_road != incoming_road && this.roadStarts(incoming_road) != this.roadEnds(outgoing_road))
+                        for(var incoming_lane : incoming_road.getLanes())
+                            for(var outgoing_lane : outgoing_road.getLanes()){
+                                var angle = (Math.atan2(
+                                        outgoing_road.getDirectionX(), outgoing_road.getDirectionY())
+                                        -  Math.atan2(-incoming_road.getDirectionX(), -incoming_road.getDirectionY()))*180/Math.PI;
+                                angle += 360;
+                                angle %= 360;
+                                angle -= 180;
+                                var primary = "uturn";
+                                if (-45 <= angle && angle <= 45){
+                                    primary = "forward";
+                                }else if (45 <= angle){
+                                    primary = "left";
+                                }else if (angle <= -45){
+                                    primary = "right";
+                                }
+                                if (outgoing_road.getLanes().length > 1){
+                                    primary += " merge to lane " + outgoing_lane.getLane();
+                                }
+                                this.addTurn(incoming_lane, outgoing_lane, primary);
+                            }
+        }
+    }
+
     /** Writes the this map (not including vehicles) to the output stream
      *
      * @param out   The place we want to output to
@@ -310,10 +381,22 @@ public class RoadMap {
     }
 
     /** Reads the map from the input provided filling out this map with its contents
+     *  Clears old contents of map
      *
      * @param readable    The place we want to read from
      */
     public void read(Readable readable) throws MapBuildingException, CustomIntersectionLoadException {
+        this.intersectionToId.clear();
+        this.idToIntersection.clear();
+        this.roadToId.clear();
+        this.idToRoad.clear();
+        this.intersections.clear();
+        this.roads.clear();
+        this.incoming.clear();
+        this.outgoing.clear();
+        this.roadStarts.clear();
+        this.roadEnds.clear();
+
         var in = new Scanner(readable);
         while(in.hasNext()){
             var line = in.nextLine().trim();
@@ -367,6 +450,17 @@ public class RoadMap {
             }
         }
     }
+
+    /**
+     *
+     * @param clazz The class of the intersection we want to construct
+     * @param name  The name of the new intersection
+     * @param x     The x coord of the new intersection
+     * @param y     The y coord of the new intersection
+     * @param arg   Optional arguments we might want to pass to the constructor
+     * @return      A intersection of type clazz
+     * @throws CustomIntersectionLoadException  If the provided clazz wasn't an intersection or couldn't be constructed for some reason.
+     */
     private static Intersection constructIntersectionFromClass(Class<?> clazz, String name, float x, float y, String arg) throws CustomIntersectionLoadException{
         try{
             var construct = clazz.getConstructor(String.class, float.class, float.class, String.class);
@@ -395,4 +489,6 @@ public class RoadMap {
         }
 
     }
+
+
 }

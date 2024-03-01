@@ -29,8 +29,10 @@ public class SourceIntersection extends Intersection{
                 var lane = (int)(random.getNumLanes()*Math.random());
                 if (random.getRemainingSpace(lane) > 2.0){
                     if (toAdd.isEmpty()){
-                        var supplier = (int)(vehicleSuppliers.length*Math.random());
-                        random.getLane(lane).addVehicle(vehicleSuppliers[supplier].get());
+                        if(vehicleSuppliers.length > 0){
+                            var supplier = (int)(vehicleSuppliers.length*Math.random());
+                            random.getLane(lane).addVehicle(vehicleSuppliers[supplier].get());
+                        }
                     }else{
                         random.getLane(lane).addVehicle(toAdd.remove(0));
                     }

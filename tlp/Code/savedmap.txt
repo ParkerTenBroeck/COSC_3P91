@@ -1,0 +1,659 @@
+# type \t  id  \t   name  	   x  \t   \y   \t  kind \t ...
+intersection	Source	Source	48.83057	-6.5958924	Source
+intersection	I0	Windsor Rd/Woodbine Ave	-3.546236	-7.178569	Default
+intersection	I1	Parnell Rd/Geneva St	-45.85119	-31.536673	Default
+intersection	I2		38.2466	-47.640503	Default
+intersection	I3		46.074856	29.523693	Default
+intersection	I4		-51.666462	44.285538	Default
+intersection	I5		-35.786293	-33.10232	Default
+intersection	I6		-45.180195	-20.57712	Default
+intersection	I7		-34.891636	-21.024448	Default
+intersection	I8		-21.248112	-22.366434	Default
+intersection	I9		-21.248112	-36.457287	Default
+intersection	I10		-4.025958	-39.14126	Default
+intersection	I11		9.170238	-42.71989	Default
+intersection	I12		21.024448	-45.403862	Default
+intersection	I13		20.800783	-33.325985	Default
+intersection	I14		17.916632	-13.562822	Default
+intersection	I15		35.607018	-8.75228	Default
+intersection	I16		33.49341	-34.443478	Default
+intersection	I17		40.70691	-33.99698	Default
+intersection	I18		43.501175	-6.6715	Default
+intersection	I19		29.523693	31.089344	Default
+intersection	I20		19.458797	32.654995	Default
+intersection	I21		8.27558	34.220642	Default
+intersection	I22		-10.512224	37.12828	Default
+intersection	I23		-24.155748	39.812252	Default
+intersection	I24		-35.115303	42.048897	Default
+intersection	I25		-38.69393	20.353455	Default
+intersection	I26		-50.10081	21.471777	Default
+intersection	I27		-28.40537	18.787804	Default
+intersection	I28		-48.311497	6.4862657	Default
+intersection	I29		-26.141706	3.8152761	Default
+intersection	I30		-24.155748	-9.170238	Default
+intersection	I31		16.274326	5.826067	Default
+intersection	I32		-10.407234	29.132778	Default
+intersection	I33		-17.441849	17.994637	Default
+intersection	I34		-10.60264	17.408419	Default
+intersection	I35		-6.303709	17.017607	Default
+intersection	I36		4.8182235	16.687048	Default
+intersection	I37		18.357256	15.348023	Default
+intersection	I38		28.325554	14.008999	Default
+intersection	I39		34.27678	7.462653	Default
+intersection	I40		5.413346	6.4211893	Default
+intersection	I41		-4.7037325	7.611434	Default
+intersection	I42		-13.333006	6.867531	Default
+intersection	I43		-12.621851	-8.220033	Default
+intersection	I44		9.226619	-16.045685	Default
+intersection	I45		-1.0151825	-17.131935	Default
+intersection	I46		-2.5669699	-25.201233	Default
+intersection	I47		-0.8600035	-32.494637	Default
+intersection	I48		10.31287	-34.046425	Default
+intersection	I49		19.933956	-25.511591	Default
+intersection	I50		31.727547	-26.442663	Default
+
+# type \t  id  \t  name \t lanes  \t  inter_id_from \t inter_id_to
+road	R156	Source Rd	1	Source	I18
+road	R8	Parnell Rd	2	I5	I1
+road	R19	Parnell Rd	2	I9	I5
+road	R128	Parnell Rd	2	I10	I9
+road	R126	Parnell Rd	2	I11	I10
+road	R124	Parnell Rd	2	I12	I11
+road	R123	Parnell Rd	2	I2	I12
+road	R9	Parnell Rd	2	I1	I5
+road	R18	Parnell Rd	2	I5	I9
+road	R129	Parnell Rd	2	I9	I10
+road	R127	Parnell Rd	2	I10	I11
+road	R125	Parnell Rd	2	I11	I12
+road	R122	Parnell Rd	2	I12	I2
+road	R7	Geneva St	1	I6	I1
+road	R6	Geneva St	1	I1	I6
+road	R22	Geneva St	1	I6	I28
+road	R21	Geneva St	1	I28	I6
+road	R31	Geneva St	1	I26	I28
+road	R23	Geneva St	1	I28	I26
+road	R25	Geneva St	1	I26	I4
+road	R24	Geneva St	1	I4	I26
+road	R10	Ross St	1	I5	I7
+road	R11	Ross St	1	I7	I5
+road	R12	Dapper Dr	1	I7	I6
+road	R13	Dapper Dr	1	I6	I7
+road	R14	Dapper Dr	1	I7	I8
+road	R15	Dapper Dr	1	I8	I7
+road	R32	Druncan Dr	1	I30	I8
+road	R33	Druncan Dr	1	I8	I30
+road	R16	Druncan Dr	1	I8	I9
+road	R17	Druncan Dr	1	I9	I8
+road	R34	Druncan Dr	1	I30	I29
+road	R35	Druncan Dr	1	I29	I30
+road	R36	Druncan Dr	1	I29	I27
+road	R37	Druncan Dr	1	I27	I29
+road	R43	Druncan Dr	1	I23	I27
+road	R44	Druncan Dr	1	I27	I23
+road	R138	Dorset St	1	I47	I10
+road	R139	Dorset St	1	I10	I47
+road	R140	Eaglewood Rd	1	I47	I48
+road	R141	Eaglewood Rd	1	I48	I47
+road	R136	Nickerson Ave	1	I46	I47
+road	R137	Nickerson Ave	1	I47	I46
+road	R111	Nickerson Ave	1	I46	I45
+road	R112	Nickerson Ave	1	I45	I46
+road	R113	Nickerson Ave	1	I45	I0
+road	R114	Nickerson Ave	1	I0	I45
+road	R90	Nickerson Ave	1	I0	I41
+road	R91	Nickerson Ave	1	I41	I0
+road	R94	Grammar Ave	1	I0	I40
+road	R95	Grammar Ave	1	I40	I0
+road	R93	Windsor Rd	1	I43	I0
+road	R115	Windsor Rd	1	I0	I43
+road	R88	Windsor Rd	1	I43	I30
+road	R89	Windsor Rd	1	I30	I43
+road	R86	Woodbine Ave	1	I43	I42
+road	R152	Woodbine Ave	1	I42	I43
+road	R109	Woodbine Ave	1	I46	I43
+road	R110	Woodbine Ave	1	I43	I46
+road	R81	Woodbine Ave	1	I42	I34
+road	R83	Woodbine Ave	1	I34	I42
+road	R20	Guy Rd	1	I29	I28
+road	R153	Guy Rd	1	I28	I29
+road	R0	Vine St	2	I3	I18
+road	R1	Vine St	2	I18	I17
+road	R2	Vine St	2	I17	I2
+road	R3	Vine St	2	I2	I17
+road	R4	Vine St	2	I17	I18
+road	R5	Vine St	2	I18	I3
+road	R154	Glenview Ave	1	I44	I14
+road	R155	Glenview Ave	1	I14	I44
+road	R133	Glenview Ave	1	I44	I45
+road	R134	Glenview Ave	1	I15	I18
+road	R104	Glenview Ave	1	I15	I14
+road	R105	Glenview Ave	1	I14	I15
+road	R135	Glenview Ave	1	I18	I15
+road	R130	Glenview Ave	1	I45	I44
+road	R144	Brisbane Glen	1	I48	I11
+road	R145	Brisbane Glen	1	I11	I48
+road	R142	Brisbane Glen	1	I48	I44
+road	R143	Brisbane Glen	1	I44	I48
+road	R106	Governor Simcoe Dr	1	I31	I14
+road	R107	Governor Simcoe Dr	1	I14	I31
+road	R84	Manor Rd	1	I42	I41
+road	R85	Manor Rd	1	I41	I42
+road	R96	Manor Rd	1	I41	I40
+road	R97	Manor Rd	1	I40	I41
+road	R100	Manor Rd	1	I31	I40
+road	R101	Manor Rd	1	I40	I31
+road	R98	Manor Rd	1	I39	I31
+road	R99	Manor Rd	1	I31	I39
+road	R121	Prince  Philip Dr	1	I13	I12
+road	R116	Prince  Philip Dr	1	I12	I13
+road	R150	Prince  Philip Dr	1	I49	I13
+road	R151	Prince  Philip Dr	1	I13	I49
+road	R148	Prince  Philip Dr	1	I50	I49
+road	R149	Prince  Philip Dr	1	I49	I50
+road	R146	Prince  Philip Dr	1	I16	I50
+road	R147	Prince  Philip Dr	1	I50	I16
+road	R117	Kennedy Ave	1	I13	I16
+road	R118	Kennedy Ave	1	I16	I17
+road	R119	Kennedy Ave	1	I17	I16
+road	R120	Kennedy Ave	1	I16	I13
+road	R26	Linwell Rd	2	I4	I24
+road	R27	Linwell Rd	2	I24	I4
+road	R41	Linwell Rd	2	I23	I24
+road	R42	Linwell Rd	2	I24	I23
+road	R55	Linwell Rd	2	I22	I23
+road	R56	Linwell Rd	2	I23	I22
+road	R59	Linwell Rd	2	I22	I21
+road	R60	Linwell Rd	2	I21	I22
+road	R73	Linwell Rd	2	I20	I21
+road	R74	Linwell Rd	2	I21	I20
+road	R75	Linwell Rd	2	I20	I19
+road	R76	Linwell Rd	2	I19	I20
+road	R79	Linwell Rd	2	I19	I3
+road	R80	Linwell Rd	2	I3	I19
+road	R28	Lora St	1	I24	I25
+road	R40	Lora St	1	I25	I24
+road	R52	W Lynn St	1	I32	I33
+road	R47	W Lynn St	1	I33	I32
+road	R57	E Lynn St	1	I32	I35
+road	R58	E Lynn St	1	I35	I32
+road	R53	Lynn St	1	I32	I22
+road	R54	Lynn St	1	I22	I32
+road	R63	Walker Ave	1	I36	I21
+road	R64	Walker Ave	1	I21	I36
+road	R71	Rodger St	1	I37	I20
+road	R72	Rodger St	1	I20	I37
+road	R77	Sharon St	1	I19	I38
+road	R78	Sharon St	1	I38	I19
+road	R29	Glen Park Rd	1	I25	I26
+road	R30	Glen Park Rd	1	I26	I25
+road	R38	Glen Park Rd	1	I25	I27
+road	R39	Glen Park Rd	1	I27	I25
+road	R45	Glen Park Rd	1	I27	I33
+road	R46	Glen Park Rd	1	I33	I27
+road	R48	Glen Park Rd	1	I33	I34
+road	R49	Glen Park Rd	1	I34	I33
+road	R50	Glen Park Rd	1	I34	I35
+road	R51	Glen Park Rd	1	I35	I34
+road	R61	Glen Park Rd	1	I35	I36
+road	R62	Glen Park Rd	1	I36	I35
+road	R65	Glen Park Rd	1	I39	I38
+road	R66	Glen Park Rd	1	I38	I39
+road	R67	Glen Park Rd	1	I38	I37
+road	R68	Glen Park Rd	1	I37	I38
+road	R69	Glen Park Rd	1	I37	I36
+road	R70	Glen Park Rd	1	I36	I37
+road	R102	Glen Park Rd	1	I39	I15
+road	R103	Glen Park Rd	1	I15	I39
+
+# type \t  from_road_id \t from_road_lane \t name \t to_road_id \t to_road_lane
+turn	R93	0	left	R114	0
+turn	R93	0	right	R90	0
+turn	R93	0	right	R94	0
+turn	R91	0	forward	R114	0
+turn	R91	0	right	R94	0
+turn	R91	0	left	R115	0
+turn	R95	0	right	R114	0
+turn	R95	0	left	R90	0
+turn	R95	0	left	R115	0
+turn	R113	0	forward	R90	0
+turn	R113	0	left	R94	0
+turn	R113	0	right	R115	0
+turn	R8	0	left	R6	0
+turn	R7	0	right merge to lane 0	R9	0
+turn	R7	0	right merge to lane 1	R9	1
+turn	R8	1	left	R6	0
+turn	R2	1	left merge to lane 0	R123	0
+turn	R2	1	left merge to lane 1	R123	1
+turn	R2	0	left merge to lane 0	R123	0
+turn	R2	0	left merge to lane 1	R123	1
+turn	R122	1	right merge to lane 0	R3	0
+turn	R122	1	right merge to lane 1	R3	1
+turn	R122	0	right merge to lane 0	R3	0
+turn	R122	0	right merge to lane 1	R3	1
+turn	R5	1	right merge to lane 0	R80	0
+turn	R5	1	right merge to lane 1	R80	1
+turn	R5	0	right merge to lane 0	R80	0
+turn	R5	0	right merge to lane 1	R80	1
+turn	R79	1	left merge to lane 0	R0	0
+turn	R79	1	left merge to lane 1	R0	1
+turn	R79	0	left merge to lane 0	R0	0
+turn	R79	0	left merge to lane 1	R0	1
+turn	R25	0	left merge to lane 0	R26	0
+turn	R25	0	left merge to lane 1	R26	1
+turn	R27	0	right	R24	0
+turn	R27	1	right	R24	0
+turn	R9	1	forward merge to lane 0	R18	0
+turn	R9	1	forward merge to lane 1	R18	1
+turn	R9	1	right	R10	0
+turn	R11	0	left merge to lane 0	R8	0
+turn	R11	0	left merge to lane 1	R8	1
+turn	R11	0	right merge to lane 0	R18	0
+turn	R11	0	right merge to lane 1	R18	1
+turn	R9	0	forward merge to lane 0	R18	0
+turn	R9	0	forward merge to lane 1	R18	1
+turn	R9	0	right	R10	0
+turn	R19	1	forward merge to lane 0	R8	0
+turn	R19	1	forward merge to lane 1	R8	1
+turn	R19	1	left	R10	0
+turn	R19	0	forward merge to lane 0	R8	0
+turn	R19	0	forward merge to lane 1	R8	1
+turn	R19	0	left	R10	0
+turn	R6	0	forward	R22	0
+turn	R6	0	left	R13	0
+turn	R12	0	right	R7	0
+turn	R12	0	left	R22	0
+turn	R21	0	forward	R7	0
+turn	R21	0	right	R13	0
+turn	R10	0	right	R12	0
+turn	R10	0	left	R14	0
+turn	R15	0	right	R11	0
+turn	R15	0	forward	R12	0
+turn	R13	0	left	R11	0
+turn	R13	0	forward	R14	0
+turn	R32	0	left	R15	0
+turn	R32	0	forward	R16	0
+turn	R17	0	right	R15	0
+turn	R17	0	forward	R33	0
+turn	R14	0	right	R33	0
+turn	R14	0	left	R16	0
+turn	R18	0	forward merge to lane 0	R129	0
+turn	R18	0	forward merge to lane 1	R129	1
+turn	R18	0	right	R17	0
+turn	R18	1	forward merge to lane 0	R129	0
+turn	R18	1	forward merge to lane 1	R129	1
+turn	R18	1	right	R17	0
+turn	R128	1	forward merge to lane 0	R19	0
+turn	R128	1	forward merge to lane 1	R19	1
+turn	R128	1	left	R17	0
+turn	R128	0	forward merge to lane 0	R19	0
+turn	R128	0	forward merge to lane 1	R19	1
+turn	R128	0	left	R17	0
+turn	R16	0	left merge to lane 0	R19	0
+turn	R16	0	left merge to lane 1	R19	1
+turn	R16	0	right merge to lane 0	R129	0
+turn	R16	0	right merge to lane 1	R129	1
+turn	R129	0	forward merge to lane 0	R127	0
+turn	R129	0	forward merge to lane 1	R127	1
+turn	R129	0	right	R139	0
+turn	R126	1	forward merge to lane 0	R128	0
+turn	R126	1	forward merge to lane 1	R128	1
+turn	R126	1	left	R139	0
+turn	R129	1	forward merge to lane 0	R127	0
+turn	R129	1	forward merge to lane 1	R127	1
+turn	R129	1	right	R139	0
+turn	R126	0	forward merge to lane 0	R128	0
+turn	R126	0	forward merge to lane 1	R128	1
+turn	R126	0	left	R139	0
+turn	R138	0	left merge to lane 0	R128	0
+turn	R138	0	left merge to lane 1	R128	1
+turn	R138	0	right merge to lane 0	R127	0
+turn	R138	0	right merge to lane 1	R127	1
+turn	R144	0	left merge to lane 0	R126	0
+turn	R144	0	left merge to lane 1	R126	1
+turn	R144	0	right merge to lane 0	R125	0
+turn	R144	0	right merge to lane 1	R125	1
+turn	R124	0	forward merge to lane 0	R126	0
+turn	R124	0	forward merge to lane 1	R126	1
+turn	R124	0	left	R145	0
+turn	R127	0	forward merge to lane 0	R125	0
+turn	R127	0	forward merge to lane 1	R125	1
+turn	R127	0	right	R145	0
+turn	R127	1	forward merge to lane 0	R125	0
+turn	R127	1	forward merge to lane 1	R125	1
+turn	R127	1	right	R145	0
+turn	R124	1	forward merge to lane 0	R126	0
+turn	R124	1	forward merge to lane 1	R126	1
+turn	R124	1	left	R145	0
+turn	R125	1	forward merge to lane 0	R122	0
+turn	R125	1	forward merge to lane 1	R122	1
+turn	R125	1	right	R116	0
+turn	R123	0	forward merge to lane 0	R124	0
+turn	R123	0	forward merge to lane 1	R124	1
+turn	R123	0	left	R116	0
+turn	R123	1	forward merge to lane 0	R124	0
+turn	R123	1	forward merge to lane 1	R124	1
+turn	R123	1	left	R116	0
+turn	R121	0	left merge to lane 0	R124	0
+turn	R121	0	left merge to lane 1	R124	1
+turn	R121	0	right merge to lane 0	R122	0
+turn	R121	0	right merge to lane 1	R122	1
+turn	R125	0	forward merge to lane 0	R122	0
+turn	R125	0	forward merge to lane 1	R122	1
+turn	R125	0	right	R116	0
+turn	R116	0	forward	R151	0
+turn	R116	0	left	R117	0
+turn	R120	0	right	R121	0
+turn	R120	0	left	R151	0
+turn	R150	0	forward	R121	0
+turn	R150	0	right	R117	0
+turn	R104	0	forward	R155	0
+turn	R104	0	left	R107	0
+turn	R154	0	forward	R105	0
+turn	R154	0	right	R107	0
+turn	R106	0	left	R155	0
+turn	R106	0	right	R105	0
+turn	R105	0	forward	R134	0
+turn	R105	0	right	R103	0
+turn	R135	0	forward	R104	0
+turn	R135	0	left	R103	0
+turn	R102	0	right	R134	0
+turn	R102	0	left	R104	0
+turn	R119	0	left	R146	0
+turn	R119	0	forward	R120	0
+turn	R117	0	right	R146	0
+turn	R117	0	forward	R118	0
+turn	R147	0	right	R118	0
+turn	R147	0	left	R120	0
+turn	R3	0	forward merge to lane 0	R4	0
+turn	R3	0	forward merge to lane 1	R4	1
+turn	R3	0	right	R119	0
+turn	R118	0	left merge to lane 0	R2	0
+turn	R118	0	left merge to lane 1	R2	1
+turn	R118	0	right merge to lane 0	R4	0
+turn	R118	0	right merge to lane 1	R4	1
+turn	R1	1	forward merge to lane 0	R2	0
+turn	R1	1	forward merge to lane 1	R2	1
+turn	R1	1	left	R119	0
+turn	R3	1	forward merge to lane 0	R4	0
+turn	R3	1	forward merge to lane 1	R4	1
+turn	R3	1	right	R119	0
+turn	R1	0	forward merge to lane 0	R2	0
+turn	R1	0	forward merge to lane 1	R2	1
+turn	R1	0	left	R119	0
+turn	R156	0	right merge to lane 0	R1	0
+turn	R156	0	right merge to lane 1	R1	1
+turn	R156	0	left merge to lane 0	R5	0
+turn	R156	0	left merge to lane 1	R5	1
+turn	R156	0	forward	R135	0
+turn	R0	0	forward merge to lane 0	R1	0
+turn	R0	0	forward merge to lane 1	R1	1
+turn	R0	0	left	R135	0
+turn	R134	0	left merge to lane 0	R1	0
+turn	R134	0	left merge to lane 1	R1	1
+turn	R134	0	right merge to lane 0	R5	0
+turn	R134	0	right merge to lane 1	R5	1
+turn	R4	1	forward merge to lane 0	R5	0
+turn	R4	1	forward merge to lane 1	R5	1
+turn	R4	1	right	R135	0
+turn	R0	1	forward merge to lane 0	R1	0
+turn	R0	1	forward merge to lane 1	R1	1
+turn	R0	1	left	R135	0
+turn	R4	0	forward merge to lane 0	R5	0
+turn	R4	0	forward merge to lane 1	R5	1
+turn	R4	0	right	R135	0
+turn	R75	1	forward merge to lane 0	R79	0
+turn	R75	1	forward merge to lane 1	R79	1
+turn	R75	1	left	R77	0
+turn	R80	0	forward merge to lane 0	R76	0
+turn	R80	0	forward merge to lane 1	R76	1
+turn	R80	0	right	R77	0
+turn	R78	0	right merge to lane 0	R76	0
+turn	R78	0	right merge to lane 1	R76	1
+turn	R78	0	left merge to lane 0	R79	0
+turn	R78	0	left merge to lane 1	R79	1
+turn	R80	1	forward merge to lane 0	R76	0
+turn	R80	1	forward merge to lane 1	R76	1
+turn	R80	1	right	R77	0
+turn	R75	0	forward merge to lane 0	R79	0
+turn	R75	0	forward merge to lane 1	R79	1
+turn	R75	0	left	R77	0
+turn	R74	1	forward merge to lane 0	R75	0
+turn	R74	1	forward merge to lane 1	R75	1
+turn	R74	1	left	R72	0
+turn	R76	0	forward merge to lane 0	R73	0
+turn	R76	0	forward merge to lane 1	R73	1
+turn	R76	0	right	R72	0
+turn	R76	1	forward merge to lane 0	R73	0
+turn	R76	1	forward merge to lane 1	R73	1
+turn	R76	1	right	R72	0
+turn	R74	0	forward merge to lane 0	R75	0
+turn	R74	0	forward merge to lane 1	R75	1
+turn	R74	0	left	R72	0
+turn	R71	0	right merge to lane 0	R73	0
+turn	R71	0	right merge to lane 1	R73	1
+turn	R71	0	left merge to lane 0	R75	0
+turn	R71	0	left merge to lane 1	R75	1
+turn	R63	0	right merge to lane 0	R60	0
+turn	R63	0	right merge to lane 1	R60	1
+turn	R63	0	left merge to lane 0	R74	0
+turn	R63	0	left merge to lane 1	R74	1
+turn	R59	0	forward merge to lane 0	R74	0
+turn	R59	0	forward merge to lane 1	R74	1
+turn	R59	0	left	R64	0
+turn	R73	0	forward merge to lane 0	R60	0
+turn	R73	0	forward merge to lane 1	R60	1
+turn	R73	0	right	R64	0
+turn	R59	1	forward merge to lane 0	R74	0
+turn	R59	1	forward merge to lane 1	R74	1
+turn	R59	1	left	R64	0
+turn	R73	1	forward merge to lane 0	R60	0
+turn	R73	1	forward merge to lane 1	R60	1
+turn	R73	1	right	R64	0
+turn	R56	0	forward merge to lane 0	R59	0
+turn	R56	0	forward merge to lane 1	R59	1
+turn	R56	0	left	R54	0
+turn	R60	0	forward merge to lane 0	R55	0
+turn	R60	0	forward merge to lane 1	R55	1
+turn	R60	0	right	R54	0
+turn	R56	1	forward merge to lane 0	R59	0
+turn	R56	1	forward merge to lane 1	R59	1
+turn	R56	1	left	R54	0
+turn	R53	0	right merge to lane 0	R55	0
+turn	R53	0	right merge to lane 1	R55	1
+turn	R53	0	left merge to lane 0	R59	0
+turn	R53	0	left merge to lane 1	R59	1
+turn	R60	1	forward merge to lane 0	R55	0
+turn	R60	1	forward merge to lane 1	R55	1
+turn	R60	1	right	R54	0
+turn	R42	1	left	R43	0
+turn	R42	1	forward merge to lane 0	R56	0
+turn	R42	1	forward merge to lane 1	R56	1
+turn	R44	0	right merge to lane 0	R41	0
+turn	R44	0	right merge to lane 1	R41	1
+turn	R44	0	left merge to lane 0	R56	0
+turn	R44	0	left merge to lane 1	R56	1
+turn	R55	0	right	R43	0
+turn	R55	0	forward merge to lane 0	R41	0
+turn	R55	0	forward merge to lane 1	R41	1
+turn	R55	1	right	R43	0
+turn	R55	1	forward merge to lane 0	R41	0
+turn	R55	1	forward merge to lane 1	R41	1
+turn	R42	0	left	R43	0
+turn	R42	0	forward merge to lane 0	R56	0
+turn	R42	0	forward merge to lane 1	R56	1
+turn	R41	1	forward merge to lane 0	R27	0
+turn	R41	1	forward merge to lane 1	R27	1
+turn	R41	1	right	R28	0
+turn	R41	0	forward merge to lane 0	R27	0
+turn	R41	0	forward merge to lane 1	R27	1
+turn	R41	0	right	R28	0
+turn	R26	0	forward merge to lane 0	R42	0
+turn	R26	0	forward merge to lane 1	R42	1
+turn	R26	0	left	R28	0
+turn	R40	0	right merge to lane 0	R27	0
+turn	R40	0	right merge to lane 1	R27	1
+turn	R40	0	left merge to lane 0	R42	0
+turn	R40	0	left merge to lane 1	R42	1
+turn	R26	1	forward merge to lane 0	R42	0
+turn	R26	1	forward merge to lane 1	R42	1
+turn	R26	1	left	R28	0
+turn	R28	0	left	R29	0
+turn	R28	0	right	R38	0
+turn	R30	0	right	R40	0
+turn	R30	0	forward	R38	0
+turn	R39	0	left	R40	0
+turn	R39	0	forward	R29	0
+turn	R29	0	right	R31	0
+turn	R29	0	left	R25	0
+turn	R24	0	forward	R31	0
+turn	R24	0	right	R30	0
+turn	R23	0	forward	R25	0
+turn	R23	0	left	R30	0
+turn	R36	0	forward	R44	0
+turn	R36	0	right	R39	0
+turn	R36	0	left	R45	0
+turn	R38	0	left	R37	0
+turn	R38	0	right	R44	0
+turn	R38	0	forward	R45	0
+turn	R46	0	right	R37	0
+turn	R46	0	left	R44	0
+turn	R46	0	forward	R39	0
+turn	R43	0	forward	R37	0
+turn	R43	0	left	R39	0
+turn	R43	0	right	R45	0
+turn	R31	0	forward	R21	0
+turn	R31	0	right	R153	0
+turn	R20	0	right	R21	0
+turn	R20	0	left	R23	0
+turn	R22	0	forward	R23	0
+turn	R22	0	left	R153	0
+turn	R34	0	forward	R36	0
+turn	R34	0	right	R20	0
+turn	R37	0	forward	R35	0
+turn	R37	0	left	R20	0
+turn	R153	0	left	R35	0
+turn	R153	0	right	R36	0
+turn	R88	0	right	R32	0
+turn	R88	0	left	R34	0
+turn	R33	0	forward	R34	0
+turn	R33	0	left	R89	0
+turn	R35	0	forward	R32	0
+turn	R35	0	right	R89	0
+turn	R101	0	left	R106	0
+turn	R101	0	forward	R99	0
+turn	R107	0	right	R100	0
+turn	R107	0	left	R99	0
+turn	R98	0	right	R106	0
+turn	R98	0	forward	R100	0
+turn	R58	0	right	R52	0
+turn	R58	0	forward	R53	0
+turn	R54	0	forward	R52	0
+turn	R54	0	forward	R57	0
+turn	R47	0	left	R57	0
+turn	R47	0	forward	R53	0
+turn	R52	0	left	R46	0
+turn	R52	0	right	R48	0
+turn	R45	0	right	R47	0
+turn	R45	0	forward	R48	0
+turn	R49	0	left	R47	0
+turn	R49	0	forward	R46	0
+turn	R81	0	right	R49	0
+turn	R81	0	left	R50	0
+turn	R48	0	left	R83	0
+turn	R48	0	forward	R50	0
+turn	R51	0	right	R83	0
+turn	R51	0	forward	R49	0
+turn	R62	0	left	R58	0
+turn	R62	0	forward	R51	0
+turn	R57	0	left	R51	0
+turn	R57	0	right	R61	0
+turn	R50	0	right	R58	0
+turn	R50	0	forward	R61	0
+turn	R69	0	left	R63	0
+turn	R69	0	forward	R62	0
+turn	R64	0	left	R62	0
+turn	R64	0	right	R70	0
+turn	R61	0	right	R63	0
+turn	R61	0	forward	R70	0
+turn	R70	0	right	R71	0
+turn	R70	0	forward	R68	0
+turn	R72	0	right	R68	0
+turn	R72	0	left	R69	0
+turn	R67	0	left	R71	0
+turn	R67	0	forward	R69	0
+turn	R68	0	right	R78	0
+turn	R68	0	forward	R66	0
+turn	R65	0	left	R78	0
+turn	R65	0	forward	R67	0
+turn	R77	0	right	R66	0
+turn	R77	0	left	R67	0
+turn	R66	0	left	R98	0
+turn	R66	0	forward	R102	0
+turn	R103	0	right	R98	0
+turn	R103	0	forward	R65	0
+turn	R99	0	right	R65	0
+turn	R99	0	left	R102	0
+turn	R100	0	right	R95	0
+turn	R100	0	forward	R97	0
+turn	R94	0	right	R97	0
+turn	R94	0	left	R101	0
+turn	R96	0	left	R95	0
+turn	R96	0	forward	R101	0
+turn	R84	0	left	R91	0
+turn	R84	0	forward	R96	0
+turn	R97	0	right	R91	0
+turn	R97	0	forward	R85	0
+turn	R90	0	right	R85	0
+turn	R90	0	left	R96	0
+turn	R83	0	forward	R152	0
+turn	R83	0	right	R84	0
+turn	R86	0	forward	R81	0
+turn	R86	0	left	R84	0
+turn	R85	0	right	R152	0
+turn	R85	0	left	R81	0
+turn	R89	0	forward	R93	0
+turn	R89	0	right	R86	0
+turn	R89	0	left	R110	0
+turn	R152	0	right	R93	0
+turn	R152	0	left	R88	0
+turn	R152	0	forward	R110	0
+turn	R109	0	left	R93	0
+turn	R109	0	right	R88	0
+turn	R109	0	forward	R86	0
+turn	R115	0	forward	R88	0
+turn	R115	0	left	R86	0
+turn	R115	0	right	R110	0
+turn	R155	0	forward	R133	0
+turn	R155	0	right	R143	0
+turn	R130	0	forward	R154	0
+turn	R130	0	left	R143	0
+turn	R142	0	left	R154	0
+turn	R142	0	right	R133	0
+turn	R133	0	right	R112	0
+turn	R133	0	left	R113	0
+turn	R111	0	forward	R113	0
+turn	R111	0	left	R130	0
+turn	R114	0	forward	R112	0
+turn	R114	0	right	R130	0
+turn	R137	0	forward	R111	0
+turn	R137	0	forward	R109	0
+turn	R112	0	forward	R136	0
+turn	R112	0	left	R109	0
+turn	R110	0	forward	R136	0
+turn	R110	0	right	R111	0
+turn	R136	0	forward	R138	0
+turn	R136	0	right	R140	0
+turn	R141	0	right	R138	0
+turn	R141	0	left	R137	0
+turn	R139	0	left	R140	0
+turn	R139	0	forward	R137	0
+turn	R145	0	right	R141	0
+turn	R145	0	forward	R142	0
+turn	R143	0	left	R141	0
+turn	R143	0	forward	R144	0
+turn	R140	0	left	R144	0
+turn	R140	0	right	R142	0
+turn	R148	0	right	R150	0
+turn	R151	0	left	R149	0
+turn	R146	0	right	R148	0
+turn	R149	0	left	R147	0

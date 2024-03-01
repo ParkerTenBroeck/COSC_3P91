@@ -1,0 +1,23 @@
+# type \t  id  \t   name  	   x  \t   \y   \t  kind \t ...
+intersection	I0		0.0	0.0	Timed
+intersection	I1		10.0	0.0	Default
+intersection	I2		10.0	10.0	Default
+intersection	I3		0.0	10.0	Default
+intersection	I4		0.0	20.0	Default
+
+# example of using a custom intersection, can be provided a string argument for additional information
+intersection	I5		-10	10	Custom	traffic_sim.map.intersection.Intersection	#optional
+# equivalent to
+# intersection	I5		-10.0	10.0	Default
+
+intersection	Source	Source	0.0	-10.0	Source
+intersection	Drain	Drain	10.0	20.0	Drain
+
+# type \t  id  \t  name \t lanes  \t  inter_id_from \t inter_id_to
+road	R0		1	Source	I0
+road	R1		1	I0	Source
+road	R2		1	I1	Source
+
+
+# type \t  from_road_id \t from_road_lane \t name \t to_road_id \t to_road_lane
+

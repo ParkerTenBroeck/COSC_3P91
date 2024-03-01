@@ -244,6 +244,17 @@ public final class Road {
         var start = sim.getMap().roadStarts(this);
         var end = sim.getMap().roadEnds(this);
 
+        {
+            var x = (start.getX() + end.getX()) / 2;
+            var y = (start.getY() + end.getY()) / 2;
+            sim.getView().setLayer(Display.Layer.Hud);
+            sim.getView().setColor(Color.WHITE);
+            if(sim.getDebug() || this.directionY>0 )
+                sim.getView().drawString(this.getName(), x+this.directionY*2, y+this.directionX*2);
+            if(sim.getDebug())
+                sim.getView().drawString(sim.getMap().getRoadId(this), x+this.directionY, y+this.directionX);
+        }
+
         var rx = -directionY /3.0f;
         var ry = directionX /3.0f;
 

@@ -29,8 +29,8 @@ public class Display {
 
     public Display(Input input) {
 
-        int WINDOW_X = 720;
-        int WINDOW_Y = 480;
+        int WINDOW_X = (int) (720*1.5);
+        int WINDOW_Y = (int) (480*1.5);
 
         frame = new JFrame("Traffic Simulator");
         for(int i = 0; i < layers1.length; i ++){

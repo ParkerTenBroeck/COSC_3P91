@@ -4,6 +4,7 @@ import traffic_sim.io.Display;
 import traffic_sim.io.Input;
 import traffic_sim.io.TextDisplay;
 import traffic_sim.io.View;
+import traffic_sim.map.Road;
 import traffic_sim.map.intersection.DrainIntersection;
 import traffic_sim.map.RoadMap;
 import traffic_sim.map.intersection.Intersection;
@@ -24,20 +25,32 @@ import java.util.Scanner;
 
 /*UML_HIDE*/
 public class Main {
+
     public static void main(String[] args) throws Exception {
         // createMap(); re-create a test map and write it to file
         var map = new RoadMap();
-        map.read(new FileReader("roadmap.txt"));
+        
+        map.read(new FileReader("newmap.txt"));
+
+//        map.addIntersection("Source", new SourceIntersection("Source", 0, 0));
         var is = (SourceIntersection)map.getIntersectionById("Source");
 
         // woah... a method reference... to a CONSTRUCTOR
         is.suppliers(Car::new, () -> new Car(new RandomController(), Color.CYAN));
+
+        for(var road : map.getRoads()){
+            for(var lane : road.getLanes()){
+                for(int i = 0; i < 3; i ++)
+                    lane.addVehicle(new Car());
+            }
+        }
 
         Simulation simulation;
         Vehicle player;
 
         // set this to false for a GUI thats very incomplete
         boolean text = true;
+        // show gui while being controlled by text mode
         boolean show_gui = false;
         if (text){
             var displayController = new TextDisplay();
@@ -49,6 +62,10 @@ public class Main {
         }
 
         if(!text || show_gui){
+            if(text){
+                simulation.setDebug(false);
+                simulation.getView().setFollowing(player);
+            }
             simulation.getView().panX = 0;
             simulation.getView().panY = 0;
             simulation.getView().zoom = 21;
@@ -81,6 +98,16 @@ public class Main {
                     }
                     if (sim.getInput().keyPressed(' ')){
                         sim.setPaused(!sim.getPaused());
+                    }
+                    if (sim.getInput().keyHeld('P')){
+                        try{
+                            sim.getMap().write(new FileWriter("savedmap.txt"));
+                        }catch (Exception ignore){}
+                    }
+                    if (sim.getInput().keyPressed('R')){
+                        try{
+                            map.read(new FileReader("newmap.txt"));
+                        }catch (Exception ignore){}
                     }
                     if (sim.getInput().keyPressed('V')){
                         sim.setDebug(!sim.getDebug());
@@ -123,6 +150,12 @@ public class Main {
                         if(held != null){
                             this.held.updatePosition(sim.getMap(),  sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
                         }
+
+                        try {
+                            map.autoLinkTurns();
+                        } catch (MapBuildingException ignore) {
+
+                        }
                     }
                     if (sim.getInput().mouseReleased(Input.MouseKey.Right)){
                         var x = sim.getView().getMouseMapX();
@@ -144,6 +177,7 @@ public class Main {
                             }catch (MapBuildingException ignore){}
                         }
                         this.held = null;
+
                     }
 
                     if(this.held != null){
@@ -233,6 +267,6 @@ public class Main {
         map.addTurn(r6.getLane(0), r7.getLane(0), "Right");
         map.addTurn(r7.getLane(0), r1.getLane(0), "Right");
 
-        map.write(new FileWriter("roadmap.txt"));
+        map.write(new FileWriter("simple_roadmap.txt"));
     }
 }

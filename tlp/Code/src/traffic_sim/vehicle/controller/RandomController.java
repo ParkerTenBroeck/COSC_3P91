@@ -68,8 +68,10 @@ public class RandomController implements Controller{
 
     @Override
     public void draw(Simulation sim, float x, float y, float dx, float dy) {
-        sim.getView().setLayer(Display.Layer.Hud);
-        sim.getView().setColor(Color.WHITE);
-        sim.getView().drawString("d"+lastDistance, x, y);
+        if(sim.getDebug()){
+            sim.getView().setLayer(Display.Layer.Hud);
+            sim.getView().setColor(Color.WHITE);
+            sim.getView().drawString("d"+lastDistance, x, y);
+        }
     }
 }

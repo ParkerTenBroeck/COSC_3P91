@@ -126,6 +126,8 @@ public class Intersection {
         sim.getView().fillOval(this.getX(), this.getY(), 2, 2);
         sim.getView().setColor(Color.WHITE);
         sim.getView().drawString(this.getName(), this.getX(), this.getY());
+        if(sim.getDebug())
+            sim.getView().drawString(sim.getMap().getIntersectionId(this), this.getX(), this.getY());
     }
 
     /*UML_RAW_OUTER Turn "n" o-- "1" Lane: A turn contains a single Lane it can turn onto\n and a Lane can have many turns onto it*/
