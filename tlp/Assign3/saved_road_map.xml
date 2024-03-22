@@ -1,6 +1,6 @@
 <roadmap>
   <intersection id='Source' name='Source' x='48.83057' y='-6.5958924'><source/></intersection>
-  <intersection id='I0' name='Windsor Rd/Woodbine Ave' x='-3.546236' y='-7.178569'><drain/></intersection>
+  <intersection id='I0' name='Windsor Rd/Woodbine Ave' x='-3.546236' y='-7.178569'><default/></intersection>
   <intersection id='I1' name='Parnell Rd/Geneva St' x='-45.85119' y='-31.536673'><default/></intersection>
   <intersection id='I2' name='Parnell Rd/Vine St' x='38.2466' y='-47.640503'><default/></intersection>
   <intersection id='I3' name='Linwell Rd/Vine St' x='46.074856' y='29.523693'><default/></intersection>
@@ -204,9 +204,6 @@
   <road id='R102' name='Glen Park Rd' lanes='1' from='I39' to='I15'/>
   <road id='R103' name='Glen Park Rd' lanes='1' from='I15' to='I39'/>
 
-  <turn from='R95' from_lane='0' name='right' to='R114' to_lane='0'/>
-  <turn from='R95' from_lane='0' name='left' to='R90' to_lane='0'/>
-  <turn from='R95' from_lane='0' name='left' to='R115' to_lane='0'/>
   <turn from='R91' from_lane='0' name='forward' to='R114' to_lane='0'/>
   <turn from='R91' from_lane='0' name='right' to='R94' to_lane='0'/>
   <turn from='R91' from_lane='0' name='left' to='R115' to_lane='0'/>
@@ -216,30 +213,36 @@
   <turn from='R93' from_lane='0' name='left' to='R114' to_lane='0'/>
   <turn from='R93' from_lane='0' name='right' to='R90' to_lane='0'/>
   <turn from='R93' from_lane='0' name='right' to='R94' to_lane='0'/>
+  <turn from='R95' from_lane='0' name='right' to='R114' to_lane='0'/>
+  <turn from='R95' from_lane='0' name='left' to='R90' to_lane='0'/>
+  <turn from='R95' from_lane='0' name='left' to='R115' to_lane='0'/>
   <turn from='R8' from_lane='0' name='left' to='R6' to_lane='0'/>
+  <turn from='R8' from_lane='1' name='left' to='R6' to_lane='0'/>
   <turn from='R7' from_lane='0' name='right merge to lane 0' to='R9' to_lane='0'/>
   <turn from='R7' from_lane='0' name='right merge to lane 1' to='R9' to_lane='1'/>
-  <turn from='R8' from_lane='1' name='left' to='R6' to_lane='0'/>
-  <turn from='R122' from_lane='0' name='right merge to lane 0' to='R3' to_lane='0'/>
-  <turn from='R122' from_lane='0' name='right merge to lane 1' to='R3' to_lane='1'/>
-  <turn from='R122' from_lane='1' name='right merge to lane 0' to='R3' to_lane='0'/>
-  <turn from='R122' from_lane='1' name='right merge to lane 1' to='R3' to_lane='1'/>
   <turn from='R2' from_lane='1' name='left merge to lane 0' to='R123' to_lane='0'/>
   <turn from='R2' from_lane='1' name='left merge to lane 1' to='R123' to_lane='1'/>
   <turn from='R2' from_lane='0' name='left merge to lane 0' to='R123' to_lane='0'/>
   <turn from='R2' from_lane='0' name='left merge to lane 1' to='R123' to_lane='1'/>
+  <turn from='R122' from_lane='1' name='right merge to lane 0' to='R3' to_lane='0'/>
+  <turn from='R122' from_lane='1' name='right merge to lane 1' to='R3' to_lane='1'/>
+  <turn from='R122' from_lane='0' name='right merge to lane 0' to='R3' to_lane='0'/>
+  <turn from='R122' from_lane='0' name='right merge to lane 1' to='R3' to_lane='1'/>
+  <turn from='R5' from_lane='1' name='right merge to lane 0' to='R80' to_lane='0'/>
+  <turn from='R5' from_lane='1' name='right merge to lane 1' to='R80' to_lane='1'/>
+  <turn from='R5' from_lane='0' name='right merge to lane 0' to='R80' to_lane='0'/>
+  <turn from='R5' from_lane='0' name='right merge to lane 1' to='R80' to_lane='1'/>
   <turn from='R79' from_lane='1' name='left merge to lane 0' to='R0' to_lane='0'/>
   <turn from='R79' from_lane='1' name='left merge to lane 1' to='R0' to_lane='1'/>
   <turn from='R79' from_lane='0' name='left merge to lane 0' to='R0' to_lane='0'/>
   <turn from='R79' from_lane='0' name='left merge to lane 1' to='R0' to_lane='1'/>
-  <turn from='R5' from_lane='0' name='right merge to lane 0' to='R80' to_lane='0'/>
-  <turn from='R5' from_lane='0' name='right merge to lane 1' to='R80' to_lane='1'/>
-  <turn from='R5' from_lane='1' name='right merge to lane 0' to='R80' to_lane='0'/>
-  <turn from='R5' from_lane='1' name='right merge to lane 1' to='R80' to_lane='1'/>
-  <turn from='R25' from_lane='0' name='left merge to lane 0' to='R26' to_lane='0'/>
-  <turn from='R25' from_lane='0' name='left merge to lane 1' to='R26' to_lane='1'/>
   <turn from='R27' from_lane='0' name='right' to='R24' to_lane='0'/>
   <turn from='R27' from_lane='1' name='right' to='R24' to_lane='0'/>
+  <turn from='R25' from_lane='0' name='left merge to lane 0' to='R26' to_lane='0'/>
+  <turn from='R25' from_lane='0' name='left merge to lane 1' to='R26' to_lane='1'/>
+  <turn from='R9' from_lane='1' name='forward merge to lane 0' to='R18' to_lane='0'/>
+  <turn from='R9' from_lane='1' name='forward merge to lane 1' to='R18' to_lane='1'/>
+  <turn from='R9' from_lane='1' name='right' to='R10' to_lane='0'/>
   <turn from='R19' from_lane='0' name='forward merge to lane 0' to='R8' to_lane='0'/>
   <turn from='R19' from_lane='0' name='forward merge to lane 1' to='R8' to_lane='1'/>
   <turn from='R19' from_lane='0' name='left' to='R10' to_lane='0'/>
@@ -247,49 +250,49 @@
   <turn from='R11' from_lane='0' name='left merge to lane 1' to='R8' to_lane='1'/>
   <turn from='R11' from_lane='0' name='right merge to lane 0' to='R18' to_lane='0'/>
   <turn from='R11' from_lane='0' name='right merge to lane 1' to='R18' to_lane='1'/>
-  <turn from='R19' from_lane='1' name='forward merge to lane 0' to='R8' to_lane='0'/>
-  <turn from='R19' from_lane='1' name='forward merge to lane 1' to='R8' to_lane='1'/>
-  <turn from='R19' from_lane='1' name='left' to='R10' to_lane='0'/>
   <turn from='R9' from_lane='0' name='forward merge to lane 0' to='R18' to_lane='0'/>
   <turn from='R9' from_lane='0' name='forward merge to lane 1' to='R18' to_lane='1'/>
   <turn from='R9' from_lane='0' name='right' to='R10' to_lane='0'/>
-  <turn from='R9' from_lane='1' name='forward merge to lane 0' to='R18' to_lane='0'/>
-  <turn from='R9' from_lane='1' name='forward merge to lane 1' to='R18' to_lane='1'/>
-  <turn from='R9' from_lane='1' name='right' to='R10' to_lane='0'/>
+  <turn from='R19' from_lane='1' name='forward merge to lane 0' to='R8' to_lane='0'/>
+  <turn from='R19' from_lane='1' name='forward merge to lane 1' to='R8' to_lane='1'/>
+  <turn from='R19' from_lane='1' name='left' to='R10' to_lane='0'/>
+  <turn from='R6' from_lane='0' name='forward' to='R22' to_lane='0'/>
+  <turn from='R6' from_lane='0' name='left' to='R13' to_lane='0'/>
   <turn from='R21' from_lane='0' name='forward' to='R7' to_lane='0'/>
   <turn from='R21' from_lane='0' name='right' to='R13' to_lane='0'/>
   <turn from='R12' from_lane='0' name='right' to='R7' to_lane='0'/>
   <turn from='R12' from_lane='0' name='left' to='R22' to_lane='0'/>
-  <turn from='R6' from_lane='0' name='forward' to='R22' to_lane='0'/>
-  <turn from='R6' from_lane='0' name='left' to='R13' to_lane='0'/>
-  <turn from='R15' from_lane='0' name='right' to='R11' to_lane='0'/>
-  <turn from='R15' from_lane='0' name='forward' to='R12' to_lane='0'/>
   <turn from='R13' from_lane='0' name='left' to='R11' to_lane='0'/>
   <turn from='R13' from_lane='0' name='forward' to='R14' to_lane='0'/>
   <turn from='R10' from_lane='0' name='right' to='R12' to_lane='0'/>
   <turn from='R10' from_lane='0' name='left' to='R14' to_lane='0'/>
-  <turn from='R32' from_lane='0' name='left' to='R15' to_lane='0'/>
-  <turn from='R32' from_lane='0' name='forward' to='R16' to_lane='0'/>
+  <turn from='R15' from_lane='0' name='right' to='R11' to_lane='0'/>
+  <turn from='R15' from_lane='0' name='forward' to='R12' to_lane='0'/>
   <turn from='R14' from_lane='0' name='right' to='R33' to_lane='0'/>
   <turn from='R14' from_lane='0' name='left' to='R16' to_lane='0'/>
   <turn from='R17' from_lane='0' name='right' to='R15' to_lane='0'/>
   <turn from='R17' from_lane='0' name='forward' to='R33' to_lane='0'/>
-  <turn from='R128' from_lane='0' name='forward merge to lane 0' to='R19' to_lane='0'/>
-  <turn from='R128' from_lane='0' name='forward merge to lane 1' to='R19' to_lane='1'/>
-  <turn from='R128' from_lane='0' name='left' to='R17' to_lane='0'/>
+  <turn from='R32' from_lane='0' name='left' to='R15' to_lane='0'/>
+  <turn from='R32' from_lane='0' name='forward' to='R16' to_lane='0'/>
+  <turn from='R18' from_lane='0' name='forward merge to lane 0' to='R129' to_lane='0'/>
+  <turn from='R18' from_lane='0' name='forward merge to lane 1' to='R129' to_lane='1'/>
+  <turn from='R18' from_lane='0' name='right' to='R17' to_lane='0'/>
   <turn from='R18' from_lane='1' name='forward merge to lane 0' to='R129' to_lane='0'/>
   <turn from='R18' from_lane='1' name='forward merge to lane 1' to='R129' to_lane='1'/>
   <turn from='R18' from_lane='1' name='right' to='R17' to_lane='0'/>
+  <turn from='R128' from_lane='1' name='forward merge to lane 0' to='R19' to_lane='0'/>
+  <turn from='R128' from_lane='1' name='forward merge to lane 1' to='R19' to_lane='1'/>
+  <turn from='R128' from_lane='1' name='left' to='R17' to_lane='0'/>
+  <turn from='R128' from_lane='0' name='forward merge to lane 0' to='R19' to_lane='0'/>
+  <turn from='R128' from_lane='0' name='forward merge to lane 1' to='R19' to_lane='1'/>
+  <turn from='R128' from_lane='0' name='left' to='R17' to_lane='0'/>
   <turn from='R16' from_lane='0' name='left merge to lane 0' to='R19' to_lane='0'/>
   <turn from='R16' from_lane='0' name='left merge to lane 1' to='R19' to_lane='1'/>
   <turn from='R16' from_lane='0' name='right merge to lane 0' to='R129' to_lane='0'/>
   <turn from='R16' from_lane='0' name='right merge to lane 1' to='R129' to_lane='1'/>
-  <turn from='R128' from_lane='1' name='forward merge to lane 0' to='R19' to_lane='0'/>
-  <turn from='R128' from_lane='1' name='forward merge to lane 1' to='R19' to_lane='1'/>
-  <turn from='R128' from_lane='1' name='left' to='R17' to_lane='0'/>
-  <turn from='R18' from_lane='0' name='forward merge to lane 0' to='R129' to_lane='0'/>
-  <turn from='R18' from_lane='0' name='forward merge to lane 1' to='R129' to_lane='1'/>
-  <turn from='R18' from_lane='0' name='right' to='R17' to_lane='0'/>
+  <turn from='R129' from_lane='0' name='forward merge to lane 0' to='R127' to_lane='0'/>
+  <turn from='R129' from_lane='0' name='forward merge to lane 1' to='R127' to_lane='1'/>
+  <turn from='R129' from_lane='0' name='right' to='R139' to_lane='0'/>
   <turn from='R129' from_lane='1' name='forward merge to lane 0' to='R127' to_lane='0'/>
   <turn from='R129' from_lane='1' name='forward merge to lane 1' to='R127' to_lane='1'/>
   <turn from='R129' from_lane='1' name='right' to='R139' to_lane='0'/>
@@ -303,16 +306,6 @@
   <turn from='R138' from_lane='0' name='left merge to lane 1' to='R128' to_lane='1'/>
   <turn from='R138' from_lane='0' name='right merge to lane 0' to='R127' to_lane='0'/>
   <turn from='R138' from_lane='0' name='right merge to lane 1' to='R127' to_lane='1'/>
-  <turn from='R129' from_lane='0' name='forward merge to lane 0' to='R127' to_lane='0'/>
-  <turn from='R129' from_lane='0' name='forward merge to lane 1' to='R127' to_lane='1'/>
-  <turn from='R129' from_lane='0' name='right' to='R139' to_lane='0'/>
-  <turn from='R127' from_lane='1' name='forward merge to lane 0' to='R125' to_lane='0'/>
-  <turn from='R127' from_lane='1' name='forward merge to lane 1' to='R125' to_lane='1'/>
-  <turn from='R127' from_lane='1' name='right' to='R145' to_lane='0'/>
-  <turn from='R144' from_lane='0' name='left merge to lane 0' to='R126' to_lane='0'/>
-  <turn from='R144' from_lane='0' name='left merge to lane 1' to='R126' to_lane='1'/>
-  <turn from='R144' from_lane='0' name='right merge to lane 0' to='R125' to_lane='0'/>
-  <turn from='R144' from_lane='0' name='right merge to lane 1' to='R125' to_lane='1'/>
   <turn from='R127' from_lane='0' name='forward merge to lane 0' to='R125' to_lane='0'/>
   <turn from='R127' from_lane='0' name='forward merge to lane 1' to='R125' to_lane='1'/>
   <turn from='R127' from_lane='0' name='right' to='R145' to_lane='0'/>
@@ -322,122 +315,122 @@
   <turn from='R124' from_lane='0' name='forward merge to lane 0' to='R126' to_lane='0'/>
   <turn from='R124' from_lane='0' name='forward merge to lane 1' to='R126' to_lane='1'/>
   <turn from='R124' from_lane='0' name='left' to='R145' to_lane='0'/>
-  <turn from='R121' from_lane='0' name='left merge to lane 0' to='R124' to_lane='0'/>
-  <turn from='R121' from_lane='0' name='left merge to lane 1' to='R124' to_lane='1'/>
-  <turn from='R121' from_lane='0' name='right merge to lane 0' to='R122' to_lane='0'/>
-  <turn from='R121' from_lane='0' name='right merge to lane 1' to='R122' to_lane='1'/>
+  <turn from='R127' from_lane='1' name='forward merge to lane 0' to='R125' to_lane='0'/>
+  <turn from='R127' from_lane='1' name='forward merge to lane 1' to='R125' to_lane='1'/>
+  <turn from='R127' from_lane='1' name='right' to='R145' to_lane='0'/>
+  <turn from='R144' from_lane='0' name='left merge to lane 0' to='R126' to_lane='0'/>
+  <turn from='R144' from_lane='0' name='left merge to lane 1' to='R126' to_lane='1'/>
+  <turn from='R144' from_lane='0' name='right merge to lane 0' to='R125' to_lane='0'/>
+  <turn from='R144' from_lane='0' name='right merge to lane 1' to='R125' to_lane='1'/>
   <turn from='R125' from_lane='1' name='forward merge to lane 0' to='R122' to_lane='0'/>
   <turn from='R125' from_lane='1' name='forward merge to lane 1' to='R122' to_lane='1'/>
   <turn from='R125' from_lane='1' name='right' to='R116' to_lane='0'/>
-  <turn from='R123' from_lane='0' name='forward merge to lane 0' to='R124' to_lane='0'/>
-  <turn from='R123' from_lane='0' name='forward merge to lane 1' to='R124' to_lane='1'/>
-  <turn from='R123' from_lane='0' name='left' to='R116' to_lane='0'/>
   <turn from='R125' from_lane='0' name='forward merge to lane 0' to='R122' to_lane='0'/>
   <turn from='R125' from_lane='0' name='forward merge to lane 1' to='R122' to_lane='1'/>
   <turn from='R125' from_lane='0' name='right' to='R116' to_lane='0'/>
   <turn from='R123' from_lane='1' name='forward merge to lane 0' to='R124' to_lane='0'/>
   <turn from='R123' from_lane='1' name='forward merge to lane 1' to='R124' to_lane='1'/>
   <turn from='R123' from_lane='1' name='left' to='R116' to_lane='0'/>
-  <turn from='R120' from_lane='0' name='right' to='R121' to_lane='0'/>
-  <turn from='R120' from_lane='0' name='left' to='R151' to_lane='0'/>
+  <turn from='R121' from_lane='0' name='left merge to lane 0' to='R124' to_lane='0'/>
+  <turn from='R121' from_lane='0' name='left merge to lane 1' to='R124' to_lane='1'/>
+  <turn from='R121' from_lane='0' name='right merge to lane 0' to='R122' to_lane='0'/>
+  <turn from='R121' from_lane='0' name='right merge to lane 1' to='R122' to_lane='1'/>
+  <turn from='R123' from_lane='0' name='forward merge to lane 0' to='R124' to_lane='0'/>
+  <turn from='R123' from_lane='0' name='forward merge to lane 1' to='R124' to_lane='1'/>
+  <turn from='R123' from_lane='0' name='left' to='R116' to_lane='0'/>
   <turn from='R150' from_lane='0' name='forward' to='R121' to_lane='0'/>
   <turn from='R150' from_lane='0' name='right' to='R117' to_lane='0'/>
+  <turn from='R120' from_lane='0' name='right' to='R121' to_lane='0'/>
+  <turn from='R120' from_lane='0' name='left' to='R151' to_lane='0'/>
   <turn from='R116' from_lane='0' name='forward' to='R151' to_lane='0'/>
   <turn from='R116' from_lane='0' name='left' to='R117' to_lane='0'/>
-  <turn from='R106' from_lane='0' name='left' to='R155' to_lane='0'/>
-  <turn from='R106' from_lane='0' name='right' to='R105' to_lane='0'/>
   <turn from='R154' from_lane='0' name='forward' to='R105' to_lane='0'/>
   <turn from='R154' from_lane='0' name='right' to='R107' to_lane='0'/>
   <turn from='R104' from_lane='0' name='forward' to='R155' to_lane='0'/>
   <turn from='R104' from_lane='0' name='left' to='R107' to_lane='0'/>
+  <turn from='R106' from_lane='0' name='left' to='R155' to_lane='0'/>
+  <turn from='R106' from_lane='0' name='right' to='R105' to_lane='0'/>
+  <turn from='R105' from_lane='0' name='forward' to='R134' to_lane='0'/>
+  <turn from='R105' from_lane='0' name='right' to='R103' to_lane='0'/>
   <turn from='R135' from_lane='0' name='forward' to='R104' to_lane='0'/>
   <turn from='R135' from_lane='0' name='left' to='R103' to_lane='0'/>
   <turn from='R102' from_lane='0' name='right' to='R134' to_lane='0'/>
   <turn from='R102' from_lane='0' name='left' to='R104' to_lane='0'/>
-  <turn from='R105' from_lane='0' name='forward' to='R134' to_lane='0'/>
-  <turn from='R105' from_lane='0' name='right' to='R103' to_lane='0'/>
-  <turn from='R147' from_lane='0' name='right' to='R118' to_lane='0'/>
-  <turn from='R147' from_lane='0' name='left' to='R120' to_lane='0'/>
   <turn from='R119' from_lane='0' name='left' to='R146' to_lane='0'/>
   <turn from='R119' from_lane='0' name='forward' to='R120' to_lane='0'/>
   <turn from='R117' from_lane='0' name='right' to='R146' to_lane='0'/>
   <turn from='R117' from_lane='0' name='forward' to='R118' to_lane='0'/>
-  <turn from='R3' from_lane='1' name='forward merge to lane 0' to='R4' to_lane='0'/>
-  <turn from='R3' from_lane='1' name='forward merge to lane 1' to='R4' to_lane='1'/>
-  <turn from='R3' from_lane='1' name='right' to='R119' to_lane='0'/>
+  <turn from='R147' from_lane='0' name='right' to='R118' to_lane='0'/>
+  <turn from='R147' from_lane='0' name='left' to='R120' to_lane='0'/>
+  <turn from='R1' from_lane='1' name='forward merge to lane 0' to='R2' to_lane='0'/>
+  <turn from='R1' from_lane='1' name='forward merge to lane 1' to='R2' to_lane='1'/>
+  <turn from='R1' from_lane='1' name='left' to='R119' to_lane='0'/>
   <turn from='R1' from_lane='0' name='forward merge to lane 0' to='R2' to_lane='0'/>
   <turn from='R1' from_lane='0' name='forward merge to lane 1' to='R2' to_lane='1'/>
   <turn from='R1' from_lane='0' name='left' to='R119' to_lane='0'/>
   <turn from='R3' from_lane='0' name='forward merge to lane 0' to='R4' to_lane='0'/>
   <turn from='R3' from_lane='0' name='forward merge to lane 1' to='R4' to_lane='1'/>
   <turn from='R3' from_lane='0' name='right' to='R119' to_lane='0'/>
+  <turn from='R3' from_lane='1' name='forward merge to lane 0' to='R4' to_lane='0'/>
+  <turn from='R3' from_lane='1' name='forward merge to lane 1' to='R4' to_lane='1'/>
+  <turn from='R3' from_lane='1' name='right' to='R119' to_lane='0'/>
   <turn from='R118' from_lane='0' name='left merge to lane 0' to='R2' to_lane='0'/>
   <turn from='R118' from_lane='0' name='left merge to lane 1' to='R2' to_lane='1'/>
   <turn from='R118' from_lane='0' name='right merge to lane 0' to='R4' to_lane='0'/>
   <turn from='R118' from_lane='0' name='right merge to lane 1' to='R4' to_lane='1'/>
-  <turn from='R1' from_lane='1' name='forward merge to lane 0' to='R2' to_lane='0'/>
-  <turn from='R1' from_lane='1' name='forward merge to lane 1' to='R2' to_lane='1'/>
-  <turn from='R1' from_lane='1' name='left' to='R119' to_lane='0'/>
-  <turn from='R4' from_lane='1' name='forward merge to lane 0' to='R5' to_lane='0'/>
-  <turn from='R4' from_lane='1' name='forward merge to lane 1' to='R5' to_lane='1'/>
-  <turn from='R4' from_lane='1' name='right' to='R135' to_lane='0'/>
   <turn from='R134' from_lane='0' name='left merge to lane 0' to='R1' to_lane='0'/>
   <turn from='R134' from_lane='0' name='left merge to lane 1' to='R1' to_lane='1'/>
   <turn from='R134' from_lane='0' name='right merge to lane 0' to='R5' to_lane='0'/>
   <turn from='R134' from_lane='0' name='right merge to lane 1' to='R5' to_lane='1'/>
+  <turn from='R0' from_lane='0' name='forward merge to lane 0' to='R1' to_lane='0'/>
+  <turn from='R0' from_lane='0' name='forward merge to lane 1' to='R1' to_lane='1'/>
+  <turn from='R0' from_lane='0' name='left' to='R135' to_lane='0'/>
+  <turn from='R0' from_lane='1' name='forward merge to lane 0' to='R1' to_lane='0'/>
+  <turn from='R0' from_lane='1' name='forward merge to lane 1' to='R1' to_lane='1'/>
+  <turn from='R0' from_lane='1' name='left' to='R135' to_lane='0'/>
+  <turn from='R4' from_lane='0' name='forward merge to lane 0' to='R5' to_lane='0'/>
+  <turn from='R4' from_lane='0' name='forward merge to lane 1' to='R5' to_lane='1'/>
+  <turn from='R4' from_lane='0' name='right' to='R135' to_lane='0'/>
+  <turn from='R4' from_lane='1' name='forward merge to lane 0' to='R5' to_lane='0'/>
+  <turn from='R4' from_lane='1' name='forward merge to lane 1' to='R5' to_lane='1'/>
+  <turn from='R4' from_lane='1' name='right' to='R135' to_lane='0'/>
   <turn from='R156' from_lane='0' name='right merge to lane 0' to='R1' to_lane='0'/>
   <turn from='R156' from_lane='0' name='right merge to lane 1' to='R1' to_lane='1'/>
   <turn from='R156' from_lane='0' name='left merge to lane 0' to='R5' to_lane='0'/>
   <turn from='R156' from_lane='0' name='left merge to lane 1' to='R5' to_lane='1'/>
   <turn from='R156' from_lane='0' name='forward' to='R135' to_lane='0'/>
-  <turn from='R4' from_lane='0' name='forward merge to lane 0' to='R5' to_lane='0'/>
-  <turn from='R4' from_lane='0' name='forward merge to lane 1' to='R5' to_lane='1'/>
-  <turn from='R4' from_lane='0' name='right' to='R135' to_lane='0'/>
-  <turn from='R0' from_lane='1' name='forward merge to lane 0' to='R1' to_lane='0'/>
-  <turn from='R0' from_lane='1' name='forward merge to lane 1' to='R1' to_lane='1'/>
-  <turn from='R0' from_lane='1' name='left' to='R135' to_lane='0'/>
-  <turn from='R0' from_lane='0' name='forward merge to lane 0' to='R1' to_lane='0'/>
-  <turn from='R0' from_lane='0' name='forward merge to lane 1' to='R1' to_lane='1'/>
-  <turn from='R0' from_lane='0' name='left' to='R135' to_lane='0'/>
-  <turn from='R75' from_lane='0' name='forward merge to lane 0' to='R79' to_lane='0'/>
-  <turn from='R75' from_lane='0' name='forward merge to lane 1' to='R79' to_lane='1'/>
-  <turn from='R75' from_lane='0' name='left' to='R77' to_lane='0'/>
+  <turn from='R80' from_lane='1' name='forward merge to lane 0' to='R76' to_lane='0'/>
+  <turn from='R80' from_lane='1' name='forward merge to lane 1' to='R76' to_lane='1'/>
+  <turn from='R80' from_lane='1' name='right' to='R77' to_lane='0'/>
+  <turn from='R80' from_lane='0' name='forward merge to lane 0' to='R76' to_lane='0'/>
+  <turn from='R80' from_lane='0' name='forward merge to lane 1' to='R76' to_lane='1'/>
+  <turn from='R80' from_lane='0' name='right' to='R77' to_lane='0'/>
   <turn from='R78' from_lane='0' name='right merge to lane 0' to='R76' to_lane='0'/>
   <turn from='R78' from_lane='0' name='right merge to lane 1' to='R76' to_lane='1'/>
   <turn from='R78' from_lane='0' name='left merge to lane 0' to='R79' to_lane='0'/>
   <turn from='R78' from_lane='0' name='left merge to lane 1' to='R79' to_lane='1'/>
-  <turn from='R80' from_lane='0' name='forward merge to lane 0' to='R76' to_lane='0'/>
-  <turn from='R80' from_lane='0' name='forward merge to lane 1' to='R76' to_lane='1'/>
-  <turn from='R80' from_lane='0' name='right' to='R77' to_lane='0'/>
+  <turn from='R75' from_lane='0' name='forward merge to lane 0' to='R79' to_lane='0'/>
+  <turn from='R75' from_lane='0' name='forward merge to lane 1' to='R79' to_lane='1'/>
+  <turn from='R75' from_lane='0' name='left' to='R77' to_lane='0'/>
   <turn from='R75' from_lane='1' name='forward merge to lane 0' to='R79' to_lane='0'/>
   <turn from='R75' from_lane='1' name='forward merge to lane 1' to='R79' to_lane='1'/>
   <turn from='R75' from_lane='1' name='left' to='R77' to_lane='0'/>
-  <turn from='R80' from_lane='1' name='forward merge to lane 0' to='R76' to_lane='0'/>
-  <turn from='R80' from_lane='1' name='forward merge to lane 1' to='R76' to_lane='1'/>
-  <turn from='R80' from_lane='1' name='right' to='R77' to_lane='0'/>
+  <turn from='R76' from_lane='0' name='forward merge to lane 0' to='R73' to_lane='0'/>
+  <turn from='R76' from_lane='0' name='forward merge to lane 1' to='R73' to_lane='1'/>
+  <turn from='R76' from_lane='0' name='right' to='R72' to_lane='0'/>
   <turn from='R74' from_lane='1' name='forward merge to lane 0' to='R75' to_lane='0'/>
   <turn from='R74' from_lane='1' name='forward merge to lane 1' to='R75' to_lane='1'/>
   <turn from='R74' from_lane='1' name='left' to='R72' to_lane='0'/>
+  <turn from='R76' from_lane='1' name='forward merge to lane 0' to='R73' to_lane='0'/>
+  <turn from='R76' from_lane='1' name='forward merge to lane 1' to='R73' to_lane='1'/>
+  <turn from='R76' from_lane='1' name='right' to='R72' to_lane='0'/>
   <turn from='R71' from_lane='0' name='right merge to lane 0' to='R73' to_lane='0'/>
   <turn from='R71' from_lane='0' name='right merge to lane 1' to='R73' to_lane='1'/>
   <turn from='R71' from_lane='0' name='left merge to lane 0' to='R75' to_lane='0'/>
   <turn from='R71' from_lane='0' name='left merge to lane 1' to='R75' to_lane='1'/>
-  <turn from='R76' from_lane='0' name='forward merge to lane 0' to='R73' to_lane='0'/>
-  <turn from='R76' from_lane='0' name='forward merge to lane 1' to='R73' to_lane='1'/>
-  <turn from='R76' from_lane='0' name='right' to='R72' to_lane='0'/>
-  <turn from='R76' from_lane='1' name='forward merge to lane 0' to='R73' to_lane='0'/>
-  <turn from='R76' from_lane='1' name='forward merge to lane 1' to='R73' to_lane='1'/>
-  <turn from='R76' from_lane='1' name='right' to='R72' to_lane='0'/>
   <turn from='R74' from_lane='0' name='forward merge to lane 0' to='R75' to_lane='0'/>
   <turn from='R74' from_lane='0' name='forward merge to lane 1' to='R75' to_lane='1'/>
   <turn from='R74' from_lane='0' name='left' to='R72' to_lane='0'/>
-  <turn from='R63' from_lane='0' name='right merge to lane 0' to='R60' to_lane='0'/>
-  <turn from='R63' from_lane='0' name='right merge to lane 1' to='R60' to_lane='1'/>
-  <turn from='R63' from_lane='0' name='left merge to lane 0' to='R74' to_lane='0'/>
-  <turn from='R63' from_lane='0' name='left merge to lane 1' to='R74' to_lane='1'/>
-  <turn from='R59' from_lane='0' name='forward merge to lane 0' to='R74' to_lane='0'/>
-  <turn from='R59' from_lane='0' name='forward merge to lane 1' to='R74' to_lane='1'/>
-  <turn from='R59' from_lane='0' name='left' to='R64' to_lane='0'/>
   <turn from='R59' from_lane='1' name='forward merge to lane 0' to='R74' to_lane='0'/>
   <turn from='R59' from_lane='1' name='forward merge to lane 1' to='R74' to_lane='1'/>
   <turn from='R59' from_lane='1' name='left' to='R64' to_lane='0'/>
@@ -447,12 +440,22 @@
   <turn from='R73' from_lane='0' name='forward merge to lane 0' to='R60' to_lane='0'/>
   <turn from='R73' from_lane='0' name='forward merge to lane 1' to='R60' to_lane='1'/>
   <turn from='R73' from_lane='0' name='right' to='R64' to_lane='0'/>
-  <turn from='R60' from_lane='1' name='forward merge to lane 0' to='R55' to_lane='0'/>
-  <turn from='R60' from_lane='1' name='forward merge to lane 1' to='R55' to_lane='1'/>
-  <turn from='R60' from_lane='1' name='right' to='R54' to_lane='0'/>
+  <turn from='R63' from_lane='0' name='right merge to lane 0' to='R60' to_lane='0'/>
+  <turn from='R63' from_lane='0' name='right merge to lane 1' to='R60' to_lane='1'/>
+  <turn from='R63' from_lane='0' name='left merge to lane 0' to='R74' to_lane='0'/>
+  <turn from='R63' from_lane='0' name='left merge to lane 1' to='R74' to_lane='1'/>
+  <turn from='R59' from_lane='0' name='forward merge to lane 0' to='R74' to_lane='0'/>
+  <turn from='R59' from_lane='0' name='forward merge to lane 1' to='R74' to_lane='1'/>
+  <turn from='R59' from_lane='0' name='left' to='R64' to_lane='0'/>
   <turn from='R56' from_lane='1' name='forward merge to lane 0' to='R59' to_lane='0'/>
   <turn from='R56' from_lane='1' name='forward merge to lane 1' to='R59' to_lane='1'/>
   <turn from='R56' from_lane='1' name='left' to='R54' to_lane='0'/>
+  <turn from='R56' from_lane='0' name='forward merge to lane 0' to='R59' to_lane='0'/>
+  <turn from='R56' from_lane='0' name='forward merge to lane 1' to='R59' to_lane='1'/>
+  <turn from='R56' from_lane='0' name='left' to='R54' to_lane='0'/>
+  <turn from='R60' from_lane='1' name='forward merge to lane 0' to='R55' to_lane='0'/>
+  <turn from='R60' from_lane='1' name='forward merge to lane 1' to='R55' to_lane='1'/>
+  <turn from='R60' from_lane='1' name='right' to='R54' to_lane='0'/>
   <turn from='R60' from_lane='0' name='forward merge to lane 0' to='R55' to_lane='0'/>
   <turn from='R60' from_lane='0' name='forward merge to lane 1' to='R55' to_lane='1'/>
   <turn from='R60' from_lane='0' name='right' to='R54' to_lane='0'/>
@@ -460,12 +463,6 @@
   <turn from='R53' from_lane='0' name='right merge to lane 1' to='R55' to_lane='1'/>
   <turn from='R53' from_lane='0' name='left merge to lane 0' to='R59' to_lane='0'/>
   <turn from='R53' from_lane='0' name='left merge to lane 1' to='R59' to_lane='1'/>
-  <turn from='R56' from_lane='0' name='forward merge to lane 0' to='R59' to_lane='0'/>
-  <turn from='R56' from_lane='0' name='forward merge to lane 1' to='R59' to_lane='1'/>
-  <turn from='R56' from_lane='0' name='left' to='R54' to_lane='0'/>
-  <turn from='R42' from_lane='0' name='left' to='R43' to_lane='0'/>
-  <turn from='R42' from_lane='0' name='forward merge to lane 0' to='R56' to_lane='0'/>
-  <turn from='R42' from_lane='0' name='forward merge to lane 1' to='R56' to_lane='1'/>
   <turn from='R44' from_lane='0' name='right merge to lane 0' to='R41' to_lane='0'/>
   <turn from='R44' from_lane='0' name='right merge to lane 1' to='R41' to_lane='1'/>
   <turn from='R44' from_lane='0' name='left merge to lane 0' to='R56' to_lane='0'/>
@@ -479,34 +476,40 @@
   <turn from='R55' from_lane='1' name='right' to='R43' to_lane='0'/>
   <turn from='R55' from_lane='1' name='forward merge to lane 0' to='R41' to_lane='0'/>
   <turn from='R55' from_lane='1' name='forward merge to lane 1' to='R41' to_lane='1'/>
-  <turn from='R26' from_lane='1' name='forward merge to lane 0' to='R42' to_lane='0'/>
-  <turn from='R26' from_lane='1' name='forward merge to lane 1' to='R42' to_lane='1'/>
-  <turn from='R26' from_lane='1' name='left' to='R28' to_lane='0'/>
-  <turn from='R41' from_lane='1' name='forward merge to lane 0' to='R27' to_lane='0'/>
-  <turn from='R41' from_lane='1' name='forward merge to lane 1' to='R27' to_lane='1'/>
-  <turn from='R41' from_lane='1' name='right' to='R28' to_lane='0'/>
-  <turn from='R41' from_lane='0' name='forward merge to lane 0' to='R27' to_lane='0'/>
-  <turn from='R41' from_lane='0' name='forward merge to lane 1' to='R27' to_lane='1'/>
-  <turn from='R41' from_lane='0' name='right' to='R28' to_lane='0'/>
+  <turn from='R42' from_lane='0' name='left' to='R43' to_lane='0'/>
+  <turn from='R42' from_lane='0' name='forward merge to lane 0' to='R56' to_lane='0'/>
+  <turn from='R42' from_lane='0' name='forward merge to lane 1' to='R56' to_lane='1'/>
   <turn from='R40' from_lane='0' name='right merge to lane 0' to='R27' to_lane='0'/>
   <turn from='R40' from_lane='0' name='right merge to lane 1' to='R27' to_lane='1'/>
   <turn from='R40' from_lane='0' name='left merge to lane 0' to='R42' to_lane='0'/>
   <turn from='R40' from_lane='0' name='left merge to lane 1' to='R42' to_lane='1'/>
+  <turn from='R41' from_lane='0' name='forward merge to lane 0' to='R27' to_lane='0'/>
+  <turn from='R41' from_lane='0' name='forward merge to lane 1' to='R27' to_lane='1'/>
+  <turn from='R41' from_lane='0' name='right' to='R28' to_lane='0'/>
   <turn from='R26' from_lane='0' name='forward merge to lane 0' to='R42' to_lane='0'/>
   <turn from='R26' from_lane='0' name='forward merge to lane 1' to='R42' to_lane='1'/>
   <turn from='R26' from_lane='0' name='left' to='R28' to_lane='0'/>
-  <turn from='R39' from_lane='0' name='left' to='R40' to_lane='0'/>
-  <turn from='R39' from_lane='0' name='forward' to='R29' to_lane='0'/>
+  <turn from='R41' from_lane='1' name='forward merge to lane 0' to='R27' to_lane='0'/>
+  <turn from='R41' from_lane='1' name='forward merge to lane 1' to='R27' to_lane='1'/>
+  <turn from='R41' from_lane='1' name='right' to='R28' to_lane='0'/>
+  <turn from='R26' from_lane='1' name='forward merge to lane 0' to='R42' to_lane='0'/>
+  <turn from='R26' from_lane='1' name='forward merge to lane 1' to='R42' to_lane='1'/>
+  <turn from='R26' from_lane='1' name='left' to='R28' to_lane='0'/>
   <turn from='R28' from_lane='0' name='left' to='R29' to_lane='0'/>
   <turn from='R28' from_lane='0' name='right' to='R38' to_lane='0'/>
   <turn from='R30' from_lane='0' name='right' to='R40' to_lane='0'/>
   <turn from='R30' from_lane='0' name='forward' to='R38' to_lane='0'/>
-  <turn from='R29' from_lane='0' name='right' to='R31' to_lane='0'/>
-  <turn from='R29' from_lane='0' name='left' to='R25' to_lane='0'/>
+  <turn from='R39' from_lane='0' name='left' to='R40' to_lane='0'/>
+  <turn from='R39' from_lane='0' name='forward' to='R29' to_lane='0'/>
   <turn from='R23' from_lane='0' name='forward' to='R25' to_lane='0'/>
   <turn from='R23' from_lane='0' name='left' to='R30' to_lane='0'/>
   <turn from='R24' from_lane='0' name='forward' to='R31' to_lane='0'/>
   <turn from='R24' from_lane='0' name='right' to='R30' to_lane='0'/>
+  <turn from='R29' from_lane='0' name='right' to='R31' to_lane='0'/>
+  <turn from='R29' from_lane='0' name='left' to='R25' to_lane='0'/>
+  <turn from='R46' from_lane='0' name='right' to='R37' to_lane='0'/>
+  <turn from='R46' from_lane='0' name='left' to='R44' to_lane='0'/>
+  <turn from='R46' from_lane='0' name='forward' to='R39' to_lane='0'/>
   <turn from='R38' from_lane='0' name='left' to='R37' to_lane='0'/>
   <turn from='R38' from_lane='0' name='right' to='R44' to_lane='0'/>
   <turn from='R38' from_lane='0' name='forward' to='R45' to_lane='0'/>
@@ -516,102 +519,96 @@
   <turn from='R43' from_lane='0' name='forward' to='R37' to_lane='0'/>
   <turn from='R43' from_lane='0' name='left' to='R39' to_lane='0'/>
   <turn from='R43' from_lane='0' name='right' to='R45' to_lane='0'/>
-  <turn from='R46' from_lane='0' name='right' to='R37' to_lane='0'/>
-  <turn from='R46' from_lane='0' name='left' to='R44' to_lane='0'/>
-  <turn from='R46' from_lane='0' name='forward' to='R39' to_lane='0'/>
-  <turn from='R31' from_lane='0' name='forward' to='R21' to_lane='0'/>
-  <turn from='R31' from_lane='0' name='right' to='R153' to_lane='0'/>
   <turn from='R22' from_lane='0' name='forward' to='R23' to_lane='0'/>
   <turn from='R22' from_lane='0' name='left' to='R153' to_lane='0'/>
+  <turn from='R31' from_lane='0' name='forward' to='R21' to_lane='0'/>
+  <turn from='R31' from_lane='0' name='right' to='R153' to_lane='0'/>
   <turn from='R20' from_lane='0' name='right' to='R21' to_lane='0'/>
   <turn from='R20' from_lane='0' name='left' to='R23' to_lane='0'/>
+  <turn from='R153' from_lane='0' name='left' to='R35' to_lane='0'/>
+  <turn from='R153' from_lane='0' name='right' to='R36' to_lane='0'/>
   <turn from='R34' from_lane='0' name='forward' to='R36' to_lane='0'/>
   <turn from='R34' from_lane='0' name='right' to='R20' to_lane='0'/>
   <turn from='R37' from_lane='0' name='forward' to='R35' to_lane='0'/>
   <turn from='R37' from_lane='0' name='left' to='R20' to_lane='0'/>
-  <turn from='R153' from_lane='0' name='left' to='R35' to_lane='0'/>
-  <turn from='R153' from_lane='0' name='right' to='R36' to_lane='0'/>
+  <turn from='R33' from_lane='0' name='forward' to='R34' to_lane='0'/>
+  <turn from='R33' from_lane='0' name='left' to='R89' to_lane='0'/>
   <turn from='R35' from_lane='0' name='forward' to='R32' to_lane='0'/>
   <turn from='R35' from_lane='0' name='right' to='R89' to_lane='0'/>
   <turn from='R88' from_lane='0' name='right' to='R32' to_lane='0'/>
   <turn from='R88' from_lane='0' name='left' to='R34' to_lane='0'/>
-  <turn from='R33' from_lane='0' name='forward' to='R34' to_lane='0'/>
-  <turn from='R33' from_lane='0' name='left' to='R89' to_lane='0'/>
-  <turn from='R107' from_lane='0' name='right' to='R100' to_lane='0'/>
-  <turn from='R107' from_lane='0' name='left' to='R99' to_lane='0'/>
   <turn from='R98' from_lane='0' name='right' to='R106' to_lane='0'/>
   <turn from='R98' from_lane='0' name='forward' to='R100' to_lane='0'/>
+  <turn from='R107' from_lane='0' name='right' to='R100' to_lane='0'/>
+  <turn from='R107' from_lane='0' name='left' to='R99' to_lane='0'/>
   <turn from='R101' from_lane='0' name='left' to='R106' to_lane='0'/>
   <turn from='R101' from_lane='0' name='forward' to='R99' to_lane='0'/>
+  <turn from='R58' from_lane='0' name='right' to='R52' to_lane='0'/>
+  <turn from='R58' from_lane='0' name='forward' to='R53' to_lane='0'/>
   <turn from='R47' from_lane='0' name='left' to='R57' to_lane='0'/>
   <turn from='R47' from_lane='0' name='forward' to='R53' to_lane='0'/>
   <turn from='R54' from_lane='0' name='forward' to='R52' to_lane='0'/>
   <turn from='R54' from_lane='0' name='forward' to='R57' to_lane='0'/>
-  <turn from='R58' from_lane='0' name='right' to='R52' to_lane='0'/>
-  <turn from='R58' from_lane='0' name='forward' to='R53' to_lane='0'/>
   <turn from='R52' from_lane='0' name='left' to='R46' to_lane='0'/>
   <turn from='R52' from_lane='0' name='right' to='R48' to_lane='0'/>
-  <turn from='R45' from_lane='0' name='right' to='R47' to_lane='0'/>
-  <turn from='R45' from_lane='0' name='forward' to='R48' to_lane='0'/>
   <turn from='R49' from_lane='0' name='left' to='R47' to_lane='0'/>
   <turn from='R49' from_lane='0' name='forward' to='R46' to_lane='0'/>
+  <turn from='R45' from_lane='0' name='right' to='R47' to_lane='0'/>
+  <turn from='R45' from_lane='0' name='forward' to='R48' to_lane='0'/>
   <turn from='R81' from_lane='0' name='right' to='R49' to_lane='0'/>
   <turn from='R81' from_lane='0' name='left' to='R50' to_lane='0'/>
   <turn from='R51' from_lane='0' name='right' to='R83' to_lane='0'/>
   <turn from='R51' from_lane='0' name='forward' to='R49' to_lane='0'/>
   <turn from='R48' from_lane='0' name='left' to='R83' to_lane='0'/>
   <turn from='R48' from_lane='0' name='forward' to='R50' to_lane='0'/>
-  <turn from='R57' from_lane='0' name='left' to='R51' to_lane='0'/>
-  <turn from='R57' from_lane='0' name='right' to='R61' to_lane='0'/>
-  <turn from='R50' from_lane='0' name='right' to='R58' to_lane='0'/>
-  <turn from='R50' from_lane='0' name='forward' to='R61' to_lane='0'/>
   <turn from='R62' from_lane='0' name='left' to='R58' to_lane='0'/>
   <turn from='R62' from_lane='0' name='forward' to='R51' to_lane='0'/>
-  <turn from='R69' from_lane='0' name='left' to='R63' to_lane='0'/>
-  <turn from='R69' from_lane='0' name='forward' to='R62' to_lane='0'/>
+  <turn from='R50' from_lane='0' name='right' to='R58' to_lane='0'/>
+  <turn from='R50' from_lane='0' name='forward' to='R61' to_lane='0'/>
+  <turn from='R57' from_lane='0' name='left' to='R51' to_lane='0'/>
+  <turn from='R57' from_lane='0' name='right' to='R61' to_lane='0'/>
   <turn from='R61' from_lane='0' name='right' to='R63' to_lane='0'/>
   <turn from='R61' from_lane='0' name='forward' to='R70' to_lane='0'/>
   <turn from='R64' from_lane='0' name='left' to='R62' to_lane='0'/>
   <turn from='R64' from_lane='0' name='right' to='R70' to_lane='0'/>
-  <turn from='R72' from_lane='0' name='right' to='R68' to_lane='0'/>
-  <turn from='R72' from_lane='0' name='left' to='R69' to_lane='0'/>
-  <turn from='R67' from_lane='0' name='left' to='R71' to_lane='0'/>
-  <turn from='R67' from_lane='0' name='forward' to='R69' to_lane='0'/>
+  <turn from='R69' from_lane='0' name='left' to='R63' to_lane='0'/>
+  <turn from='R69' from_lane='0' name='forward' to='R62' to_lane='0'/>
   <turn from='R70' from_lane='0' name='right' to='R71' to_lane='0'/>
   <turn from='R70' from_lane='0' name='forward' to='R68' to_lane='0'/>
-  <turn from='R77' from_lane='0' name='right' to='R66' to_lane='0'/>
-  <turn from='R77' from_lane='0' name='left' to='R67' to_lane='0'/>
-  <turn from='R68' from_lane='0' name='right' to='R78' to_lane='0'/>
-  <turn from='R68' from_lane='0' name='forward' to='R66' to_lane='0'/>
+  <turn from='R67' from_lane='0' name='left' to='R71' to_lane='0'/>
+  <turn from='R67' from_lane='0' name='forward' to='R69' to_lane='0'/>
+  <turn from='R72' from_lane='0' name='right' to='R68' to_lane='0'/>
+  <turn from='R72' from_lane='0' name='left' to='R69' to_lane='0'/>
   <turn from='R65' from_lane='0' name='left' to='R78' to_lane='0'/>
   <turn from='R65' from_lane='0' name='forward' to='R67' to_lane='0'/>
+  <turn from='R68' from_lane='0' name='right' to='R78' to_lane='0'/>
+  <turn from='R68' from_lane='0' name='forward' to='R66' to_lane='0'/>
+  <turn from='R77' from_lane='0' name='right' to='R66' to_lane='0'/>
+  <turn from='R77' from_lane='0' name='left' to='R67' to_lane='0'/>
   <turn from='R103' from_lane='0' name='right' to='R98' to_lane='0'/>
   <turn from='R103' from_lane='0' name='forward' to='R65' to_lane='0'/>
-  <turn from='R99' from_lane='0' name='right' to='R65' to_lane='0'/>
-  <turn from='R99' from_lane='0' name='left' to='R102' to_lane='0'/>
   <turn from='R66' from_lane='0' name='left' to='R98' to_lane='0'/>
   <turn from='R66' from_lane='0' name='forward' to='R102' to_lane='0'/>
+  <turn from='R99' from_lane='0' name='right' to='R65' to_lane='0'/>
+  <turn from='R99' from_lane='0' name='left' to='R102' to_lane='0'/>
+  <turn from='R94' from_lane='0' name='right' to='R97' to_lane='0'/>
+  <turn from='R94' from_lane='0' name='left' to='R101' to_lane='0'/>
   <turn from='R96' from_lane='0' name='left' to='R95' to_lane='0'/>
   <turn from='R96' from_lane='0' name='forward' to='R101' to_lane='0'/>
   <turn from='R100' from_lane='0' name='right' to='R95' to_lane='0'/>
   <turn from='R100' from_lane='0' name='forward' to='R97' to_lane='0'/>
-  <turn from='R94' from_lane='0' name='right' to='R97' to_lane='0'/>
-  <turn from='R94' from_lane='0' name='left' to='R101' to_lane='0'/>
-  <turn from='R90' from_lane='0' name='right' to='R85' to_lane='0'/>
-  <turn from='R90' from_lane='0' name='left' to='R96' to_lane='0'/>
   <turn from='R84' from_lane='0' name='left' to='R91' to_lane='0'/>
   <turn from='R84' from_lane='0' name='forward' to='R96' to_lane='0'/>
+  <turn from='R90' from_lane='0' name='right' to='R85' to_lane='0'/>
+  <turn from='R90' from_lane='0' name='left' to='R96' to_lane='0'/>
   <turn from='R97' from_lane='0' name='right' to='R91' to_lane='0'/>
   <turn from='R97' from_lane='0' name='forward' to='R85' to_lane='0'/>
+  <turn from='R86' from_lane='0' name='forward' to='R81' to_lane='0'/>
+  <turn from='R86' from_lane='0' name='left' to='R84' to_lane='0'/>
   <turn from='R85' from_lane='0' name='right' to='R152' to_lane='0'/>
   <turn from='R85' from_lane='0' name='left' to='R81' to_lane='0'/>
   <turn from='R83' from_lane='0' name='forward' to='R152' to_lane='0'/>
   <turn from='R83' from_lane='0' name='right' to='R84' to_lane='0'/>
-  <turn from='R86' from_lane='0' name='forward' to='R81' to_lane='0'/>
-  <turn from='R86' from_lane='0' name='left' to='R84' to_lane='0'/>
-  <turn from='R115' from_lane='0' name='forward' to='R88' to_lane='0'/>
-  <turn from='R115' from_lane='0' name='left' to='R86' to_lane='0'/>
-  <turn from='R115' from_lane='0' name='right' to='R110' to_lane='0'/>
   <turn from='R152' from_lane='0' name='right' to='R93' to_lane='0'/>
   <turn from='R152' from_lane='0' name='left' to='R88' to_lane='0'/>
   <turn from='R152' from_lane='0' name='forward' to='R110' to_lane='0'/>
@@ -621,38 +618,41 @@
   <turn from='R109' from_lane='0' name='left' to='R93' to_lane='0'/>
   <turn from='R109' from_lane='0' name='right' to='R88' to_lane='0'/>
   <turn from='R109' from_lane='0' name='forward' to='R86' to_lane='0'/>
+  <turn from='R115' from_lane='0' name='forward' to='R88' to_lane='0'/>
+  <turn from='R115' from_lane='0' name='left' to='R86' to_lane='0'/>
+  <turn from='R115' from_lane='0' name='right' to='R110' to_lane='0'/>
+  <turn from='R155' from_lane='0' name='forward' to='R133' to_lane='0'/>
+  <turn from='R155' from_lane='0' name='right' to='R143' to_lane='0'/>
   <turn from='R130' from_lane='0' name='forward' to='R154' to_lane='0'/>
   <turn from='R130' from_lane='0' name='left' to='R143' to_lane='0'/>
   <turn from='R142' from_lane='0' name='left' to='R154' to_lane='0'/>
   <turn from='R142' from_lane='0' name='right' to='R133' to_lane='0'/>
-  <turn from='R155' from_lane='0' name='forward' to='R133' to_lane='0'/>
-  <turn from='R155' from_lane='0' name='right' to='R143' to_lane='0'/>
-  <turn from='R133' from_lane='0' name='right' to='R112' to_lane='0'/>
-  <turn from='R133' from_lane='0' name='left' to='R113' to_lane='0'/>
   <turn from='R114' from_lane='0' name='forward' to='R112' to_lane='0'/>
   <turn from='R114' from_lane='0' name='right' to='R130' to_lane='0'/>
+  <turn from='R133' from_lane='0' name='right' to='R112' to_lane='0'/>
+  <turn from='R133' from_lane='0' name='left' to='R113' to_lane='0'/>
   <turn from='R111' from_lane='0' name='forward' to='R113' to_lane='0'/>
   <turn from='R111' from_lane='0' name='left' to='R130' to_lane='0'/>
+  <turn from='R112' from_lane='0' name='forward' to='R136' to_lane='0'/>
+  <turn from='R112' from_lane='0' name='left' to='R109' to_lane='0'/>
   <turn from='R137' from_lane='0' name='forward' to='R111' to_lane='0'/>
   <turn from='R137' from_lane='0' name='forward' to='R109' to_lane='0'/>
   <turn from='R110' from_lane='0' name='forward' to='R136' to_lane='0'/>
   <turn from='R110' from_lane='0' name='right' to='R111' to_lane='0'/>
-  <turn from='R112' from_lane='0' name='forward' to='R136' to_lane='0'/>
-  <turn from='R112' from_lane='0' name='left' to='R109' to_lane='0'/>
-  <turn from='R136' from_lane='0' name='forward' to='R138' to_lane='0'/>
-  <turn from='R136' from_lane='0' name='right' to='R140' to_lane='0'/>
-  <turn from='R141' from_lane='0' name='right' to='R138' to_lane='0'/>
-  <turn from='R141' from_lane='0' name='left' to='R137' to_lane='0'/>
   <turn from='R139' from_lane='0' name='left' to='R140' to_lane='0'/>
   <turn from='R139' from_lane='0' name='forward' to='R137' to_lane='0'/>
+  <turn from='R141' from_lane='0' name='right' to='R138' to_lane='0'/>
+  <turn from='R141' from_lane='0' name='left' to='R137' to_lane='0'/>
+  <turn from='R136' from_lane='0' name='forward' to='R138' to_lane='0'/>
+  <turn from='R136' from_lane='0' name='right' to='R140' to_lane='0'/>
   <turn from='R143' from_lane='0' name='left' to='R141' to_lane='0'/>
   <turn from='R143' from_lane='0' name='forward' to='R144' to_lane='0'/>
   <turn from='R145' from_lane='0' name='right' to='R141' to_lane='0'/>
   <turn from='R145' from_lane='0' name='forward' to='R142' to_lane='0'/>
   <turn from='R140' from_lane='0' name='left' to='R144' to_lane='0'/>
   <turn from='R140' from_lane='0' name='right' to='R142' to_lane='0'/>
-  <turn from='R148' from_lane='0' name='right' to='R150' to_lane='0'/>
   <turn from='R151' from_lane='0' name='left' to='R149' to_lane='0'/>
+  <turn from='R148' from_lane='0' name='right' to='R150' to_lane='0'/>
   <turn from='R146' from_lane='0' name='right' to='R148' to_lane='0'/>
   <turn from='R149' from_lane='0' name='left' to='R147' to_lane='0'/>
 </roadmap>
