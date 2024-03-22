@@ -47,12 +47,13 @@ public interface Controller {
     /**
      * Draws the Controller
      * @param sim   The simulation
+     * @param v     The vehicle this controller is attached to
      * @param x     The x position of the vehicle
      * @param y     The y position of the vehicle
      * @param dx    the x component of the direction vector for this vehicle
      * @param dy    the y component of the direction vector for this vehicle
      */
-    default void draw(Simulation sim, float x, float y, float dx, float dy){}
+    default void draw(Simulation sim, Vehicle v, float x, float y, float dx, float dy){}
 
     /**
      * Is set when the vehicle is put in a new lane for any reason

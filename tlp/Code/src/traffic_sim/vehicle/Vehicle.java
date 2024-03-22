@@ -24,6 +24,7 @@ public abstract class Vehicle {
     private Controller controller;
 
     protected float speedMultiplier;
+    protected float actualSpeed = 0.0f;
     private final float size;
 
     public Vehicle(Controller controller, float size){
@@ -105,6 +106,13 @@ public abstract class Vehicle {
         this.distanceAlongRoad = distanceAlongRoad;
     }
 
+    /**
+     * @return  The actual speed of the vehicle
+     */
+    public float getActualSpeed(){
+        return this.actualSpeed;
+    }
+
     /** This gets ran every simulation tick and is responsible for ticking the controller and updating the vehicles
      * position
      *
@@ -113,9 +121,12 @@ public abstract class Vehicle {
      * @param delta the simulation time delta in seconds
      */
     public void tick(Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
+        var old = this.distanceAlongRoad;
         this.distanceAlongRoad += lane.road().getSpeedLimit() * delta * this.getSpeedMultiplier();
         this.distanceAlongRoad = Math.min(lane.remainingSpace()-0.25f, this.distanceAlongRoad);
         if(controller != null) controller.tick(this, sim, lane, laneIndex, changedLanes, delta);
+        if(delta != 0)
+            this.actualSpeed = (this.distanceAlongRoad - old) / delta;
     }
 
     /** Gets called every time this vehicle can make a turn, return null of no turn should be made
@@ -184,7 +195,7 @@ public abstract class Vehicle {
             sim.getView().drawString("h" + this.getHealth(), x, y+-10/sim.getView().zoom);
             sim.getView().drawString("r" + this.getReputation(), x, y+-20/sim.getView().zoom);
         }
-        if(this.controller!=null)this.controller.draw(sim, x, y, dx, dy);
+        if(this.controller!=null)this.controller.draw(sim, this, x, y, dx, dy);
     }
 
     /** Updates the cached position of this vehicle to the given values, position is in map space

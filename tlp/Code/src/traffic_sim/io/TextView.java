@@ -14,7 +14,7 @@ import java.util.function.Function;
 /**
  * A controller for Vehicles and also a way to display information about the currently controlled vehicle
  */
-public class TextDisplay implements Controller {
+public class TextView implements Controller {
 
     public void attach(Simulation simulation) {
         simulation.addSystem(new Simulation.SimSystem(50) {

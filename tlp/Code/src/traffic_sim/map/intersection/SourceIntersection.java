@@ -3,16 +3,16 @@ package traffic_sim.map.intersection;
 import traffic_sim.Simulation;
 import traffic_sim.vehicle.Car;
 import traffic_sim.vehicle.Vehicle;
+import traffic_sim.vehicle.VehicleFactory;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 /**
  * An intersection that spawns new Vehicles at random and allows for inserting specified Vehicles to place
  */
 public class SourceIntersection extends Intersection{
 
-    private Supplier<Vehicle>[] vehicleSuppliers = new Supplier[]{Car::new};
+    private VehicleFactory[] vehicleFactories = new VehicleFactory[]{Car::new};
     private final ArrayList<Vehicle> toAdd = new ArrayList<>();
 
     public SourceIntersection(String name, float x, float y) {
@@ -29,9 +29,9 @@ public class SourceIntersection extends Intersection{
                 var lane = (int)(random.getNumLanes()*Math.random());
                 if (random.getRemainingSpace(lane) > 2.0){
                     if (toAdd.isEmpty()){
-                        if(vehicleSuppliers.length > 0){
-                            var supplier = (int)(vehicleSuppliers.length*Math.random());
-                            random.getLane(lane).addVehicle(vehicleSuppliers[supplier].get());
+                        if(vehicleFactories.length > 0){
+                            var supplier = (int)(vehicleFactories.length*Math.random());
+                            random.getLane(lane).addVehicle(vehicleFactories[supplier].create());
                         }
                     }else{
                         random.getLane(lane).addVehicle(toAdd.remove(0));
@@ -49,7 +49,7 @@ public class SourceIntersection extends Intersection{
         toAdd.add(vehicle);
     }
 
-    public void suppliers(Supplier<Vehicle>... suppliers){
-        this.vehicleSuppliers = suppliers;
+    public void factories(VehicleFactory... suppliers){
+        this.vehicleFactories = suppliers;
     }
 }

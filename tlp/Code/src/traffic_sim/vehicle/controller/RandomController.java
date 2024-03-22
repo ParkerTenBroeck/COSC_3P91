@@ -20,7 +20,7 @@ public class RandomController implements Controller{
     public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
         if (lane.vehicleAt(laneIndex -1) != null){
             lastDistance = lane.distanceToNext(laneIndex);
-            if (lastDistance < 0.1){
+            if (lastDistance <= 0.2500000001 ){
                 wantsToLaneChange = true;
             }else{
                 wantsToLaneChange = false;
@@ -67,11 +67,12 @@ public class RandomController implements Controller{
     }
 
     @Override
-    public void draw(Simulation sim, float x, float y, float dx, float dy) {
+    public void draw(Simulation sim, Vehicle v, float x, float y, float dx, float dy) {
         if(sim.getDebug()){
             sim.getView().setLayer(Display.Layer.Hud);
             sim.getView().setColor(Color.WHITE);
             sim.getView().drawString("d"+lastDistance, x, y);
+            sim.getView().drawString("s"+v.getActualSpeed(), x, y+10/sim.getView().zoom);
         }
     }
 }

@@ -3,13 +3,12 @@ package traffic_sim.map;
 import traffic_sim.Simulation;
 import traffic_sim.excpetions.CustomIntersectionLoadException;
 import traffic_sim.excpetions.MapBuildingException;
-import traffic_sim.map.intersection.DrainIntersection;
-import traffic_sim.map.intersection.Intersection;
-import traffic_sim.map.intersection.SourceIntersection;
-import traffic_sim.map.intersection.TimedIntersection;
+import traffic_sim.map.intersection.*;
 import traffic_sim.vehicle.Vehicle;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -85,7 +84,7 @@ public class RoadMap {
      * @return      The created intersection
      */
     public Intersection addIntersection(String id, String name, float x, float y) throws MapBuildingException{
-        var intersection = new Intersection(name, x, y);
+        var intersection = new DefaultIntersection(name, x, y);
         return addIntersection(id, intersection);
     }
 
@@ -309,186 +308,4 @@ public class RoadMap {
                             }
         }
     }
-
-    /** Writes the this map (not including vehicles) to the output stream
-     *
-     * @param out   The place we want to output to
-     * @throws IOException if writing to the file goes wrong an io exception will be thrown
-     */
-    public void write(OutputStreamWriter out) throws IOException {
-        out.write("# type \\t  id  \\t   name  \t   x  \\t   \\y   \\t  kind \\t ...\n");
-
-        for(var intersection : intersections){
-            out.write("intersection\t");
-            // id
-            out.write(intersectionToId.get(intersection));
-            out.write("\t");
-            out.write(intersection.getName());
-            out.write("\t");
-            out.write(intersection.getX()+"");
-            out.write("\t");
-            out.write(intersection.getY()+"");
-            out.write("\t");
-            if (intersection instanceof DrainIntersection){
-                out.write("Drain");
-            }else if (intersection instanceof SourceIntersection){
-                out.write("Source");
-            }else if(intersection instanceof TimedIntersection){
-                out.write("Timed");
-            }else{
-                out.write("Default");
-            }
-            out.write('\n');
-        }
-        out.write('\n');
-
-        out.write("# type \\t  id  \\t  name \\t lanes  \\t  inter_id_from \\t inter_id_to\n");
-        for(var road : roads){
-            out.write("road\t");
-
-            out.write(roadToId.get(road));
-
-            out.write("\t");
-            out.write(road.getName());
-            out.write("\t");
-            out.write(road.getNumLanes()+"");
-            out.write("\t");
-            out.write(intersectionToId.get(this.roadStarts.get(road)));
-            out.write("\t");
-            out.write(intersectionToId.get(this.roadEnds.get(road)));
-            out.write('\n');
-        }
-        out.write('\n');
-
-
-        out.write("# type \\t  from_road_id \\t from_road_lane \\t name \\t to_road_id \\t to_road_lane\n");
-
-        for(var intersection : intersections){
-            for(var turns : intersection.getAllTurns().entrySet()){
-                for(var turn : turns.getValue()){
-                    out.write("turn\t");
-                    out.write(roadToId.get(turns.getKey().road()));
-                    out.write("\t"+turns.getKey().getLane()+"\t");
-                    out.write(turn.getName()+"\t");
-                    out.write(roadToId.get(turn.getLane().road()));
-                    out.write("\t"+turn.getLane().getLane());
-                    out.write('\n');
-                }
-            }
-        }
-
-        out.flush();
-    }
-
-    /** Reads the map from the input provided filling out this map with its contents
-     *  Clears old contents of map
-     *
-     * @param readable    The place we want to read from
-     */
-    public void read(Readable readable) throws MapBuildingException, CustomIntersectionLoadException {
-        this.intersectionToId.clear();
-        this.idToIntersection.clear();
-        this.roadToId.clear();
-        this.idToRoad.clear();
-        this.intersections.clear();
-        this.roads.clear();
-        this.incoming.clear();
-        this.outgoing.clear();
-        this.roadStarts.clear();
-        this.roadEnds.clear();
-
-        var in = new Scanner(readable);
-        while(in.hasNext()){
-            var line = in.nextLine().trim();
-
-            if(line.startsWith("#") || line.isEmpty()) continue;
-            var split = line.split("\t", 2);
-            var kind = split[0];
-            switch (kind) {
-                case "intersection" -> {
-                    split = split[1].split("\t", 6);
-                    var name = split[1];
-                    float x = Float.parseFloat(split[2]);
-                    float y = Float.parseFloat(split[3]);
-                    Intersection intersection = null;
-                    switch (split[4]) {
-                        case "Default" -> intersection = new Intersection(name, x, y);
-                        case "Source" -> intersection = new SourceIntersection(name, x, y);
-                        case "Drain" -> intersection = new DrainIntersection(name, x, y);
-                        case "Timed" -> intersection = new TimedIntersection(name, x, y);
-                        case "Custom" -> {
-                            var c_split = split[5].split("\t", 2);
-                            try{
-                                intersection = constructIntersectionFromClass(Class.forName(c_split[0].trim()), name, x, y,c_split[1].trim());
-                            }catch (ClassNotFoundException e) {
-                                throw new CustomIntersectionLoadException(e, "Failed to find custom class name: " + c_split[0].trim());
-                            }
-
-                        }
-                    }
-
-                    this.addIntersection(split[0], intersection);
-                }
-                case "road" -> {
-                    split = split[1].split("\t", 5);
-                    var id = split[0];
-                    var name = split[1];
-                    int lanes = Integer.parseInt(split[2]);
-                    var from = idToIntersection.get(split[3]);
-                    var to = idToIntersection.get(split[4]);
-                    this.linkIntersection(from, to, id, name, lanes);
-                }
-                case "turn" -> {
-                    split = split[1].split("\t", 5);
-                    var from = idToRoad.get(split[0]);
-                    var from_lane = Integer.parseInt(split[1]);
-                    var name = split[2];
-                    var to = idToRoad.get(split[3]);
-                    var to_lane = Integer.parseInt(split[4]);
-                    this.addTurn(from.getLane(from_lane), to.getLane(to_lane), name);
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     * @param clazz The class of the intersection we want to construct
-     * @param name  The name of the new intersection
-     * @param x     The x coord of the new intersection
-     * @param y     The y coord of the new intersection
-     * @param arg   Optional arguments we might want to pass to the constructor
-     * @return      A intersection of type clazz
-     * @throws CustomIntersectionLoadException  If the provided clazz wasn't an intersection or couldn't be constructed for some reason.
-     */
-    private static Intersection constructIntersectionFromClass(Class<?> clazz, String name, float x, float y, String arg) throws CustomIntersectionLoadException{
-        try{
-            var construct = clazz.getConstructor(String.class, float.class, float.class, String.class);
-            var value = construct.newInstance(name, x, y, arg);
-            if (value instanceof Intersection intersection){
-                return intersection;
-            }else{
-                throw new CustomIntersectionLoadException(new ClassCastException(), "Loaded class is not an intersection");
-            }
-        }catch (NoSuchMethodException ignore){
-
-        }catch (InvocationTargetException | RuntimeException | IllegalAccessException | InstantiationException e) {
-            throw new CustomIntersectionLoadException(e, "Failed to run custom intersection constructor");
-        }
-
-        try{
-            var construct = clazz.getConstructor(String.class, float.class, float.class);
-            var value = construct.newInstance(name, x, y);
-            if (value instanceof Intersection intersection){
-                return intersection;
-            }else{
-                throw new CustomIntersectionLoadException(new ClassCastException(), "Loaded class is not an intersection");
-            }
-        }catch (NoSuchMethodException | InvocationTargetException | RuntimeException | IllegalAccessException | InstantiationException e) {
-            throw new CustomIntersectionLoadException(e, "Failed to run custom intersection constructor");
-        }
-
-    }
-
-
 }

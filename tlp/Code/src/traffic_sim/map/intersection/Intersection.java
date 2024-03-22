@@ -13,7 +13,7 @@ import java.util.HashMap;
 /**
  * An Intersection that exists at some coordinate X,Y. It also holds a name and the turns it can take.
  */
-public class Intersection {
+public abstract class Intersection {
 
     protected float x;
     protected float y;
@@ -74,12 +74,15 @@ public class Intersection {
      * @param from  The incoming lane
      * @param to    The outgoing lane
      * @param turnDirection The direction/name of the turn
+     * @return The turn created
      */
-    public void addTurn(Road.Lane from, Road.Lane to, String turnDirection) {
+    public Turn addTurn(Road.Lane from, Road.Lane to, String turnDirection) {
         if (!this.turns.containsKey(from)){
             this.turns.put(from, new ArrayList<>());
         }
-        this.turns.get(from).add(new Intersection.Turn(turnDirection, to));
+        var turn = new Intersection.Turn(turnDirection, to);
+        this.turns.get(from).add(turn);
+        return turn;
     }
 
     /** Updates the intersections position also updating all the connecting road positions

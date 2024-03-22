@@ -1,0 +1,55 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <xs:element name="roadmap">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:sequence>
+                    <xs:element name="intersection" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:choice>
+                                <xs:element name="default">
+                                </xs:element>
+                                <xs:element name="timed">
+                                </xs:element>
+                                <xs:element name="source">
+                                </xs:element>
+                                <xs:element name="drain">
+                                </xs:element>
+                                <xs:element name="custom">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:any minOccurs="0" maxOccurs="unbounded"/>
+                                        </xs:sequence>
+                                        <xs:attribute name="classPath" type="xs:string"/>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:choice>
+                            <xs:attribute name="id" type="xs:string"/>
+                            <xs:attribute name="name" type="xs:string"/>
+                            <xs:attribute name="x" type="xs:float"/>
+                            <xs:attribute name="y" type="xs:float"/>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="road" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="id" type="xs:string"/>
+                            <xs:attribute name="name" type="xs:string"/>
+                            <xs:attribute name="lanes" type="xs:int"/>
+                            <xs:attribute name="from" type="xs:string"/>
+                            <xs:attribute name="to" type="xs:string"/>
+                        </xs:complexType>
+                    </xs:element>
+                    <xs:element name="turn" maxOccurs="unbounded">
+                        <xs:complexType>
+                            <xs:attribute name="name" type="xs:string"/>
+                            <xs:attribute name="from_lane" type="xs:int"/>
+                            <xs:attribute name="to_lane" type="xs:int"/>
+                            <xs:attribute name="from" type="xs:string"/>
+                            <xs:attribute name="to" type="xs:string"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:sequence>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

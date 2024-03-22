@@ -3,7 +3,7 @@ package traffic_sim;
 import traffic_sim.gamble.DefaultGambleHandler;
 import traffic_sim.gamble.GambleHandler;
 import traffic_sim.io.Input;
-import traffic_sim.io.TextDisplay;
+import traffic_sim.io.TextView;
 import traffic_sim.io.View;
 import traffic_sim.map.RoadMap;
 
@@ -83,7 +83,7 @@ public class Simulation implements Runnable{
         this.addSystem(SimSystem.simple(2000, (sim, delta) -> sim.view.update()));
     }
 
-    public Simulation(RoadMap map, TextDisplay display, boolean show_gui){
+    public Simulation(RoadMap map, TextView display, boolean show_gui){
         this(map, show_gui?new View():null);
         this.systems.removeIf((s) -> s.priority == 50);
 

@@ -2,9 +2,9 @@ import traffic_sim.Simulation;
 import traffic_sim.excpetions.MapBuildingException;
 import traffic_sim.io.Display;
 import traffic_sim.io.Input;
-import traffic_sim.io.TextDisplay;
+import traffic_sim.io.TextView;
 import traffic_sim.io.View;
-import traffic_sim.map.Road;
+import traffic_sim.map.xml.MapXmlTools;
 import traffic_sim.map.intersection.DrainIntersection;
 import traffic_sim.map.RoadMap;
 import traffic_sim.map.intersection.Intersection;
@@ -14,29 +14,19 @@ import traffic_sim.vehicle.Car;
 import traffic_sim.vehicle.Truck;
 import traffic_sim.vehicle.Vehicle;
 import traffic_sim.vehicle.controller.PlayerController;
-import traffic_sim.vehicle.controller.RandomController;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Scanner;
+import java.io.*;
 
 /*UML_HIDE*/
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        // createMap(); re-create a test map and write it to file
-        var map = new RoadMap();
-        
-        map.read(new FileReader("newmap.txt"));
 
-//        map.addIntersection("Source", new SourceIntersection("Source", 0, 0));
+        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
+        MapXmlTools.saveMap(map, new FileWriter("saved_road_map.xml"));
+
         var is = (SourceIntersection)map.getIntersectionById("Source");
-
-        // woah... a method reference... to a CONSTRUCTOR
-        is.suppliers(Car::new, () -> new Car(new RandomController(), Color.CYAN));
 
         for(var road : map.getRoads()){
             for(var lane : road.getLanes()){
@@ -53,7 +43,7 @@ public class Main {
         // show gui while being controlled by text mode
         boolean show_gui = false;
         if (text){
-            var displayController = new TextDisplay();
+            var displayController = new TextView();
             simulation = new Simulation(map, displayController, show_gui);
             player = new Car(displayController, Color.MAGENTA);
         }else{
@@ -79,16 +69,16 @@ public class Main {
                 @Override
                 public void run(Simulation sim, float delta) {
                     if (sim.getInput().keyHeld('D')){
-                        sim.getView().panX -= sim.getFrameDelta()*7;
+                        sim.getView().panX -= sim.getFrameDelta()*300*1/sim.getView().zoom;
                     }
                     if (sim.getInput().keyHeld('A')){
-                        sim.getView().panX += sim.getFrameDelta()*7;
+                        sim.getView().panX += sim.getFrameDelta()*300*1/sim.getView().zoom;
                     }
                     if (sim.getInput().keyHeld('W')){
-                        sim.getView().panY += sim.getFrameDelta()*7;
+                        sim.getView().panY += sim.getFrameDelta()*300*1/sim.getView().zoom;
                     }
                     if (sim.getInput().keyHeld('S')){
-                        sim.getView().panY -= sim.getFrameDelta()*7;
+                        sim.getView().panY -= sim.getFrameDelta()*300*1/sim.getView().zoom;
                     }
                     if (sim.getInput().keyHeld('Q')){
                         sim.getView().zoom += sim.getFrameDelta()*sim.getView().zoom*2;
@@ -101,14 +91,14 @@ public class Main {
                     }
                     if (sim.getInput().keyHeld('P')){
                         try{
-                            sim.getMap().write(new FileWriter("savedmap.txt"));
+                            MapXmlTools.saveMap(sim.getMap(), new FileWriter("savedmap.xml"));
                         }catch (Exception ignore){}
                     }
-                    if (sim.getInput().keyPressed('R')){
-                        try{
-                            map.read(new FileReader("newmap.txt"));
-                        }catch (Exception ignore){}
-                    }
+//                    if (sim.getInput().keyPressed('R')){
+//                        try{
+//                            map.read(new FileReader("newmap.txt"));
+//                        }catch (Exception ignore){}
+//                    }
                     if (sim.getInput().keyPressed('V')){
                         sim.setDebug(!sim.getDebug());
                     }
@@ -267,6 +257,7 @@ public class Main {
         map.addTurn(r6.getLane(0), r7.getLane(0), "Right");
         map.addTurn(r7.getLane(0), r1.getLane(0), "Right");
 
-        map.write(new FileWriter("simple_roadmap.txt"));
+
+        MapXmlTools.saveMap(map, new FileWriter("simple_roadmap.xml"));
     }
 }
