@@ -34,6 +34,7 @@ public class Simulation implements Runnable{
 
 
     private GambleHandler gambleHandler = new DefaultGambleHandler();
+    public boolean isPooled = false;
 
     /**
      * @param map  the map the simulation should use
@@ -64,7 +65,7 @@ public class Simulation implements Runnable{
         this.addSystem(SimSystem.simple(1000, (sim, delta) -> {
             sim.map.draw(sim);
 
-            if (sim.getDebug()){
+//            if (sim.getDebug()){
                 sim.view.setColor(Color.WHITE);
 
                 sim.view.drawStringHud("X: " + sim.view.panX, 10,10);
@@ -77,7 +78,8 @@ public class Simulation implements Runnable{
                 sim.view.drawStringHud("FrameTime: " + sim.frameDelta + "s", 10,80);
                 sim.view.drawStringHud("SystemsTime: " + sim.systemsTime + "s", 10,90);
                 sim.view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(delta*sim.simulationMultiplier/sim.maxDeltaTick)*1f/sim.frameDelta, 10,100);
-            }
+                sim.view.drawStringHud("Pooled: " +isPooled, 10,110);
+//            }
         }));
 
         this.addSystem(SimSystem.simple(2000, (sim, delta) -> sim.view.update()));
@@ -227,6 +229,10 @@ public class Simulation implements Runnable{
     
     public void setGambleHandler(GambleHandler handler){
         this.gambleHandler = handler;
+    }
+
+    public boolean isPooled() {
+        return this.isPooled;
     }
 
 

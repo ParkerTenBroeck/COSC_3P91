@@ -123,7 +123,7 @@ public abstract class Vehicle {
     public void tick(Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
         var old = this.distanceAlongRoad;
         this.distanceAlongRoad += lane.road().getSpeedLimit() * delta * this.getSpeedMultiplier();
-        this.distanceAlongRoad = Math.min(lane.remainingSpace()-0.25f, this.distanceAlongRoad);
+        this.distanceAlongRoad = Math.min(lane.remainingSpace()-0.01f, this.distanceAlongRoad);
         if(controller != null) controller.tick(this, sim, lane, laneIndex, changedLanes, delta);
         if(delta != 0)
             this.actualSpeed = (this.distanceAlongRoad - old) / delta;

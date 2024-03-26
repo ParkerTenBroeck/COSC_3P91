@@ -1,3 +1,4 @@
+import traffic_sim.NetworkSystem;
 import traffic_sim.Simulation;
 import traffic_sim.excpetions.MapBuildingException;
 import traffic_sim.io.Display;
@@ -39,9 +40,9 @@ public class Main {
         Vehicle player;
 
         // set this to false for a GUI thats very incomplete
-        boolean text = true;
+        boolean text = false;
         // show gui while being controlled by text mode
-        boolean show_gui = false;
+        boolean show_gui = true;
         if (text){
             var displayController = new TextView();
             simulation = new Simulation(map, displayController, show_gui);
@@ -90,10 +91,11 @@ public class Main {
                         sim.setPaused(!sim.getPaused());
                     }
                     if (sim.getInput().keyHeld('P')){
-                        try{
-                            MapXmlTools.saveMap(sim.getMap(), new FileWriter("savedmap.xml"));
-                        }catch (Exception ignore){}
+//                        try{
+//                            MapXmlTools.saveMap(sim.getMap(), new FileWriter("savedmap.xml"));
+//                        }catch (Exception ignore){}
                     }
+                    sim.isPooled ^= sim.getInput().keyPressed('P');
 //                    if (sim.getInput().keyPressed('R')){
 //                        try{
 //                            map.read(new FileReader("newmap.txt"));
@@ -199,6 +201,8 @@ public class Main {
         player.setSpeedMultiplier(1f);
         is.toAdd(player);
         is.toAdd(new Truck());
+
+        simulation.addSystem(new NetworkSystem());
 
         simulation.run();
     }

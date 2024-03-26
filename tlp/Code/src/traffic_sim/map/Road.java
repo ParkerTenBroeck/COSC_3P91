@@ -73,12 +73,8 @@ public final class Road {
         }
     }
 
-    /** This function is ran every simulation tick and updates all Vehicles on it.
-     *
-     * @param sim   The simulation this road is apart of
-     * @param delta The simulation delta time in seconds
-     */
-    public void tick(Simulation sim, float delta){
+
+    public void tickTurn(Simulation sim, float delta){
         // go through each lane checking if the last vehicle is ready to turn, prompting it to do so if it is
         for(int l = 0; l < lanes.length; l ++) {
             var current_lane = lanes[l];
@@ -100,14 +96,29 @@ public final class Road {
                     }
                 }
             }
-
-            if (!current_lane.vehicles.isEmpty()){
-                current_lane.remainingSpace = this.length + current_lane.vehicles.get(0).getSize()/2.0f;
-            }else{
-                current_lane.remainingSpace = this.length;
-            }
+//
+//            if (!current_lane.vehicles.isEmpty()){
+//                current_lane.remainingSpace = this.length + current_lane.vehicles.get(0).getSize()/2.0f;
+//            }else{
+//                current_lane.remainingSpace = this.length;
+//            }
         }
+    }
+    /** This function is ran every simulation tick and updates all Vehicles on it.
+     *
+     * @param sim   The simulation this road is apart of
+     * @param delta The simulation delta time in seconds
+     */
+    public void tick(Simulation sim, float delta){
 
+    for(int l = 0; l < lanes.length; l ++) {
+        var current_lane = lanes[l];
+        if (!current_lane.vehicles.isEmpty()){
+            current_lane.remainingSpace = this.length + current_lane.vehicles.get(0).getSize()/2.0f;
+        }else{
+            current_lane.remainingSpace = this.length;
+        }
+    }
 
         this.tick = sim.getSimTick();
         var indexes = new int[this.lanes.length];

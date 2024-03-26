@@ -1,19 +1,14 @@
 package traffic_sim.map;
 
 import traffic_sim.Simulation;
-import traffic_sim.excpetions.CustomIntersectionLoadException;
+import traffic_sim.ThreadPool;
 import traffic_sim.excpetions.MapBuildingException;
 import traffic_sim.map.intersection.*;
 import traffic_sim.vehicle.Vehicle;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
+import java.util.concurrent.Future;
 
 /**
  * A map of connected Intersection and Roads
@@ -174,17 +169,46 @@ public class RoadMap {
         middle.addTurn(from, to, turnDirection);
     }
 
+
+    static ThreadPool threadPool = new ThreadPool();
+
     /** A simulation tick for the entire map
      *
      * @param sim   The simulation this map is apart of
      * @param delta The simulation delta in seconds
      */
     public void tick(Simulation sim, float delta){
-        for(var intersection : intersections){
+//        Future<String> future = executorService.submit(() -> "Hello World");
+
+//        String result = future.get();
+        for (Intersection intersection : intersections) {
             intersection.tick(sim, delta);
         }
-        for(var road : roads){
-            road.tick(sim, delta);
+
+        for (Road value : roads) {
+            value.tickTurn(sim, delta);
+        }
+
+
+
+        if(sim.isPooled()){
+
+            var size = threadPool.max*2;
+            for(int i = 0; i < size; i ++){
+                var index = i;
+                Runnable thing = () -> {
+                    for(int j = index*roads.size()/size; j < (index+1)*roads.size()/size;j ++){
+                        var road = roads.get(j);
+                        road.tick(sim, delta);
+                    }
+                };
+                threadPool.add(thing);
+            }
+            threadPool.join();
+        }else{
+            for(var road : roads){
+                road.tick(sim, delta);
+            }
         }
     }
 
