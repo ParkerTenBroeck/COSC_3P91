@@ -100,6 +100,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 var source = (SourceIntersection)sim.getMap().getIntersectionById("Source");
                 var vehicle = new Car(new NetworkController(client));
                 try {
+                    initBuf.clear();
                     // kind
                     initBuf.writeByte((byte) 1);
                     initBuf.writeInt(this.getVehicleId(vehicle));

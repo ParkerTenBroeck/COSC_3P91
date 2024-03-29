@@ -25,6 +25,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 //        for(var v : args) System.out.println("i: " + v);
+//        args = new String[]{"c"};
         if(args.length < 1){
             new Thread(Main::runClient).start();
             runServer();
