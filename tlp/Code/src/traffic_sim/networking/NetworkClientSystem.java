@@ -4,6 +4,7 @@ import traffic_sim.Simulation;
 import traffic_sim.map.Road;
 import traffic_sim.map.RoadMap;
 import traffic_sim.vehicle.Vehicle;
+import traffic_sim.vehicle.controller.Controller;
 
 import javax.swing.*;
 import java.io.ObjectInputStream;
@@ -17,9 +18,12 @@ public class NetworkClientSystem extends Simulation.SimSystem {
     private final HashMap<Integer, Vehicle> vehicleIdMap = new HashMap<>();
     private final HashMap<Integer, Road> roadIdMap = new HashMap<>();
 
+    private final Controller playerController;
+
     private Socket server;
-    public NetworkClientSystem() {
+    public NetworkClientSystem(Controller controller) {
         super(10);
+        this.playerController = controller;
     }
 
     @Override

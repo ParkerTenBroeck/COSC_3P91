@@ -4,7 +4,7 @@ import traffic_sim.Simulation;
 import traffic_sim.excpetions.MapBuildingException;
 import traffic_sim.io.Display;
 import traffic_sim.io.Input;
-import traffic_sim.io.TextView;
+import traffic_sim.vehicle.controller.TextPlayerController;
 import traffic_sim.io.View;
 import traffic_sim.map.xml.MapXmlTools;
 import traffic_sim.map.intersection.DrainIntersection;
@@ -15,7 +15,7 @@ import traffic_sim.map.intersection.TimedIntersection;
 import traffic_sim.vehicle.Car;
 import traffic_sim.vehicle.Truck;
 import traffic_sim.vehicle.Vehicle;
-import traffic_sim.vehicle.controller.PlayerController;
+import traffic_sim.vehicle.controller.GUIPlayerController;
 
 import java.awt.*;
 import java.io.*;
@@ -24,19 +24,102 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-//        for(var v : args) System.out.println("i: " + v);
-//        args = new String[]{"c"};
-        if(args.length < 1){
-            new Thread(Main::runClient).start();
-            runServer();
-        }else if (args[0].trim().equals("s")){
-            runServer();
-        }else if(args[0].trim().equals("c")){
-            runClient();
+        var item = args.length == 1? args[0].trim() : "__EMPTY";
+        switch (item) {
+            case "b" -> {
+                new Thread(() -> {
+                    try {
+                        runServer();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
+                runClientTerm();
+            }
+            case "bg" -> {
+                new Thread(() -> {
+                    try {
+                        runServer();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).start();
+                runClientGUI();
+            }
+            case "s" -> runServer();
+            case "cg" -> runClientGUI();
+            case "c" -> runClientTerm();
+            case "l" -> runLocal();
+            case "lg" -> runLocalGraphical();
+            default -> System.out.println("""
+                    Please provide a single argument
+                    b:  Both Server + Client
+                    bg: Both Server + Client Graphical
+                    s:  Server
+                    c:  Client
+                    cg: Client Graphical
+                    l:  Local (Not networked)
+                    lg: Local Graphical (Not networked)
+                    """
+            );
         }
     }
 
-    public static void createLocal() throws Exception{
+    public static void runClientTerm() {
+        var simulation = new Simulation();
+        simulation.addSystem(new NetworkClientSystem(new TextPlayerController()));
+        simulation.run();
+    }
+
+    public static void runClientGUI() {
+        var simulation = new Simulation(new View());
+        simulation.getView().panX = 0;
+        simulation.getView().panY = 0;
+        simulation.getView().zoom = 21;
+        simulation.addSystem(new NetworkClientSystem(new GUIPlayerController(simulation.getInput())));
+        simulation.addSystem(Simulation.SimSystem.simple(1, (sim, delta) -> {
+             if (sim.getInput().keyHeld('D')) {
+                 sim.getView().panX -= sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+             }
+             if (sim.getInput().keyHeld('A')) {
+                 sim.getView().panX += sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+             }
+             if (sim.getInput().keyHeld('W')) {
+                 sim.getView().panY += sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+             }
+             if (sim.getInput().keyHeld('S')) {
+                 sim.getView().panY -= sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+             }
+             if (sim.getInput().keyHeld('Q')) {
+                 sim.getView().zoom += sim.getFrameDelta() * sim.getView().zoom * 2;
+             }
+             if (sim.getInput().keyHeld('E')) {
+                 sim.getView().zoom -= sim.getFrameDelta() * sim.getView().zoom * 2;
+             }
+             if (sim.getInput().keyPressed('V')){
+                 sim.setDebug(!sim.getDebug());
+             }
+         }));
+        simulation.run();
+    }
+
+    public static void runServer() throws Exception{
+        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
+        for(var road : map.getRoads()){
+            for(var lane : road.getLanes()){
+                for(int i = 0; i < 3; i ++)
+                    lane.addVehicle(new Car());
+            }
+        }
+        var simulation = new Simulation(map);
+        simulation.addSystem(new NetworkServerSystem());
+        simulation.run();
+    }
+
+
+    public static void runLocalGraphical() throws Exception {
+    }
+    public static void runLocal() throws Exception{
 
         var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
         MapXmlTools.saveMap(map, new FileWriter("saved_road_map.xml"));
@@ -58,12 +141,12 @@ public class Main {
         // show gui while being controlled by text mode
         boolean show_gui = true;
         if (text){
-            var displayController = new TextView();
+            var displayController = new TextPlayerController();
             simulation = new Simulation(map, displayController, show_gui);
             player = new Car(displayController, Color.MAGENTA);
         }else{
             simulation = new Simulation(map, new View());
-            player = new Car(new PlayerController(simulation.getInput()), Color.MAGENTA);
+            player = new Car(new GUIPlayerController(simulation.getInput()), Color.MAGENTA);
         }
 
         if(!text || show_gui){
@@ -104,22 +187,10 @@ public class Main {
                     if (sim.getInput().keyPressed(' ')){
                         sim.setPaused(!sim.getPaused());
                     }
-                    if (sim.getInput().keyHeld('P')){
-//                        try{
-//                            MapXmlTools.saveMap(sim.getMap(), new FileWriter("savedmap.xml"));
-//                        }catch (Exception ignore){}
-                    }
-
-//                    if (sim.getInput().keyPressed('R')){
-//                        try{
-//                            map.read(new FileReader("newmap.txt"));
-//                        }catch (Exception ignore){}
-//                    }
                     if (sim.getInput().keyPressed('V')){
                         sim.setDebug(!sim.getDebug());
                     }
                     if (sim.getInput().keyPressed('T')){
-//                    is.toAdd(new Truck());
                         sim.tick(1f);
                     }
                     if (sim.getInput().keyPressed('1')){
@@ -135,7 +206,6 @@ public class Main {
                         sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 100.0f);
                     }
                     if(sim.getInput().mousePressed(Input.MouseKey.Left) | sim.getInput().mousePressed(Input.MouseKey.Right)){
-
                         this.held = null;
                         var x = sim.getView().getMouseMapX();
                         var y = sim.getView().getMouseMapY();
@@ -183,7 +253,6 @@ public class Main {
                             }catch (MapBuildingException ignore){}
                         }
                         this.held = null;
-
                     }
 
                     if(this.held != null){
@@ -215,119 +284,6 @@ public class Main {
         player.setSpeedMultiplier(1f);
         is.toAdd(player);
         is.toAdd(new Truck());
-
-        simulation.addSystem(new NetworkServerSystem());
-
         simulation.run();
-    }
-
-    public static void runClient() {
-        var simulation = new Simulation(new View());
-        simulation.getView().panX = 0;
-        simulation.getView().panY = 0;
-        simulation.getView().zoom = 21;
-        simulation.addSystem(new NetworkClientSystem());
-        simulation.addSystem(new Simulation.SimSystem(1) {
-                                 @Override
-                                 public void init(Simulation sim) {
-                                 }
-
-                                 @Override
-                                 public void run(Simulation sim, float delta) {
-                                     if (sim.getInput().keyHeld('D')) {
-                                         sim.getView().panX -= sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
-                                     }
-                                     if (sim.getInput().keyHeld('A')) {
-                                         sim.getView().panX += sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
-                                     }
-                                     if (sim.getInput().keyHeld('W')) {
-                                         sim.getView().panY += sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
-                                     }
-                                     if (sim.getInput().keyHeld('S')) {
-                                         sim.getView().panY -= sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
-                                     }
-                                     if (sim.getInput().keyHeld('Q')) {
-                                         sim.getView().zoom += sim.getFrameDelta() * sim.getView().zoom * 2;
-                                     }
-                                     if (sim.getInput().keyHeld('E')) {
-                                         sim.getView().zoom -= sim.getFrameDelta() * sim.getView().zoom * 2;
-                                     }
-                                     if (sim.getInput().keyPressed('V')){
-                                         sim.setDebug(!sim.getDebug());
-                                     }
-                                 }
-                             });
-        simulation.run();
-    }
-
-    public static void runServer() throws Exception{
-        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
-        for(var road : map.getRoads()){
-            for(var lane : road.getLanes()){
-                for(int i = 0; i < 3; i ++)
-                    lane.addVehicle(new Car());
-            }
-        }
-        var simulation = new Simulation(map);
-        simulation.addSystem(new NetworkServerSystem());
-        simulation.run();
-    }
-
-    public static void createMap() throws MapBuildingException, IOException {
-        var map = new RoadMap();
-        var i1 = map.addIntersection(null, new TimedIntersection("", 0,0));
-        var i2 = map.addIntersection(null, "", 10,0);
-        var i3 = map.addIntersection(null, "", 10,10);
-        var i4 = map.addIntersection(null, "", 0,10);
-        var i5 = map.addIntersection(null, "", 0,20);
-        var i6 = map.addIntersection(null, "", -10,10);
-        var is = new SourceIntersection("Source", 0, -10);
-        var id = new DrainIntersection("Drain", 10, 20);
-        map.addIntersection("Source", is);
-        map.addIntersection("Drain", id);
-
-        var sr = map.linkIntersection(is, i1, null,"", 2);
-        map.linkIntersection(i1, is, null, "", 2);
-        var dr = map.linkIntersection(i3, id, null, "", 1);
-
-        var r1 = map.linkIntersection(i1, i2, null, "", 1);
-        var r2 = map.linkIntersection(i2, i3, null, "", 2);
-        var r3 = map.linkIntersection(i3, i4, null, "", 1);
-        var r4 = map.linkIntersection(i4, i1, null, "", 1);
-
-        var r5 = map.linkIntersection(i4, i5, null, "", 1);
-
-        var r6 = map.linkIntersection(i5, i6, null, "", 1);
-        var r7 = map.linkIntersection(i6, i1, null, "", 1);
-
-        var r8 = map.linkIntersection(i1, i6, null, "", 1);
-        var r9 = map.linkIntersection(i6, i4, null, "", 1);
-
-        map.addTurn(sr.getLane(0), r1.getLane(0), "Left");
-        map.addTurn(sr.getLane(0), r8.getLane(0), "Right");
-        map.addTurn(sr.getLane(1), r8.getLane(0), "Right");
-
-        map.addTurn(r2.getLane(0), dr.getLane(0), "Forward");
-
-        map.addTurn(r4.getLane(0), r8.getLane(0), "Left");
-        map.addTurn(r8.getLane(0), r9.getLane(0), "Left");
-        map.addTurn(r9.getLane(0), r4.getLane(0), "Left");
-        map.addTurn(r9.getLane(0), r5.getLane(0), "Right");
-        map.addTurn(r6.getLane(0), r9.getLane(0), "Right");
-
-
-        map.addTurn(r1.getLane(0), r2.getLane(0), "Right");
-        map.addTurn(r2.getLane(0), r3.getLane(0), "Right");
-        map.addTurn(r3.getLane(0), r4.getLane(0), "Right");
-        map.addTurn(r4.getLane(0), r1.getLane(0), "Right");
-
-        map.addTurn(r3.getLane(0), r5.getLane(0), "Left");
-
-        map.addTurn(r5.getLane(0), r6.getLane(0), "Right");
-        map.addTurn(r6.getLane(0), r7.getLane(0), "Right");
-        map.addTurn(r7.getLane(0), r1.getLane(0), "Right");
-
-
-        MapXmlTools.saveMap(map, new FileWriter("simple_roadmap.xml"));
     }
 }

@@ -13,12 +13,12 @@ import java.util.ArrayList;
 /**
  * A controller that allows for a player to control a vehicle with user input
  */
-public class PlayerController implements Controller{
+public class GUIPlayerController implements Controller{
     private final Input input;
     private int menu_index = 0;
     private Intersection.Turn choice = null;
 
-    public PlayerController(Input input){
+    public GUIPlayerController(Input input){
         this.input = input;
     }
     @Override

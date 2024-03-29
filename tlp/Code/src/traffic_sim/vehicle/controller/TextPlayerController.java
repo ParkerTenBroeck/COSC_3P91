@@ -1,10 +1,9 @@
-package traffic_sim.io;
+package traffic_sim.vehicle.controller;
 
 import traffic_sim.Simulation;
 import traffic_sim.map.Road;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.vehicle.Vehicle;
-import traffic_sim.vehicle.controller.Controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +13,7 @@ import java.util.function.Function;
 /**
  * A controller for Vehicles and also a way to display information about the currently controlled vehicle
  */
-public class TextView implements Controller {
+public class TextPlayerController implements Controller {
 
     public void attach(Simulation simulation) {
         simulation.addSystem(new Simulation.SimSystem(50) {
