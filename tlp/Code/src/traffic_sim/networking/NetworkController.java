@@ -1,13 +1,17 @@
-package traffic_sim.vehicle.controller;
+package traffic_sim.networking;
 
 import traffic_sim.Simulation;
 import traffic_sim.map.Road;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.vehicle.Vehicle;
+import traffic_sim.vehicle.controller.Controller;
 
 import java.util.ArrayList;
 
-public class NetworkController implements Controller{
+public class NetworkController implements Controller {
+    public NetworkController(NetworkServerSystem.Client client) {
+    }
+
     @Override
     public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
 
@@ -15,7 +19,7 @@ public class NetworkController implements Controller{
 
     @Override
     public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns) {
-        return null;
+        return turns.get(0);
     }
 
     @Override

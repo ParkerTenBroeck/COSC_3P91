@@ -14,7 +14,7 @@ import java.util.Comparator;
 /*UML_RAW_OUTER interface Runnable*/
 public class Simulation implements Runnable{
     /*UML_RAW_OUTER Simulation "1" *-- "1" View: simulation contains a view into the world*/
-    private final View view;
+    private View view;
     /*UML_RAW_OUTER Simulation "1" *-- "1" RoadMap: simulation contains a map*/
     private RoadMap map;
 
@@ -24,7 +24,7 @@ public class Simulation implements Runnable{
     private boolean debug = true;
     private float simulationMultiplier = 1.0f;
     private final float maxDeltaTick = 0.1f/1f;
-    private long targetFrameTime = 33333333;//16666667;
+    private long targetFrameTime = 41666666;//33333333;//16666667;
     private int simTick = 0;
     private long simNanos = 0;
 
@@ -34,20 +34,9 @@ public class Simulation implements Runnable{
 
 
     private GambleHandler gambleHandler = new DefaultGambleHandler();
-    public boolean isPooled = false;
 
-    /**
-     * @param map  the map the simulation should use
-     */
-    public Simulation(RoadMap map, View view){
+    public Simulation(RoadMap map){
         this.map = map;
-        this.view = view;
-
-        this.addSystem(SimSystem.simple(1, (sim, delta) -> {
-            sim.view.getInput().update();
-            sim.view.setDefaultStroke(0.08f);
-            sim.view.clearAll();
-        }));
 
         this.addSystem(SimSystem.simple(50, (sim, delta) -> {
             if (sim.getPaused()){
@@ -60,6 +49,48 @@ public class Simulation implements Runnable{
                     sim.tick(r_tick);
                 }
             }
+        }));
+    }
+
+    public Simulation(View view){
+        this.view = view;
+        this.addSystem(SimSystem.simple(1, (sim, delta) -> {
+            sim.view.getInput().update();
+            sim.view.setDefaultStroke(0.08f);
+            sim.view.clearAll();
+        }));
+
+        this.addSystem(SimSystem.simple(1000, (sim, delta) -> {
+            sim.map.draw(sim);
+
+            sim.view.setColor(Color.WHITE);
+
+            sim.view.drawStringHud("X: " + sim.view.panX, 10,10);
+            sim.view.drawStringHud("Y: " + sim.view.panY, 10,20);
+            sim.view.drawStringHud("Zoom: " + sim.view.zoom, 10,30);
+            sim.view.drawStringHud("SimMultiplier: " + sim.simulationMultiplier, 10,40);
+            sim.view.drawStringHud("Paused: " + sim.pause, 10,50);
+            sim.view.drawStringHud("Tick: " + sim.simTick, 10,60);
+            sim.view.drawStringHud("SimTime: " + sim.simNanos*1e-9 + "s", 10,70);
+            sim.view.drawStringHud("FrameTime: " + sim.frameDelta + "s", 10,80);
+            sim.view.drawStringHud("SystemsTime: " + sim.systemsTime + "s", 10,90);
+            sim.view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(delta*sim.simulationMultiplier/sim.maxDeltaTick)*1f/sim.frameDelta, 10,100);
+        }));
+
+        this.addSystem(SimSystem.simple(2000, (sim, delta) -> sim.view.update()));
+    }
+
+    /**
+     * @param map  the map the simulation should use
+     */
+    public Simulation(RoadMap map, View view){
+        this(map);
+        this.view = view;
+
+        this.addSystem(SimSystem.simple(1, (sim, delta) -> {
+            sim.view.getInput().update();
+            sim.view.setDefaultStroke(0.08f);
+            sim.view.clearAll();
         }));
 
         this.addSystem(SimSystem.simple(1000, (sim, delta) -> {
@@ -78,7 +109,6 @@ public class Simulation implements Runnable{
                 sim.view.drawStringHud("FrameTime: " + sim.frameDelta + "s", 10,80);
                 sim.view.drawStringHud("SystemsTime: " + sim.systemsTime + "s", 10,90);
                 sim.view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(delta*sim.simulationMultiplier/sim.maxDeltaTick)*1f/sim.frameDelta, 10,100);
-                sim.view.drawStringHud("Pooled: " +isPooled, 10,110);
 //            }
         }));
 
@@ -231,8 +261,8 @@ public class Simulation implements Runnable{
         this.gambleHandler = handler;
     }
 
-    public boolean isPooled() {
-        return this.isPooled;
+    public void setMap(RoadMap map) {
+        this.map = map;
     }
 
 

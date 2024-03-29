@@ -6,12 +6,16 @@ import traffic_sim.map.intersection.Intersection;
 import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * A Edge on a graph that connects two Intersections in a single direction
  */
-public final class Road {
+public final class Road implements Serializable {
 
     private final String name;
     private float speedLimit = 1.0f;
@@ -22,7 +26,7 @@ public final class Road {
     private float directionX;
     private float directionY;
 
-    private long tick;
+    private transient long tick;
 
 
     protected Road(String name, int lanes, Intersection from, Intersection to) {
@@ -79,6 +83,7 @@ public final class Road {
         for(int l = 0; l < lanes.length; l ++) {
             var current_lane = lanes[l];
             if(!current_lane.vehicles.isEmpty()){
+
                 var vehicle = current_lane.vehicles.get(0);
                 if (vehicle.getDistanceAlongRoad() + 0.0001 + vehicle.getSize()/2 > length){
                     var intersection = sim.getMap().roadEnds(this);
@@ -90,18 +95,9 @@ public final class Road {
                         turn.getLane().vehicles.add(turn.getLane().vehicles.size(), vehicle);
                         vehicle.setDistanceAlongRoad(vehicle.getSize()/2);
                         vehicle.putInLane(turn.getLane());
-                        // road was already updated so we need to run the update on le car
-                        if (turn.getLane().road().tick == sim.getSimTick())
-                            turn.getLane().tickVehicle(sim, vehicle, 0, false, delta);
                     }
                 }
             }
-//
-//            if (!current_lane.vehicles.isEmpty()){
-//                current_lane.remainingSpace = this.length + current_lane.vehicles.get(0).getSize()/2.0f;
-//            }else{
-//                current_lane.remainingSpace = this.length;
-//            }
         }
     }
     /** This function is ran every simulation tick and updates all Vehicles on it.
@@ -111,14 +107,14 @@ public final class Road {
      */
     public void tick(Simulation sim, float delta){
 
-    for(int l = 0; l < lanes.length; l ++) {
-        var current_lane = lanes[l];
-        if (!current_lane.vehicles.isEmpty()){
-            current_lane.remainingSpace = this.length + current_lane.vehicles.get(0).getSize()/2.0f;
-        }else{
-            current_lane.remainingSpace = this.length;
+        for(int l = 0; l < lanes.length; l ++) {
+            var current_lane = lanes[l];
+            if (!current_lane.vehicles.isEmpty()){
+                current_lane.remainingSpace = this.length + current_lane.vehicles.get(0).getSize()/2.0f;
+            }else{
+                current_lane.remainingSpace = this.length;
+            }
         }
-    }
 
         this.tick = sim.getSimTick();
         var indexes = new int[this.lanes.length];
@@ -146,6 +142,7 @@ public final class Road {
                         .vehicles.get(indexes[furthest_lane]);
 
                 var lane_change = vehicle.changeLane(sim, lanes[furthest_lane], indexes[furthest_lane], furthest_lane>1?indexes[furthest_lane-1]:-1, furthest_lane<indexes.length-1?indexes[furthest_lane+1]:-1);
+                if(lane_change == null) lane_change = LaneChangeDecision.Nothing;
                 var new_lane = furthest_lane+lane_change.laneOffset;
                 boolean can_merge = false;
 
@@ -363,11 +360,11 @@ public final class Road {
     }
 
 
-    public final class Lane{
+    public final class Lane implements Serializable{
         private final int lane;
         private float remainingSpace;
         /*UML_RAW_OUTER Lane "1" o-- "n" Vehicle: A lane will have cars on it*/
-        private ArrayList<Vehicle> vehicles = new ArrayList<>();
+        private transient ArrayList<Vehicle> vehicles = new ArrayList<>();
         public boolean leftmost;
         public boolean rightmost;
 
@@ -386,6 +383,12 @@ public final class Road {
                 return null;
             }else{
                 return lanes[this.lane - 1];
+            }
+        }
+
+        public void inorder(Consumer<Vehicle> f){
+            for(var vehicle : this.vehicles){
+                f.accept(vehicle);
             }
         }
 
@@ -493,6 +496,13 @@ public final class Road {
             }
         }
 
+        @Serial
+        private void readObject(java.io.ObjectInputStream in)
+                throws IOException, ClassNotFoundException{
+            in.defaultReadObject();
+            this.vehicles = new ArrayList<>();
+        }
+
         /**
          * Tick a vehicle on this road
          * @param sim       The simulation
@@ -506,6 +516,17 @@ public final class Road {
             vehicle.tick(sim, this, index, changedLanes, delta);
             this.remainingSpace = Math.max(0.0f, vehicle.getDistanceAlongRoadBack());
 
+        }
+
+        /**
+         * @return  The number of vehicles currently in this lane
+         */
+        public int currentVehicles() {
+            return this.vehicles.size();
+        }
+
+        public ArrayList<Vehicle> getVehicles() {
+            return this.vehicles;
         }
     }
 }

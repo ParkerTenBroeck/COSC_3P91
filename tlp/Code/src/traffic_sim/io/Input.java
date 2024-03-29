@@ -197,15 +197,19 @@ public class Input implements KeyListener, MouseListener, MouseMotionListener, M
 
     @Override
     public void mousePressed(MouseEvent e) {
-        working.mousePressed[e.getButton()] = true;
-        working.mouseHeld[e.getButton()] = true;
+        try{
+            working.mousePressed[e.getButton()] = true;
+            working.mouseHeld[e.getButton()] = true;
+        }catch (Exception ignore){}
     }
 
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        working.mouseHeld[e.getButton()] = false;
-        working.mouseReleased[e.getButton()] = true;
+        try{
+            working.mouseHeld[e.getButton()] = false;
+            working.mouseReleased[e.getButton()] = true;
+        }catch (Exception ignore){}
     }
 
     @Override

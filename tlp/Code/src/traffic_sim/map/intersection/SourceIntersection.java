@@ -12,8 +12,8 @@ import java.util.ArrayList;
  */
 public class SourceIntersection extends Intersection{
 
-    private VehicleFactory[] vehicleFactories = new VehicleFactory[]{Car::new};
-    private final ArrayList<Vehicle> toAdd = new ArrayList<>();
+    transient private VehicleFactory[] vehicleFactories = new VehicleFactory[]{Car::new};
+    transient private final ArrayList<Vehicle> toAdd = new ArrayList<>();
 
     public SourceIntersection(String name, float x, float y) {
         super(name, x, y);

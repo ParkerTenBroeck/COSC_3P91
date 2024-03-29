@@ -1,4 +1,5 @@
-import traffic_sim.NetworkSystem;
+import traffic_sim.networking.NetworkClientSystem;
+import traffic_sim.networking.NetworkServerSystem;
 import traffic_sim.Simulation;
 import traffic_sim.excpetions.MapBuildingException;
 import traffic_sim.io.Display;
@@ -23,6 +24,18 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
+//        for(var v : args) System.out.println("i: " + v);
+        if(args.length < 1){
+            new Thread(Main::runClient).start();
+            runServer();
+        }else if (args[0].trim().equals("s")){
+            runServer();
+        }else if(args[0].trim().equals("c")){
+            runClient();
+        }
+    }
+
+    public static void createLocal() throws Exception{
 
         var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
         MapXmlTools.saveMap(map, new FileWriter("saved_road_map.xml"));
@@ -95,7 +108,7 @@ public class Main {
 //                            MapXmlTools.saveMap(sim.getMap(), new FileWriter("savedmap.xml"));
 //                        }catch (Exception ignore){}
                     }
-                    sim.isPooled ^= sim.getInput().keyPressed('P');
+
 //                    if (sim.getInput().keyPressed('R')){
 //                        try{
 //                            map.read(new FileReader("newmap.txt"));
@@ -202,8 +215,60 @@ public class Main {
         is.toAdd(player);
         is.toAdd(new Truck());
 
-        simulation.addSystem(new NetworkSystem());
+        simulation.addSystem(new NetworkServerSystem());
 
+        simulation.run();
+    }
+
+    public static void runClient() {
+        var simulation = new Simulation(new View());
+        simulation.getView().panX = 0;
+        simulation.getView().panY = 0;
+        simulation.getView().zoom = 21;
+        simulation.addSystem(new NetworkClientSystem());
+        simulation.addSystem(new Simulation.SimSystem(1) {
+                                 @Override
+                                 public void init(Simulation sim) {
+                                 }
+
+                                 @Override
+                                 public void run(Simulation sim, float delta) {
+                                     if (sim.getInput().keyHeld('D')) {
+                                         sim.getView().panX -= sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+                                     }
+                                     if (sim.getInput().keyHeld('A')) {
+                                         sim.getView().panX += sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+                                     }
+                                     if (sim.getInput().keyHeld('W')) {
+                                         sim.getView().panY += sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+                                     }
+                                     if (sim.getInput().keyHeld('S')) {
+                                         sim.getView().panY -= sim.getFrameDelta() * 300 * 1 / sim.getView().zoom;
+                                     }
+                                     if (sim.getInput().keyHeld('Q')) {
+                                         sim.getView().zoom += sim.getFrameDelta() * sim.getView().zoom * 2;
+                                     }
+                                     if (sim.getInput().keyHeld('E')) {
+                                         sim.getView().zoom -= sim.getFrameDelta() * sim.getView().zoom * 2;
+                                     }
+                                     if (sim.getInput().keyPressed('V')){
+                                         sim.setDebug(!sim.getDebug());
+                                     }
+                                 }
+                             });
+        simulation.run();
+    }
+
+    public static void runServer() throws Exception{
+        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
+        for(var road : map.getRoads()){
+            for(var lane : road.getLanes()){
+                for(int i = 0; i < 3; i ++)
+                    lane.addVehicle(new Car());
+            }
+        }
+        var simulation = new Simulation(map);
+        simulation.addSystem(new NetworkServerSystem());
         simulation.run();
     }
 

@@ -7,21 +7,22 @@ import traffic_sim.map.Road;
 import traffic_sim.vehicle.controller.Controller;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * A form of transportation that can use Raods, Change lanes, and make turns.
  */
-public abstract class Vehicle {
+public abstract class Vehicle implements Serializable {
 
     private float health = 1.0f;
     protected float reputation = 1.0f;
-    private float distanceAlongRoad = 0.0f;
+    private transient float distanceAlongRoad = 0.0f;
     private float lastX;
     private float lastY;
-    private boolean onRoad;
+    private transient boolean onRoad;
     /*UML_RAW_OUTER Vehicle "1" *-- "0..1" Controller: Each Vehicle can potentially have one Controller*/
-    private Controller controller;
+    private transient Controller controller;
 
     protected float speedMultiplier;
     protected float actualSpeed = 0.0f;

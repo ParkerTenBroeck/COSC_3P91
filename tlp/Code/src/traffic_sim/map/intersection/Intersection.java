@@ -7,13 +7,14 @@ import traffic_sim.map.Road;
 import traffic_sim.vehicle.Vehicle;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * An Intersection that exists at some coordinate X,Y. It also holds a name and the turns it can take.
  */
-public abstract class Intersection {
+public abstract class Intersection implements Serializable {
 
     protected float x;
     protected float y;
@@ -134,7 +135,7 @@ public abstract class Intersection {
     }
 
     /*UML_RAW_OUTER Turn "n" o-- "1" Lane: A turn contains a single Lane it can turn onto\n and a Lane can have many turns onto it*/
-    public static class Turn{
+    public static class Turn implements Serializable{
         protected String name;
         protected Road.Lane lane;
         protected boolean enabled = true;

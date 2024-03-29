@@ -2,81 +2,63 @@ package traffic_sim;
 
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ThreadPool {
 
-    private volatile int count;
-    public final int max;
-    private Runnable bruh;
+
     private final ArrayList<Runnable> next = new ArrayList<>();
+    private final AtomicInteger count = new AtomicInteger();
 
     public ThreadPool(){
-        var pool = this;
-        this.max = Runtime.getRuntime().availableProcessors();
-        for(int i = 0; i < this.max - 1; i ++)
+        for(int i = 0; i < Runtime.getRuntime().availableProcessors() - 1; i ++)
             new Thread(() -> {
                 while(true){
                     Runnable run;
-                    synchronized (pool.next){
-                        while(pool.next.isEmpty()){
+                    synchronized (next){
+                        while(next.size() <= 1){
                             try{
-                                pool.next.wait();
+                                next.wait();
                             }catch (Exception ignore){}
                         }
-                        run = pool.next.remove(pool.next.size()-1);
+                        run = next.remove(next.size()-1);
                     }
-//                    System.out.println("Thread started");
                     run.run();
-                    synchronized (pool){
-                        pool.count -= 1;
-                        pool.notify();
-                    }
+                    count.getAndDecrement();
                 }
             }).start();
     }
 
+    /**
+     * @param run Something we want to run in the thread pool
+     */
     public void add(Runnable run){
-        if(bruh != null){
-            synchronized (this){
-                this.count += 1;
-            }
-            synchronized (this.next){
-                this.next.add(run);
-                this.next.notifyAll();
-            }
-        }else{
-            bruh = run;
+        count.getAndIncrement();
+        synchronized (this.next){
+            this.next.add(run);
+            this.next.notifyAll();
         }
     }
 
+    /**
+     * Join on the currently running tasks on the thread pool and wait for them all to finish executing
+     */
     public void join(){
 
         while(true){
             Runnable run;
             synchronized (this.next){
                 if(this.next.isEmpty()){
-                    break ;
+                    break;
                 }
                 run = this.next.remove(this.next.size()-1);
             }
             run.run();
-            synchronized (this){
-                this.count -= 1;
-            }
+            count.getAndDecrement();
         }
 
-
-        if(bruh != null)
-            bruh.run();
-        bruh = null;
-
-
-        while(this.count != 0){
+        while(count.get() != 0){
             Thread.onSpinWait();
-
         }
-//        System.out.println("Finished\n\n\n");
     }
-
-//    public void
 }

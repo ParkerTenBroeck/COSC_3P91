@@ -6,6 +6,7 @@ import traffic_sim.excpetions.MapBuildingException;
 import traffic_sim.map.intersection.*;
 import traffic_sim.vehicle.Vehicle;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Future;
@@ -13,7 +14,7 @@ import java.util.concurrent.Future;
 /**
  * A map of connected Intersection and Roads
  */
-public class RoadMap {
+public class RoadMap implements Serializable {
     /*UML_RAW_OUTER RoadMap "1" *-- "n" Road: map contains many roads*/
     private final ArrayList<Road> roads = new ArrayList<>();
     /*UML_RAW_OUTER RoadMap "1" *-- "n" Intersection: map contains many intersections*/
@@ -178,9 +179,7 @@ public class RoadMap {
      * @param delta The simulation delta in seconds
      */
     public void tick(Simulation sim, float delta){
-//        Future<String> future = executorService.submit(() -> "Hello World");
 
-//        String result = future.get();
         for (Intersection intersection : intersections) {
             intersection.tick(sim, delta);
         }
@@ -189,27 +188,10 @@ public class RoadMap {
             value.tickTurn(sim, delta);
         }
 
-
-
-        if(sim.isPooled()){
-
-            var size = threadPool.max*2;
-            for(int i = 0; i < size; i ++){
-                var index = i;
-                Runnable thing = () -> {
-                    for(int j = index*roads.size()/size; j < (index+1)*roads.size()/size;j ++){
-                        var road = roads.get(j);
-                        road.tick(sim, delta);
-                    }
-                };
-                threadPool.add(thing);
-            }
-            threadPool.join();
-        }else{
-            for(var road : roads){
-                road.tick(sim, delta);
-            }
+        for(var road : roads){
+            threadPool.add(() -> road.tick(sim, delta));
         }
+        threadPool.join();
     }
 
     /** Draws this map to the display
