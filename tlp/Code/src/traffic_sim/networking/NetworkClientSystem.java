@@ -70,12 +70,13 @@ public class NetworkClientSystem extends Simulation.SimSystem {
         if(this.server.isInputShutdown()) throw new RuntimeException();
         try{
             var in = new Reader(this.server.getInputStream());
-            while(in.available() > 0){
+            for(int bruh = 0; bruh < 3; bruh ++){
                 switch(in.readByte()){
                     case 2 -> {
-                        var tick = in.readInt();
-                        var frameDelta = in.readFloat();
-                        var simNanos = in.readLong();
+                        sim.setTick(in.readInt());
+                        var ignore = in.readFloat();
+                        sim.setSimNanos(in.readLong());
+
                     }
                     case 3 -> {
                         var vehicles = in.readInt();

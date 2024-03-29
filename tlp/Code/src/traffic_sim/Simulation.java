@@ -265,6 +265,14 @@ public class Simulation implements Runnable{
         this.map = map;
     }
 
+    public void setTick(int i) {
+        this.simTick = i;
+    }
+
+    public void setSimNanos(long n){
+        this.simNanos = n;
+    }
+
 
     public interface RunSystem{
         void run(Simulation sim, float delta);

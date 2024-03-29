@@ -223,8 +223,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                     this.socket.close();
                 } catch (IOException ignore) {
                 }
-                throw new RuntimeException(e);
-//                return true;
+                return true;
             }
             return false;
         }
