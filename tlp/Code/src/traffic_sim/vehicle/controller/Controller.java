@@ -25,11 +25,12 @@ public interface Controller {
      *
      * @param v            The vehicle being controlled
      * @param sim          The simulation the vehicle is apart of
+     * @param current_lane
      * @param intersection
      * @param turns        The turns that are available at the end of this lane
      * @return The turn decision that was made, null if no turn was selected
      */
-    Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns);
+    Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns);
 
     /**
      * This is called every tick to ask if a Vehicle should change lanes

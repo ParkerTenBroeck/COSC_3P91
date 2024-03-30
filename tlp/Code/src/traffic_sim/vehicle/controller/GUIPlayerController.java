@@ -38,7 +38,7 @@ public class GUIPlayerController implements Controller{
     }
 
     @Override
-    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns) {
+    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns) {
         if (turns == null){
             return null;
         }
@@ -90,8 +90,8 @@ public class GUIPlayerController implements Controller{
                     sim.getView().setColor(Color.RED);
                 }
             }
-//            sim.getView().drawBox();
-//            sim.getView().drawString(turns.get(i).getName(), v.getLastX()-40/sim.getView().zoom, v.getLastY() + offset/sim.getView().zoom);
+//            sim.getView().vdev();
+            sim.getView().drawString(turns.get(i).getName(), v.getLastX()-40/sim.getView().zoom, v.getLastY() + offset/sim.getView().zoom);
             offset += 15;
         }
 

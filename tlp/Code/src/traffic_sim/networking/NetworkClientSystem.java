@@ -3,6 +3,7 @@ package traffic_sim.networking;
 import traffic_sim.Simulation;
 import traffic_sim.map.Road;
 import traffic_sim.map.RoadMap;
+import traffic_sim.map.intersection.Intersection;
 import traffic_sim.vehicle.Vehicle;
 import traffic_sim.vehicle.controller.Controller;
 
@@ -17,6 +18,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
 
     private final HashMap<Integer, Vehicle> vehicleIdMap = new HashMap<>();
     private final HashMap<Integer, Road> roadIdMap = new HashMap<>();
+    private final HashMap<Integer, Intersection> intersectionIdMap = new HashMap<>();
 
     private final Controller playerController;
     private Vehicle player;
@@ -52,6 +54,8 @@ public class NetworkClientSystem extends Simulation.SimSystem {
             var myid = in.readInt();
 
             var oin = new ObjectInputStream(in);
+            player = (Vehicle)oin.readObject();
+            this.vehicleIdMap.put(myid, player);
             sim.setMap((RoadMap)oin.readObject());
             var vehicles = in.readInt();
             oin = new ObjectInputStream(in);
@@ -60,14 +64,19 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                 this.vehicleIdMap.put(vid, (Vehicle) oin.readObject());
             }
 
-            player = this.vehicleIdMap.get(myid);
 
             var roads = in.readInt();
             for(int i = 0; i < roads; i ++){
                 var rid = in.readInt();
                 String id = in.readString();
-//                System.out.println(id);
                 roadIdMap.put(rid, sim.getMap().getRoadById(id));
+            }
+
+            var intersections = in.readInt();
+            for(int i = 0; i < intersections; i ++){
+                var iid = in.readInt();
+                String id = in.readString();
+                intersectionIdMap.put(iid, sim.getMap().getIntersectionById(id));
             }
 
         }catch (Exception e){
@@ -83,30 +92,27 @@ public class NetworkClientSystem extends Simulation.SimSystem {
 
 
             Road.Lane putInLane = null;
-            int rightVehicleBackIndex = 0;
-            int leftVehicleBackIndex = 0;
-            int currentIndex = 0;
+            int rightVehicleBackIndex = -1;
+            int leftVehicleBackIndex = -1;
+            int currentIndex = -1;
             Road.Lane currentLane = null;
+            int intersectionId = -1;
+            int turnsRid = -1;
+            int turnsLane = -1;
 
-            boolean requestLaneChange = false;
+
 
             for(int bruh = 0; bruh < 3; bruh ++){
                 switch(in.readByte()){
                     case 2 -> {
                         sim.setTick(in.readInt());
-                        var ignore = in.readFloat();
+                        delta = in.readFloat();
+                        sim.setSimNanos(in.readLong());
 
                         rightVehicleBackIndex = in.readInt();
                         leftVehicleBackIndex = in.readInt();
                         currentIndex = in.readInt();
-                        {
-                            var rid = in.readInt();
-                            var lane = in.readInt();
-                            var road = this.roadIdMap.get(rid);
-                            if(road != null){
-                                putInLane = road.getLane(lane);
-                            }
-                        }
+
                         {
                             var rid = in.readInt();
                             var lane = in.readInt();
@@ -115,9 +121,20 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                                 currentLane = road.getLane(lane);
                             }
                         }
-//                        requestLaneChange = in.readByte() == 1;
 
-                        sim.setSimNanos(in.readLong());
+                        {
+                            var rid = in.readInt();
+                            var lane = in.readInt();
+                            var road = this.roadIdMap.get(rid);
+                            if(road != null){
+                                putInLane = road.getLane(lane);
+                            }
+                        }
+
+                        turnsRid = in.readInt();
+                        turnsLane = in.readInt();
+                        intersectionId = in.readInt();
+
                     }
                     case 3 -> {
                         var vehicles = in.readInt();
@@ -126,6 +143,10 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                             var vid = in.readInt();
                             if(!this.vehicleIdMap.containsKey(vid))
                                 this.vehicleIdMap.put(vid, (Vehicle) oin.readObject());
+                            else{
+                                oin.readObject();
+                            }
+
                         }
                     }
                     case 4 -> {
@@ -136,8 +157,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                             var lanes = in.readInt();
                             for(int l = 0; l < lanes; l ++){
                                 var lane = road.getLane(l);
-                                var stuff = lane.getVehicles();
-                                stuff.clear();
+                                lane.empty();
                                 var vehicles = in.readInt();
                                 for(int v = 0; v < vehicles; v ++){
                                     var vid = in.readInt();
@@ -145,7 +165,8 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                                     var vehicle = this.vehicleIdMap.get(vid);
                                     if(vehicle != null){
                                         vehicle.setDistanceAlongRoad(distance);
-                                        stuff.add(vehicle);
+//                                        stuff.add(vehicle);
+                                        lane.addVehicle(vehicle);
                                     }
                                 }
                             }
@@ -159,13 +180,23 @@ public class NetworkClientSystem extends Simulation.SimSystem {
             if(putInLane != null)
                 playerController.putInLane(player, putInLane);
 
-            playerController.chooseTurn(player, sim, null, null);
+
+            var turn = -1;
+            if(intersectionId != -1){
+                var intersection = intersectionIdMap.get(intersectionId);
+                var currentLaneTurn = roadIdMap.get(turnsRid).getLane(turnsLane);
+                var turns = intersection.getTurns(currentLaneTurn);
+                var chosenTurn = playerController.chooseTurn(player, sim, currentLaneTurn, intersection, turns);
+                if(chosenTurn != null){
+                    turn = turns.indexOf(chosenTurn);
+                }
+            }
+
+
             var decision = playerController.laneChange(player, sim, currentLane, currentIndex, leftVehicleBackIndex, rightVehicleBackIndex);
-
-
             writer.clear();
             writer.writeFloat(player.getSpeedMultiplier());
-            writer.writeInt(-1);
+            writer.writeInt(turn);
             switch(decision){
                 case ForceLeft -> writer.writeByte((byte) -3);
                 case NudgeLeft -> writer.writeByte((byte) -2);
@@ -175,6 +206,8 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                 case NudgeRight -> writer.writeByte((byte) 2);
                 case ForceRight -> writer.writeByte((byte) 3);
             }
+
+            playerController.tick(player, sim, null, -1, false, delta);
 
             this.server.getOutputStream().write(writer.getAllData(), 0, writer.getSize());
 

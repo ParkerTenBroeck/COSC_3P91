@@ -130,14 +130,16 @@ public abstract class Vehicle implements Serializable {
             this.actualSpeed = (this.distanceAlongRoad - old) / delta;
     }
 
-    /** Gets called every time this vehicle can make a turn, return null of no turn should be made
+    /**
+     * Gets called every time this vehicle can make a turn, return null of no turn should be made
      *
-     * @param sim   the simulation this vehicle is apart of
-     * @param turns The turns available for this vehicle to make
-     * @return  The turn this vehicle has decided on, null if none
+     * @param sim          the simulation this vehicle is apart of
+     * @param current_lane
+     * @param turns        The turns available for this vehicle to make
+     * @return The turn this vehicle has decided on, null if none
      */
-    public Intersection.Turn chooseTurn(Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns){
-        if(controller != null) return controller.chooseTurn(this, sim, intersection, turns);
+    public Intersection.Turn chooseTurn(Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns){
+        if(controller != null) return controller.chooseTurn(this, sim, current_lane, intersection, turns);
         return null;
     }
 

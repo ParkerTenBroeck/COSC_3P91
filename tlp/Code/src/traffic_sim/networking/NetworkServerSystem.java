@@ -21,16 +21,18 @@ public class NetworkServerSystem extends Simulation.SimSystem {
     private final ArrayList<Client> newClients = new ArrayList<>();
 
 
-    private final ArrayList<Road> newRoads = new ArrayList<>();
-    private final ArrayList<Vehicle> newVehicles = new ArrayList<>();
 
-    private int nextRoadId;
+    private int nextRoadId = 0;
     private final HashMap<Road, Integer> roadIdMap = new HashMap<>();
-    private final HashMap<Integer, Intersection> intersectionIdMap = new HashMap<>();
+    private final ArrayList<Road> newRoads = new ArrayList<>();
 
+    private int nextIntersectionId = 0;
+    private final HashMap<Intersection, Integer> intersectionIdMap = new HashMap<>();
+    private final ArrayList<Intersection> newIntersections = new ArrayList<>();
 
-    private int nextVehicleId;
+    private int nextVehicleId = 0;
     private final HashMap<Vehicle, Integer> vehicleIdMap = new HashMap<>();
+    private final ArrayList<Vehicle> newVehicles = new ArrayList<>();
 
 
     BufferedWriter vehicleBuf = new BufferedWriter();
@@ -71,6 +73,16 @@ public class NetworkServerSystem extends Simulation.SimSystem {
     }
 
 
+    private int getIntersectionId(Intersection r){
+        var id = this.intersectionIdMap.get(r);
+        if (id == null){
+            this.newIntersections.add(r);
+            this.intersectionIdMap.put(r, this.nextIntersectionId);
+            id = this.nextIntersectionId;
+            this.nextIntersectionId += 1;
+        }
+        return id;
+    }
 
     private int getRoadId(Road r){
         var id = this.roadIdMap.get(r);
@@ -108,6 +120,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                     initBuf.writeByte((byte) 1);
                     initBuf.writeInt(this.getVehicleId(vehicle));
                     ObjectOutputStream oos = new ObjectOutputStream(initBuf);
+                    oos.writeObject(vehicle);
                     oos.writeObject(sim.getMap());
                     oos.flush();
 
@@ -131,6 +144,12 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                     for(var road : sim.getMap().getRoads()){
                         this.initBuf.writeInt(this.getRoadId(road));
                         this.initBuf.writeString(sim.getMap().getRoadId(road));
+                    }
+
+                    this.initBuf.writeInt(sim.getMap().getIntersections().size());
+                    for(var intersection : sim.getMap().getIntersections()){
+                        this.initBuf.writeInt(this.getIntersectionId(intersection));
+                        this.initBuf.writeString(sim.getMap().getIntersectionId(intersection));
                     }
 
                     client.socket.getOutputStream().write(initBuf.getAllData(), 0, initBuf.getSize());
@@ -189,6 +208,9 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         private int currentIndex;
         private Road.Lane currentLane = null;
 
+        private Road.Lane turnLane;
+        private Intersection turnIntersection;
+
 
         public Client(Socket socket){
             this.socket = socket;
@@ -211,37 +233,57 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 writer.writeInt(rightVehicleBackIndex);
                 writer.writeInt(leftVehicleBackIndex);
                 writer.writeInt(currentIndex);
-                if(putInLane != null){
-                    writer.writeInt(system.roadIdMap.get(putInLane.road()));
-                    writer.writeInt(putInLane.getLane());
+
+                if(currentLane != null){
+                    writer.writeInt(system.roadIdMap.get(currentLane.road()));
+                    writer.writeInt(currentLane.getLane());
+                    currentLane = null;
                 }else{
                     writer.writeInt(-1);
                     writer.writeInt(-1);
                 }
 
+
                 if(putInLane != null){
-                    writer.writeInt(system.roadIdMap.get(currentLane.road()));
-                    writer.writeInt(currentLane.getLane());
+                    writer.writeInt(system.roadIdMap.get(putInLane.road()));
+                    writer.writeInt(putInLane.getLane());
+                    putInLane = null;
                 }else{
                     writer.writeInt(-1);
                     writer.writeInt(-1);
                 }
+
+
+
+                // intersections
+                if(turnLane != null){
+                    writer.writeInt(system.roadIdMap.get(turnLane.road()));
+                    writer.writeInt(turnLane.getLane());
+                    writer.writeInt(system.intersectionIdMap.get(turnIntersection));
+                    turnLane = null;
+                    turnIntersection = null;
+                }else{
+                    writer.writeInt(-1);
+                    writer.writeInt(-1);
+                    writer.writeInt(-1);
+                }
+//                writer.write
 
                 out.write(writer.getAllData(), 0, writer.getSize());
                 writer.clear();
 
+
+                // write delta data
+                writer.writeByte((byte) 3);
+                out.write(writer.getAllData(), 0, writer.getSize());
+                out.write(system.deltaBuf.getAllData(), 0, system.deltaBuf.getSize());
+                writer.clear();
 
                 // write vehicle data
                 writer.writeByte((byte) 4);
                 out.write(writer.getAllData(), 0, writer.getSize());
                 out.write(system.vehicleBuf.getAllData(), 0, system.vehicleBuf.getSize());
                 out.flush();
-                writer.clear();
-
-                // write delta data
-                writer.writeByte((byte) 3);
-                out.write(writer.getAllData(), 0, writer.getSize());
-                out.write(system.deltaBuf.getAllData(), 0, system.deltaBuf.getSize());
                 writer.clear();
 
 
@@ -274,12 +316,17 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         }
 
         @Override
-        public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns) {
+        public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns) {
+//            turn
+            this.turnIntersection = intersection;
+            this.turnLane = current_lane;
             if(this.chosenTurn == -1){
                 return null;
             }else{
+                var tmp = this.chosenTurn;
+                this.chosenTurn = -1;
                 try{
-                    return turns.get(this.chosenTurn);
+                    return turns.get(tmp);
                 }catch (Exception e){
                     return null;
                 }
@@ -291,7 +338,9 @@ public class NetworkServerSystem extends Simulation.SimSystem {
             this.currentIndex = current_index;
             this.leftVehicleBackIndex = left_vehicle_back_index;
             this.rightVehicleBackIndex = right_vehicle_back_index;
-            return laneChangeDecision;
+            var tmp = laneChangeDecision;
+            laneChangeDecision = null;
+            return tmp;
         }
 
         @Override

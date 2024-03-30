@@ -88,7 +88,7 @@ public final class Road implements Serializable {
                 if (vehicle.getDistanceAlongRoad() + 0.0001 + vehicle.getSize()/2 > length){
                     var intersection = sim.getMap().roadEnds(this);
                     var turns = intersection.getTurns(current_lane);
-                    var turn = vehicle.chooseTurn(sim, intersection, turns);
+                    var turn = vehicle.chooseTurn(sim, current_lane, intersection, turns);
                     if (turn != null){
                         sim.getGambleHandler().chooseTurn(vehicle, current_lane, turn);
                         current_lane.vehicles.remove(0);
@@ -461,7 +461,7 @@ public final class Road implements Serializable {
         public void addVehicle(Vehicle vehicle) {
             vehicle.putInLane(this);
             this.vehicles.add(this.vehicles.size(), vehicle);
-            this.remainingSpace = 0;
+            this.remainingSpace = vehicle.getDistanceAlongRoadBack();
         }
 
         /**
@@ -525,8 +525,10 @@ public final class Road implements Serializable {
             return this.vehicles.size();
         }
 
-        public ArrayList<Vehicle> getVehicles() {
-            return this.vehicles;
+
+        public void empty() {
+            this.vehicles.clear();
+            this.remainingSpace = length;
         }
     }
 }

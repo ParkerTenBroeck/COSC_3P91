@@ -32,7 +32,7 @@ public class RandomController implements Controller{
     }
 
     @Override
-    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns) {
+    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns) {
         if (turns == null || turns.isEmpty()) {
             wantsToChange2 = true;
             return null;

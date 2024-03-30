@@ -19,7 +19,7 @@ public class TextPlayerController implements Controller {
     public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {}
 
     @Override
-    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns) {
+    public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns) {
         if(turns == null) return null;
 
         System.out.println("At Intersection: '" + intersection.getName() + "'");
