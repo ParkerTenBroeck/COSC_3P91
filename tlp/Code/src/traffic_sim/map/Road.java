@@ -530,5 +530,9 @@ public final class Road implements Serializable {
             this.vehicles.clear();
             this.remainingSpace = length;
         }
+
+        public void removeVehicle(int laneIndex) {
+            this.vehicles.remove(laneIndex);
+        }
     }
 }

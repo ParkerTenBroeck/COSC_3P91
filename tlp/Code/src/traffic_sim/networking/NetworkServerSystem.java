@@ -288,6 +288,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
 
                 speed = in.readFloat();
+                if(Float.isNaN(speed) | Float.isInfinite(speed)) speed = 0;
                 chosenTurn = in.readInt();
                 switch(in.readByte()){
                     case -3 -> laneChangeDecision = Road.LaneChangeDecision.ForceLeft;
@@ -312,6 +313,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
         @Override
         public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
+            if(socket.isClosed()) lane.removeVehicle(laneIndex);
             v.setSpeedMultiplier(this.speed);
         }
 
