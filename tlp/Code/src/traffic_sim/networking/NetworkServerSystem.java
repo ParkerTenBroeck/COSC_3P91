@@ -320,9 +320,10 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         @Override
         public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns) {
 //            turn
-            this.turnIntersection = intersection;
-            this.turnLane = current_lane;
             if(this.chosenTurn == -1){
+
+                this.turnIntersection = intersection;
+                this.turnLane = current_lane;
                 return null;
             }else{
                 var tmp = this.chosenTurn;
@@ -330,6 +331,8 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 try{
                     return turns.get(tmp);
                 }catch (Exception e){
+                    this.turnIntersection = intersection;
+                    this.turnLane = current_lane;
                     return null;
                 }
             }
@@ -340,6 +343,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
             this.currentIndex = current_index;
             this.leftVehicleBackIndex = left_vehicle_back_index;
             this.rightVehicleBackIndex = right_vehicle_back_index;
+            this.currentLane = lane;
             var tmp = laneChangeDecision;
             laneChangeDecision = null;
             return tmp;

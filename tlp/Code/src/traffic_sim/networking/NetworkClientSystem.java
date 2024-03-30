@@ -193,7 +193,10 @@ public class NetworkClientSystem extends Simulation.SimSystem {
             }
 
 
-            var decision = playerController.laneChange(player, sim, currentLane, currentIndex, leftVehicleBackIndex, rightVehicleBackIndex);
+            Road.LaneChangeDecision decision = Road.LaneChangeDecision.Nothing;
+            if(currentLane != null){
+                decision = playerController.laneChange(player, sim, currentLane, currentIndex, leftVehicleBackIndex, rightVehicleBackIndex);
+            }
             writer.clear();
             writer.writeFloat(player.getSpeedMultiplier());
             writer.writeInt(turn);
