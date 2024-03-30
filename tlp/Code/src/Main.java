@@ -73,6 +73,7 @@ public class Main {
 
     public static void runClientGUI() {
         var simulation = new Simulation(new View());
+        simulation.attachGUIRenderer();
         simulation.getView().panX = 0;
         simulation.getView().panY = 0;
         simulation.getView().zoom = 21;
@@ -105,185 +106,189 @@ public class Main {
 
     public static void runServer() throws Exception{
         var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
+        var is = (SourceIntersection)map.getIntersectionById("Source");
         for(var road : map.getRoads()){
             for(var lane : road.getLanes()){
                 for(int i = 0; i < 3; i ++)
-                    lane.addVehicle(new Car());
+                    lane.addVehicle(is.getRandom());
             }
         }
         var simulation = new Simulation(map);
         simulation.addSystem(new NetworkServerSystem());
+        simulation.attachRealTimeSim();
         simulation.run();
     }
 
 
-    public static void runLocalGraphical() throws Exception {
-    }
-    public static void runLocal() throws Exception{
+    public static void runLocal() throws Exception {
 
         var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
-        MapXmlTools.saveMap(map, new FileWriter("saved_road_map.xml"));
 
+        var is = (SourceIntersection)map.getIntersectionById("Source");
+        for(var road : map.getRoads()){
+            for(var lane : road.getLanes()){
+                for(int i = 0; i < 3; i ++)
+                    lane.addVehicle(is.getRandom());
+            }
+        }
+
+        var displayController = new TextPlayerController();
+        var simulation = new Simulation(map);
+        simulation.attachConstantTimeSteppedSim();
+
+        var player = new Car(displayController, Color.MAGENTA);
+
+        player.setSpeedMultiplier(1f);
+        is.toAdd(player);
+        simulation.run();
+    }
+    public static void runLocalGraphical() throws Exception{
+
+        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
         var is = (SourceIntersection)map.getIntersectionById("Source");
 
         for(var road : map.getRoads()){
             for(var lane : road.getLanes()){
                 for(int i = 0; i < 3; i ++)
-                    lane.addVehicle(new Car());
+                    lane.addVehicle(is.getRandom());
             }
         }
 
-        Simulation simulation;
-        Vehicle player;
 
-        // set this to false for a GUI thats very incomplete
-        boolean text = false;
-        // show gui while being controlled by text mode
-        boolean show_gui = true;
-        if (text){
-            var displayController = new TextPlayerController();
-            simulation = new Simulation(map, displayController, show_gui);
-            player = new Car(displayController, Color.MAGENTA);
-        }else{
-            simulation = new Simulation(map, new View());
-            player = new Car(new GUIPlayerController(simulation.getInput()), Color.MAGENTA);
-        }
+        var simulation = new Simulation(map, new View());
+        var player = new Car(new GUIPlayerController(simulation.getInput()), Color.MAGENTA);
 
-        if(!text || show_gui){
-            if(text){
-                simulation.setDebug(false);
-                simulation.getView().setFollowing(player);
-            }
-            simulation.getView().panX = 0;
-            simulation.getView().panY = 0;
-            simulation.getView().zoom = 21;
+        simulation.attachGUIRenderer();
+        simulation.attachRealTimeSim();
 
-            simulation.addSystem(new Simulation.SimSystem(1){
+        simulation.getView().panX = 0;
+        simulation.getView().panY = 0;
+        simulation.getView().zoom = 21;
 
-                Intersection held;
-                @Override
-                public void init(Simulation sim) {}
+        simulation.addSystem(new Simulation.SimSystem(1){
 
-                @Override
-                public void run(Simulation sim, float delta) {
-                    if (sim.getInput().keyHeld('D')){
-                        sim.getView().panX -= sim.getFrameDelta()*300*1/sim.getView().zoom;
-                    }
-                    if (sim.getInput().keyHeld('A')){
-                        sim.getView().panX += sim.getFrameDelta()*300*1/sim.getView().zoom;
-                    }
-                    if (sim.getInput().keyHeld('W')){
-                        sim.getView().panY += sim.getFrameDelta()*300*1/sim.getView().zoom;
-                    }
-                    if (sim.getInput().keyHeld('S')){
-                        sim.getView().panY -= sim.getFrameDelta()*300*1/sim.getView().zoom;
-                    }
-                    if (sim.getInput().keyHeld('Q')){
-                        sim.getView().zoom += sim.getFrameDelta()*sim.getView().zoom*2;
-                    }
-                    if (sim.getInput().keyHeld('E')){
-                        sim.getView().zoom -= sim.getFrameDelta()*sim.getView().zoom*2;
-                    }
-                    if (sim.getInput().keyPressed(' ')){
-                        sim.setPaused(!sim.getPaused());
-                    }
-                    if (sim.getInput().keyPressed('V')){
-                        sim.setDebug(!sim.getDebug());
-                    }
-                    if (sim.getInput().keyPressed('T')){
-                        sim.tick(1f);
-                    }
-                    if (sim.getInput().keyPressed('1')){
-                        sim.setSimulationMultiplier(1.0f);
-                    }
-                    if (sim.getInput().keyHeld('-')){
-                        sim.setSimulationMultiplier(sim.getSimulationMultiplier() - 0.01f);
-                    }
-                    if (sim.getInput().keyHeld('=')){
-                        sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 0.01f);
-                    }
-                    if (sim.getInput().keyHeld('=') && sim.getInput().keyHeld(16)){
-                        sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 100.0f);
-                    }
-                    if(sim.getInput().mousePressed(Input.MouseKey.Left) | sim.getInput().mousePressed(Input.MouseKey.Right)){
-                        this.held = null;
-                        var x = sim.getView().getMouseMapX();
-                        var y = sim.getView().getMouseMapY();
-                        for(var intersection : sim.getMap().getIntersections()){
-                            var xd = Math.abs(x - intersection.getX());
-                            var yd = Math.abs(y - intersection.getY());
-                            if(xd < 1 && yd < 1){
-                                this.held = intersection;
-                            }
-                        }
-                    }
-                    if (sim.getInput().mousePressed(Input.MouseKey.Middle)){
-                        try{
-                            sim.getMap().addIntersection(null, "", sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
-                        }catch (MapBuildingException ignore){}
-                    }
-                    if(sim.getInput().mouseHeld(Input.MouseKey.Left)) {
-                        if(held != null){
-                            this.held.updatePosition(sim.getMap(),  sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
-                        }
+            Intersection held;
+            @Override
+            public void init(Simulation sim) {}
 
-                        try {
-                            map.autoLinkTurns();
-                        } catch (MapBuildingException ignore) {
-
-                        }
-                    }
-                    if (sim.getInput().mouseReleased(Input.MouseKey.Right)){
-                        var x = sim.getView().getMouseMapX();
-                        var y = sim.getView().getMouseMapY();
-                        Intersection other = null;
-                        for(var intersection : sim.getMap().getIntersections()){
-                            var xd = Math.abs(x - intersection.getX());
-                            var yd = Math.abs(y - intersection.getY());
-                            if(xd < 1 && yd < 1){
-                                other = intersection;
-                            }
-                        }
-                        if(other != null && held !=null){
-                            var linked = sim.getMap().getLinked(held, other);
-                            if (linked != null){
-                                linked.addLanes(1);
-                            }else try{
-                                sim.getMap().linkIntersection(held, other, null, "", 1);
-                            }catch (MapBuildingException ignore){}
-                        }
-                        this.held = null;
-                    }
-
-                    if(this.held != null){
-                        sim.getView().setLayer(Display.Layer.TopLevel);
-                        sim.getView().setColor(Color.YELLOW);
-                        sim.getView().drawOval(held.getX(), held.getY(), 3f, 3f);
-                        if(sim.getInput().mouseHeld(Input.MouseKey.Right)){
-                            sim.getView().drawLine(held.getX(), held.getY(), sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
-                        }
-                    }
-
-
-                    if (sim.getInput().keyPressed('F')){
-                        if (sim.getView().getFollowing() == null){
-                            sim.getView().setFollowing(player);
-                        }else{
-                            sim.getView().setFollowing(null);
-                        }
-                    }
-                    if (sim.getInput().keyPressed('R')){
-                        if (!player.isOnRoad()){
-                            is.toAdd(player);
+            @Override
+            public void run(Simulation sim, float delta) {
+                if (sim.getInput().keyHeld('D')){
+                    sim.getView().panX -= sim.getFrameDelta()*300*1/sim.getView().zoom;
+                }
+                if (sim.getInput().keyHeld('A')){
+                    sim.getView().panX += sim.getFrameDelta()*300*1/sim.getView().zoom;
+                }
+                if (sim.getInput().keyHeld('W')){
+                    sim.getView().panY += sim.getFrameDelta()*300*1/sim.getView().zoom;
+                }
+                if (sim.getInput().keyHeld('S')){
+                    sim.getView().panY -= sim.getFrameDelta()*300*1/sim.getView().zoom;
+                }
+                if (sim.getInput().keyHeld('Q')){
+                    sim.getView().zoom += sim.getFrameDelta()*sim.getView().zoom*2;
+                }
+                if (sim.getInput().keyHeld('E')){
+                    sim.getView().zoom -= sim.getFrameDelta()*sim.getView().zoom*2;
+                }
+                if (sim.getInput().keyPressed(' ')){
+                    sim.setPaused(!sim.getPaused());
+                }
+                if (sim.getInput().keyPressed('V')){
+                    sim.setDebug(!sim.getDebug());
+                }
+                if (sim.getInput().keyPressed('T')){
+                    sim.tick(1f);
+                }
+                if (sim.getInput().keyPressed('1')){
+                    sim.setSimulationMultiplier(1.0f);
+                }
+                if (sim.getInput().keyHeld('-')){
+                    sim.setSimulationMultiplier(sim.getSimulationMultiplier() - 0.01f);
+                }
+                if (sim.getInput().keyHeld('=')){
+                    sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 0.01f);
+                }
+                if (sim.getInput().keyHeld('=') && sim.getInput().keyHeld(16)){
+                    sim.setSimulationMultiplier(sim.getSimulationMultiplier() + 100.0f);
+                }
+                if(sim.getInput().mousePressed(Input.MouseKey.Left) | sim.getInput().mousePressed(Input.MouseKey.Right)){
+                    this.held = null;
+                    var x = sim.getView().getMouseMapX();
+                    var y = sim.getView().getMouseMapY();
+                    for(var intersection : sim.getMap().getIntersections()){
+                        var xd = Math.abs(x - intersection.getX());
+                        var yd = Math.abs(y - intersection.getY());
+                        if(xd < 1 && yd < 1){
+                            this.held = intersection;
                         }
                     }
                 }
-            });
-        }
+                if (sim.getInput().mousePressed(Input.MouseKey.Middle)){
+                    try{
+                        sim.getMap().addIntersection(null, "", sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
+                    }catch (MapBuildingException ignore){}
+                }
+                if(sim.getInput().mouseHeld(Input.MouseKey.Left)) {
+                    if(held != null){
+                        this.held.updatePosition(sim.getMap(),  sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
+                    }
+
+                    try {
+                        map.autoLinkTurns();
+                    } catch (MapBuildingException ignore) {
+
+                    }
+                }
+                if (sim.getInput().mouseReleased(Input.MouseKey.Right)){
+                    var x = sim.getView().getMouseMapX();
+                    var y = sim.getView().getMouseMapY();
+                    Intersection other = null;
+                    for(var intersection : sim.getMap().getIntersections()){
+                        var xd = Math.abs(x - intersection.getX());
+                        var yd = Math.abs(y - intersection.getY());
+                        if(xd < 1 && yd < 1){
+                            other = intersection;
+                        }
+                    }
+                    if(other != null && held !=null){
+                        var linked = sim.getMap().getLinked(held, other);
+                        if (linked != null){
+                            linked.addLanes(1);
+                        }else try{
+                            sim.getMap().linkIntersection(held, other, null, "", 1);
+                        }catch (MapBuildingException ignore){}
+                    }
+                    this.held = null;
+                }
+
+                if(this.held != null){
+                    sim.getView().setLayer(Display.Layer.TopLevel);
+                    sim.getView().setColor(Color.YELLOW);
+                    sim.getView().drawOval(held.getX(), held.getY(), 3f, 3f);
+                    if(sim.getInput().mouseHeld(Input.MouseKey.Right)){
+                        sim.getView().drawLine(held.getX(), held.getY(), sim.getView().getMouseMapX(), sim.getView().getMouseMapY());
+                    }
+                }
+
+
+                if (sim.getInput().keyPressed('F')){
+                    if (sim.getView().getFollowing() == null){
+                        sim.getView().setFollowing(player);
+                    }else{
+                        sim.getView().setFollowing(null);
+                    }
+                }
+                if (sim.getInput().keyPressed('R')){
+                    if (!player.isOnRoad()){
+                        is.toAdd(player);
+                    }
+                }
+            }
+        });
 
         player.setSpeedMultiplier(1f);
         is.toAdd(player);
-        is.toAdd(new Truck());
         simulation.run();
     }
 }

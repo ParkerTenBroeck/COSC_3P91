@@ -15,16 +15,6 @@ import java.util.function.Function;
  */
 public class TextPlayerController implements Controller {
 
-    public void attach(Simulation simulation) {
-        simulation.addSystem(new Simulation.SimSystem(50) {
-            @Override
-            public void init(Simulation sim) {}
-
-            @Override
-            public void run(Simulation sim, float delta) { sim.tick(0.5f); }
-        });
-    }
-
     @Override
     public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {}
 

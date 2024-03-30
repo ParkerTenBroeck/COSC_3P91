@@ -27,17 +27,24 @@ public class SourceIntersection extends Intersection{
             var random = outgoing.get((int) (outgoing.size()*Math.random()));
             if (random.getNumLanes() > 0){
                 var lane = (int)(random.getNumLanes()*Math.random());
-                if (random.getRemainingSpace(lane) > 2.0){
-                    if (toAdd.isEmpty()){
-                        if(vehicleFactories.length > 0){
-                            var supplier = (int)(vehicleFactories.length*Math.random());
-                            random.getLane(lane).addVehicle(vehicleFactories[supplier].create());
-                        }
-                    }else{
-                        random.getLane(lane).addVehicle(toAdd.remove(0));
-                    }
+
+                if(toAdd.isEmpty()){
+                    toAdd.add(getRandom());
+                }
+
+                if (random.getRemainingSpace(lane) > toAdd.get(0).getSize()){
+                    random.getLane(lane).addVehicle(toAdd.remove(0));
                 }
             }
+        }
+    }
+
+    public Vehicle getRandom() {
+        if(vehicleFactories.length > 0){
+            var supplier = (int)(vehicleFactories.length*Math.random());
+            return vehicleFactories[supplier].create();
+        }else{
+            return null;
         }
     }
 

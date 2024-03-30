@@ -37,23 +37,22 @@ public class Simulation implements Runnable{
 
     public Simulation(RoadMap map){
         this.map = map;
-
-        this.addSystem(SimSystem.simple(50, (sim, delta) -> {
-            if (sim.getPaused()){
-                map.tick(sim, 0.0f);
-            }else{
-                delta *= sim.simulationMultiplier;
-                var num = (int)Math.ceil(delta/sim.maxDeltaTick);
-                var r_tick = delta/num;
-                for(int i = 0; i < num; i ++){
-                    sim.tick(r_tick);
-                }
-            }
-        }));
     }
 
     public Simulation(View view){
         this.view = view;
+    }
+
+    public Simulation(RoadMap map, View view){
+        this.map = map;
+        this.view = view;
+    }
+
+    public Simulation(){
+
+    }
+
+    public void attachGUIRenderer(){
         this.addSystem(SimSystem.simple(1, (sim, delta) -> {
             sim.view.getInput().update();
             sim.view.setDefaultStroke(0.08f);
@@ -62,7 +61,6 @@ public class Simulation implements Runnable{
 
         this.addSystem(SimSystem.simple(1000, (sim, delta) -> {
             sim.map.draw(sim);
-
             sim.view.setColor(Color.WHITE);
 
             sim.view.drawStringHud("X: " + sim.view.panX, 10,10);
@@ -80,54 +78,29 @@ public class Simulation implements Runnable{
         this.addSystem(SimSystem.simple(2000, (sim, delta) -> sim.view.update()));
     }
 
-    public Simulation(){
-
+    public void attachRealTimeSim(){
+        this.addSystem(SimSystem.simple(50, (sim, delta) -> {
+            if (sim.getPaused()){
+                map.tick(sim, 0.0f);
+            }else{
+                delta *= sim.simulationMultiplier;
+                var num = (int)Math.ceil(delta/sim.maxDeltaTick);
+                var r_tick = delta/num;
+                for(int i = 0; i < num; i ++){
+                    sim.tick(r_tick);
+                }
+            }
+        }));
     }
 
-    /**
-     * @param map  the map the simulation should use
-     */
-    public Simulation(RoadMap map, View view){
-        this(map);
-        this.view = view;
+    public void attachConstantTimeSteppedSim(){
+        this.addSystem(new Simulation.SimSystem(50) {
+            @Override
+            public void init(Simulation sim) {}
 
-        this.addSystem(SimSystem.simple(1, (sim, delta) -> {
-            sim.view.getInput().update();
-            sim.view.setDefaultStroke(0.08f);
-            sim.view.clearAll();
-        }));
-
-        this.addSystem(SimSystem.simple(1000, (sim, delta) -> {
-            sim.map.draw(sim);
-
-//            if (sim.getDebug()){
-                sim.view.setColor(Color.WHITE);
-
-                sim.view.drawStringHud("X: " + sim.view.panX, 10,10);
-                sim.view.drawStringHud("Y: " + sim.view.panY, 10,20);
-                sim.view.drawStringHud("Zoom: " + sim.view.zoom, 10,30);
-                sim.view.drawStringHud("SimMultiplier: " + sim.simulationMultiplier, 10,40);
-                sim.view.drawStringHud("Paused: " + sim.pause, 10,50);
-                sim.view.drawStringHud("Tick: " + sim.simTick, 10,60);
-                sim.view.drawStringHud("SimTime: " + sim.simNanos*1e-9 + "s", 10,70);
-                sim.view.drawStringHud("FrameTime: " + sim.frameDelta + "s", 10,80);
-                sim.view.drawStringHud("SystemsTime: " + sim.systemsTime + "s", 10,90);
-                sim.view.drawStringHud("TicksPerFrame: " + (int)Math.ceil(delta*sim.simulationMultiplier/sim.maxDeltaTick)*1f/sim.frameDelta, 10,100);
-//            }
-        }));
-
-        this.addSystem(SimSystem.simple(2000, (sim, delta) -> sim.view.update()));
-    }
-
-    public Simulation(RoadMap map, TextPlayerController display, boolean show_gui){
-        this(map, show_gui?new View():null);
-        this.systems.removeIf((s) -> s.priority == 50);
-
-        if(!show_gui){
-            this.systems.removeIf((s) -> s.priority == 50 || s.priority == 2000 || s.priority == 1 || s.priority == 1000);
-        }
-
-        display.attach(this);
+            @Override
+            public void run(Simulation sim, float delta) { sim.tick(0.5f); }
+        });
     }
     
     public void tick(float delta){

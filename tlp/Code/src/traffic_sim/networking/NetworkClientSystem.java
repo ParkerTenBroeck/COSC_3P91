@@ -79,8 +79,11 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                     case 2 -> {
                         sim.setTick(in.readInt());
                         var ignore = in.readFloat();
-                        sim.setSimNanos(in.readLong());
 
+                        var lane_change = in.readByte();
+                        var turn = in.readInt();
+
+                        sim.setSimNanos(in.readLong());
                     }
                     case 3 -> {
                         var vehicles = in.readInt();
@@ -92,7 +95,6 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                         }
                     }
                     case 4 -> {
-
                         var roads = in.readInt();
                         for(int r = 0; r < roads; r ++){
                             var rid = in.readInt();
