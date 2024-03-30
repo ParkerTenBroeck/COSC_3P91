@@ -2,12 +2,13 @@ package traffic_sim.networking;
 
 import traffic_sim.Simulation;
 import traffic_sim.map.Road;
+import traffic_sim.map.intersection.Intersection;
 import traffic_sim.map.intersection.SourceIntersection;
 import traffic_sim.vehicle.Car;
 import traffic_sim.vehicle.Vehicle;
+import traffic_sim.vehicle.controller.Controller;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -25,6 +26,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
     private int nextRoadId;
     private final HashMap<Road, Integer> roadIdMap = new HashMap<>();
+    private final HashMap<Integer, Intersection> intersectionIdMap = new HashMap<>();
 
 
     private int nextVehicleId;
@@ -40,6 +42,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
     public NetworkServerSystem() {
         super(200);
+        this.roadIdMap.put(null, -1);
         new Thread(() -> {
             try {
                 socketServer = new ServerSocket(42069);
@@ -98,7 +101,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         synchronized (newClients){
             for(var client : newClients){
                 var source = (SourceIntersection)sim.getMap().getIntersectionById("Source");
-                var vehicle = new Car(new NetworkController(client));
+                var vehicle = new Car(client);
                 try {
                     initBuf.clear();
                     // kind
@@ -170,11 +173,22 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         clients.removeIf((client) -> client.update(sim, this));
     }
 
-    public static class Client{
+    public static class Client  implements Controller{
 
         private final Socket socket;
 
         BufferedWriter writer = new BufferedWriter(512);
+
+        private int chosenTurn = -1;
+        private Road.LaneChangeDecision laneChangeDecision = Road.LaneChangeDecision.Nothing;
+        private float speed = 1.0f;
+
+        Road.Lane putInLane = null;
+        private int rightVehicleBackIndex;
+        private int leftVehicleBackIndex;
+        private int currentIndex;
+        private Road.Lane currentLane = null;
+
 
         public Client(Socket socket){
             this.socket = socket;
@@ -184,7 +198,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
             if(socket.isClosed()) return true;
             try{
-//                var in = new ObjectInputStream(socket.getInputStream());
+                var in = new Reader(socket.getInputStream());
                 var out = socket.getOutputStream();
 
                 // write sim data
@@ -192,6 +206,27 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 writer.writeInt(sim.getSimTick());
                 writer.writeFloat(sim.getFrameDelta());
                 writer.writeLong(sim.getSimNanos());
+
+
+                writer.writeInt(rightVehicleBackIndex);
+                writer.writeInt(leftVehicleBackIndex);
+                writer.writeInt(currentIndex);
+                if(putInLane != null){
+                    writer.writeInt(system.roadIdMap.get(putInLane.road()));
+                    writer.writeInt(putInLane.getLane());
+                }else{
+                    writer.writeInt(-1);
+                    writer.writeInt(-1);
+                }
+
+                if(putInLane != null){
+                    writer.writeInt(system.roadIdMap.get(currentLane.road()));
+                    writer.writeInt(currentLane.getLane());
+                }else{
+                    writer.writeInt(-1);
+                    writer.writeInt(-1);
+                }
+
                 out.write(writer.getAllData(), 0, writer.getSize());
                 writer.clear();
 
@@ -210,13 +245,17 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 writer.clear();
 
 
-//                if(in.available() >= 4){
-//                    var num = in.readInt();
-//                    for(int i = 0; i < num; i ++){
-//                        System.out.print(in.readChar() + " ");
-//                    }
-//                    System.out.println();
-//                }
+                speed = in.readFloat();
+                chosenTurn = in.readInt();
+                switch(in.readByte()){
+                    case -3 -> laneChangeDecision = Road.LaneChangeDecision.ForceLeft;
+                    case -2 -> laneChangeDecision = Road.LaneChangeDecision.NudgeLeft;
+                    case -1 -> laneChangeDecision = Road.LaneChangeDecision.WaitLeft;
+                    default -> laneChangeDecision = Road.LaneChangeDecision.Nothing;
+                    case 1 -> laneChangeDecision = Road.LaneChangeDecision.WaitRight;
+                    case 2 -> laneChangeDecision = Road.LaneChangeDecision.NudgeRight;
+                    case 3 -> laneChangeDecision = Road.LaneChangeDecision.ForceRight;
+                }
 
             }catch (Exception e){
                 try {
@@ -227,6 +266,37 @@ public class NetworkServerSystem extends Simulation.SimSystem {
             }
             return false;
         }
-    }
 
+
+        @Override
+        public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
+            v.setSpeedMultiplier(this.speed);
+        }
+
+        @Override
+        public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Intersection intersection, ArrayList<Intersection.Turn> turns) {
+            if(this.chosenTurn == -1){
+                return null;
+            }else{
+                try{
+                    return turns.get(this.chosenTurn);
+                }catch (Exception e){
+                    return null;
+                }
+            }
+        }
+
+        @Override
+        public Road.LaneChangeDecision laneChange(Vehicle v, Simulation sim, Road.Lane lane, int current_index, int left_vehicle_back_index, int right_vehicle_back_index) {
+            this.currentIndex = current_index;
+            this.leftVehicleBackIndex = left_vehicle_back_index;
+            this.rightVehicleBackIndex = right_vehicle_back_index;
+            return laneChangeDecision;
+        }
+
+        @Override
+        public void putInLane(Vehicle vehicle, Road.Lane lane) {
+            this.putInLane = lane;
+        }
+    }
 }
