@@ -78,6 +78,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
             }
             try{
                 server = new Socket(InetAddress.getByName(path), 42069);
+                this.server.setTcpNoDelay(true);
                 try{
                     var authMessage = "Enter Username/Password";
                     while(true){
@@ -105,8 +106,9 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                 }catch (Exception e){
                     message = "Failed to Authenticate: Enter IP/URL";
                 }
-            }catch (Exception ignore){}
-            message = "Failed to Connect, Enter IP/URL";
+            }catch (Exception ignore){
+                message = "Failed to Connect, Enter IP/URL";
+            }
         }
 
         try{
@@ -279,7 +281,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                 playerController.tick(player, sim, null, -1, false, delta);
 
                 this.server.getOutputStream().write(writer.getAllData(), 0, writer.getSize());
-
+                this.server.getOutputStream().flush();
 //            }
         }catch (Exception e){throw new RuntimeException(e);}
     }

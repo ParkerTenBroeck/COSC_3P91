@@ -25,7 +25,6 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-
 //        if(true){
 //            ConsoleUtils.enterRawMode();
 //            ConsoleUtils.clear();
@@ -70,7 +69,7 @@ public class Main {
             case "c" -> runClientTerm();
             case "l" -> runLocal();
             case "lg" -> runLocalGraphical();
-            default -> System.out.println("""
+            default -> ConsoleUtils.println("""
                     Please provide a single argument
                     b:  Both Server + Client
                     bg: Both Server + Client Graphical
@@ -87,6 +86,7 @@ public class Main {
     public static void runClientTerm() {
         var simulation = new Simulation();
         simulation.addSystem(new NetworkClientSystem(new TextPlayerController()));
+        simulation.attachRawModeTUI();
         simulation.run();
     }
 
@@ -154,6 +154,7 @@ public class Main {
         var displayController = new TextPlayerController();
         var simulation = new Simulation(map);
         simulation.attachConstantTimeSteppedSim();
+        simulation.attachRawModeTUI();
 
         var player = new Car(displayController, Color.MAGENTA);
 

@@ -1,5 +1,6 @@
 package traffic_sim.vehicle.controller;
 
+import traffic_sim.ConsoleUtils;
 import traffic_sim.Simulation;
 import traffic_sim.map.Road;
 import traffic_sim.map.intersection.Intersection;
@@ -7,13 +8,16 @@ import traffic_sim.vehicle.Vehicle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 import java.util.function.Function;
 
 /**
  * A controller for Vehicles and also a way to display information about the currently controlled vehicle
  */
 public class TextPlayerController implements Controller {
+
+    private int index = 0;
+    private boolean select = false;
+    private final static int START_TURN_Y = 8;
 
     @Override
     public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {}
@@ -22,92 +26,103 @@ public class TextPlayerController implements Controller {
     public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns) {
         if(turns == null) return null;
 
-        System.out.println("At Intersection: '" + intersection.getName() + "'");
-        System.out.println("Select Turn, Enter name of turn or index to select or enter nothing to wait");
-
-        boolean first = true;
-        while(true){
-            if(!first)
-                System.out.println("Invalid turn, please select a valid turn");
-            first = false;
-
-            for(int i = 0; i < turns.size(); i ++){
-                var turn = turns.get(i);
-                System.out.println("turn ("+i+") '"+turn.getName() + "' onto '" + turn.getLane().road().getName() + "': " + (turn.enabled()?"Enabled":"Disabled") + " " + (turn.getLane().canFit(v)?"Can Fit":"Can't Fit"));
-            }
-
-            var input = new Scanner(System.in).nextLine().trim();
-            if (input.isEmpty()) return null;
-
+        if(select){
+            select = false;
             try{
-                return turns.get(Integer.parseInt(input));
+                return turns.get(index);
             }catch (Exception ignore){}
-
-            for(var turn : turns){
-                if (turn.getName().equalsIgnoreCase(input))return turn;
-            }
         }
+
+        ConsoleUtils.moveCursor(13, START_TURN_Y);
+        ConsoleUtils.print("At Intersection: '" + intersection.getName() + "'");
+
+        ConsoleUtils.moveCursor(13, START_TURN_Y+1);
+        ConsoleUtils.print("Select With Up/Down arrow keys, Enter/Space to select");
+
+
+        for(int i = 0; i < turns.size(); i ++){
+            var turn = turns.get(i);
+
+            ConsoleUtils.moveCursor(13, START_TURN_Y+3+i);
+            if(index == i){
+                ConsoleUtils.applyStyle(ConsoleUtils.Style.Underline);
+                ConsoleUtils.print("*");
+            }else{
+                ConsoleUtils.print(" ");
+            }
+            if(!turn.enabled()){
+                ConsoleUtils.applyStyle(ConsoleUtils.BasicBackground.Yellow);
+            }
+            if(!turn.getLane().canFit(v)){
+                ConsoleUtils.applyStyle(ConsoleUtils.BasicBackground.Red);
+            }
+            ConsoleUtils.print("'"+turn.getName() + "' onto '" + turn.getLane().road().getName() + "': " + (turn.enabled()?"Enabled":"Disabled") + " " + (turn.getLane().canFit(v)?"Can Fit":"Can't Fit"));
+            ConsoleUtils.resetStyle();
+        }
+        if(index < 0 || index >= turns.size()){
+            index = 0;
+        }
+
+
+        return null;
     }
 
     @Override
     public Road.LaneChangeDecision laneChange(Vehicle v, Simulation sim, Road.Lane lane, int current_index, int left_vehicle_back_index, int right_vehicle_back_index) {
 
-        var start = v.getDistanceAlongRoadBack()-1f;
-        var end = v.getDistanceAlongRoad()+1f;
-        var left = lane.leftLane() != null ? crateLane(lane.leftLane(), left_vehicle_back_index, start,end,lane.road().getRoadLength()):null;
-        var curr = crateLane(lane, current_index, start, end, lane.road().getRoadLength());
-        var right = lane.rightLane() != null ? crateLane(lane.rightLane(), right_vehicle_back_index, start,end,lane.road().getRoadLength()):null;
+        try{
+            var middle =( v.getDistanceAlongRoadBack() + v.getDistanceAlongRoad()) / 2;
+            var left = lane.leftLane() != null ? crateLane(lane.leftLane(), left_vehicle_back_index, middle,lane.road().getRoadLength()):null;
+            var curr = crateLane(lane, current_index, middle, lane.road().getRoadLength());
+            var right = lane.rightLane() != null ? crateLane(lane.rightLane(), right_vehicle_back_index, middle,lane.road().getRoadLength()):null;
 
-        for(int i = curr.length-1; i >= 0; i --){
-            printVehicleLine(left == null?null:left[i], '#');
-            System.out.print(" ");
-            printVehicleLine(curr[i], '@');
-            System.out.print(" ");
-            printVehicleLine(right == null?null:right[i], '#');
-            System.out.println();
-        }
+            ConsoleUtils.moveCursor(1, 1);
+            for(int i = curr.length-1; i >= 0; i --){
+                printVehicleLine(left == null?null:left[i], '#');
+                ConsoleUtils.print(" ");
+                printVehicleLine(curr[i], '@');
+                ConsoleUtils.print(" ");
+                printVehicleLine(right == null?null:right[i], '#');
+                ConsoleUtils.println();
+            }
+        }catch (Exception ignore){}
 
-        System.out.println("Speed: " + v.getSpeedMultiplier()*lane.road().getSpeedLimit());
-        System.out.println("Current Speed Limit: " + lane.road().getSpeedLimit());
-        System.out.println("Speed Multiplier: " + v.getSpeedMultiplier());
-        System.out.println("Health: " + v.getHealth());
-        System.out.println("Reputation: " + v.getReputation());
-        System.out.println("Road: '" + lane.road().getName()+"' lane " + lane.getLane());
 
-        System.out.println("Lane change? (nothing for no change) ForceLeft, NudgeLeft, WaitLeft, WaitRight, NudgeRight, ForceRight, SpeedUp, SlowDown");
-        var input = new Scanner(System.in).nextLine().trim();
-        if(input.isEmpty()) return  Road.LaneChangeDecision.Nothing;
-        switch (input.toLowerCase()){
-            case "forceleft" -> {
-                return Road.LaneChangeDecision.ForceLeft;
+        ConsoleUtils.moveCursor(13, 1);
+        ConsoleUtils.println("Speed: " + v.getSpeedMultiplier()*lane.road().getSpeedLimit());
+        ConsoleUtils.moveCursor(13, 2);
+        ConsoleUtils.println("Current Speed Limit: " + lane.road().getSpeedLimit());
+        ConsoleUtils.moveCursor(13, 3);
+        ConsoleUtils.println("Speed Multiplier: " + v.getSpeedMultiplier());
+        ConsoleUtils.moveCursor(13, 4);
+        ConsoleUtils.println("Health: " + v.getHealth());
+        ConsoleUtils.moveCursor(13, 5);
+        ConsoleUtils.println("Reputation: " + v.getReputation());
+        ConsoleUtils.moveCursor(13, 6);
+        ConsoleUtils.println("Road: '" + lane.road().getName()+"' lane " + lane.getLane());
+
+//        ConsoleUtils.println("Lane change? (nothing for no change) ForceLeft, NudgeLeft, WaitLeft, WaitRight, NudgeRight, ForceRight, SpeedUp, SlowDown");
+        var laneChange  = Road.LaneChangeDecision.Nothing;
+        try{
+            ConsoleUtils.moveCursor(13, 20);
+            while(ConsoleUtils.hasNext()) {
+                var read = ConsoleUtils.read();
+                switch(read){
+                    case 'A' -> index -= 1;
+                    case 'B' -> index += 1;
+
+                    case 'D' -> laneChange = Road.LaneChangeDecision.WaitLeft;
+                    case 'C' -> laneChange = Road.LaneChangeDecision.WaitRight;
+                    case ' ', 13 -> select = true;
+                }
+                System.out.println(read);
             }
-            case "nudgeleft" -> {
-                return Road.LaneChangeDecision.NudgeLeft;
-            }
-            case "waitleft" -> {
-                return Road.LaneChangeDecision.WaitLeft;
-            }
-            case "waitright" -> {
-                return Road.LaneChangeDecision.WaitRight;
-            }
-            case "nudgeright" -> {
-                return Road.LaneChangeDecision.NudgeRight;
-            }
-            case "forceright" -> {
-                return Road.LaneChangeDecision.ForceRight;
-            }
-            case "speedup" -> {
-                v.setSpeedMultiplier((float)Math.min(1.8, v.getSpeedMultiplier() + 0.1f));
-                return Road.LaneChangeDecision.Nothing;
-            }
-            case "slowdown" -> {
-                v.setSpeedMultiplier((float)Math.max(0.3, v.getSpeedMultiplier() - 0.1f));
-                return Road.LaneChangeDecision.Nothing;
-            }
-            default -> {
-                return Road.LaneChangeDecision.Nothing;
-            }
-        }
+        }catch (Exception ignore){}
+        ConsoleUtils.show();
+        ConsoleUtils.fullClear();
+        ConsoleUtils.moveCursor(0, 0);
+
+        return laneChange;
     }
 
     /** Print a singular line of e vehicle/road piece
@@ -118,20 +133,20 @@ public class TextPlayerController implements Controller {
     private static void printVehicleLine(Character got, char highlight){
         if(got != null){
             if (got == '|'){
-                System.out.print(" | ");
+                ConsoleUtils.print(" | ");
                 return;
             };
             if (got == '^'){
                 got = highlight;
-                System.out.print(got + "^" + got);
+                ConsoleUtils.print(got + "^" + got);
                 return;
             }
             if (got == '@'){
                 got = highlight;
             }
-            System.out.print("" + got + got + got);
+            ConsoleUtils.print("" + got + got + got);
         }else{
-            System.out.print("   ");
+            ConsoleUtils.print("   ");
         }
     }
 
@@ -139,14 +154,16 @@ public class TextPlayerController implements Controller {
      *
      * @param lane      The lane we want to draw
      * @param middleV    The index of the middle vehicle
-     * @param from  the start of the slice of lane to display
-     * @param to    The end of the slice of lane to display
      * @param max   The max length of the visible lane
      * @return  The lane slice represented as characters
      */
-    private static char[] crateLane(Road.Lane lane, int middleV, float from, float to, float max){
+    private static char[] crateLane(Road.Lane lane, int middleV, float middle, float max){
+        int height = ConsoleUtils.getHeight();
+//        System.out.println(height);
         float bruh = 4;
-        var full = new char[(int) (bruh * (to - from))];
+        var full = new char[height];
+        var from = middle - height / bruh / 2;
+        var to =  middle + height / bruh / 2;
         var max_l = Math.min(to, max);
         var min_l = Math.max(0, from);
         Function<Float, Integer> map_l = (v) -> (int)((Math.max(Math.min(v, max_l), min_l)-from)*bruh);

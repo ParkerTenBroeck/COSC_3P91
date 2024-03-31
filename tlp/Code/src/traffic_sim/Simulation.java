@@ -250,9 +250,21 @@ public class Simulation implements Runnable{
         this.simNanos = n;
     }
 
+    public void attachRawModeTUI() {
+        this.addSystem(SimSystem.initializer(99999999, (system) -> {
+            ConsoleUtils.enterRawMode();
+            ConsoleUtils.fullClear();
+            ConsoleUtils.show();
+        }));
+    }
+
 
     public interface RunSystem{
         void run(Simulation sim, float delta);
+    }
+
+    public interface InitSystem{
+        void init(Simulation sim);
     }
 
     public abstract static class SimSystem implements RunSystem {
@@ -272,6 +284,18 @@ public class Simulation implements Runnable{
                 @Override
                 public void run(Simulation sim, float delta) {
                     runSystem.run(sim, delta);
+                }
+            };
+        }
+
+        public static SimSystem initializer(int priority, InitSystem initSystem){
+            return new SimSystem(priority) {
+                @Override
+                public void init(Simulation sim) {initSystem.init(sim);}
+
+                @Override
+                public void run(Simulation sim, float delta) {
+                    ;
                 }
             };
         }

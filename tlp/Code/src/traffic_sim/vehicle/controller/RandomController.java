@@ -1,5 +1,6 @@
 package traffic_sim.vehicle.controller;
 
+import traffic_sim.ConsoleUtils;
 import traffic_sim.Simulation;
 import traffic_sim.io.Display;
 import traffic_sim.map.Road;

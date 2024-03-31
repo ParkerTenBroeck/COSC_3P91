@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 
+/**
+ * A class for handling authentication of clients
+ * Has little
+ */
 public class Authentication {
-
-
     public static boolean authenticateClient(String user, String password, Socket client) throws IOException {
         var output = client.getOutputStream();
 
@@ -20,20 +22,13 @@ public class Authentication {
         output.write(passwordBytes.length & 0xFF);
         output.write(passwordBytes);
 
+        output.flush();
+
         return client.getInputStream().read() == 69;
     }
 
-    public boolean authenticateCheckClient(Socket client) throws IOException{
-        var reader = new Reader(client.getInputStream());
-        var username = reader.readString();
-        var password = reader.readString();
-        if (password.equals(users.get(username))){
-            client.getOutputStream().write(69);
-            return true;
-        }else {
-            client.getOutputStream().write(0);
-            return false;
-        }
+    public boolean authenticateCheckClient(String username, String password) {
+        return password.equals(users.get(username));
     }
 
 

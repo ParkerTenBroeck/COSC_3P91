@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 public class ConsoleUtils {
 
+
+
     public static void enterRawMode() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             show();
@@ -19,13 +21,12 @@ public class ConsoleUtils {
         String[] cmd = {"/bin/sh", "-c", "stty raw -echo </dev/tty"};
         try{
             Runtime.getRuntime().exec(cmd).waitFor();
+            out = new PrintWriter(System.out, false);
         }catch (Exception e){throw new RuntimeException(e);}
     }
 
     private static InputStream in = System.in;
-
-
-    private static PrintWriter out = new PrintWriter(System.out);//new PrintWriter(System.out, false);
+    private static PrintWriter out = new PrintWriter(System.out, true);//new PrintWriter(System.out, false);
 
     public static boolean hasNext() throws IOException {
         return in.available() > 0;
@@ -36,12 +37,37 @@ public class ConsoleUtils {
         return read;
     }
 
+    public static void fullClear(){
+        resetStyle();
+        out.write("\033[2J");
+    }
+
     public static void clear(){
         resetStyle();
         out.write("\033[J");
     }
     public static void println(String msg) {
         out.write(msg);
+        out.write("\033[0E");
+    }
+
+    private static String getSize(){
+        try{
+            var process = new ProcessBuilder("stty","size").redirectInput(ProcessBuilder.Redirect.INHERIT).start();
+            var read = process.getInputStream().readAllBytes();
+            var str = new String(read).trim();
+            return str.isEmpty() ? "24 80" : str;
+        }catch (Exception e){throw new RuntimeException(e);}
+    }
+
+    public static int getWidth(){
+        return Integer.parseInt(getSize().split(" ")[1].trim());
+    }
+    public static int getHeight(){
+        return Integer.parseInt(getSize().split(" ")[0].trim());
+    }
+
+    public static void println() {
         out.write("\033[0E");
     }
 
@@ -64,7 +90,8 @@ public class ConsoleUtils {
     }
 
     public static void moveCursor(int x, int y) {
-        out.write("\033["+y+":"+x+"H");
+        out.write("\033["+y+";"+x+"H");
+        out.write("\033["+y+";"+x+"f");
     }
 
     public static void resetStyle(){

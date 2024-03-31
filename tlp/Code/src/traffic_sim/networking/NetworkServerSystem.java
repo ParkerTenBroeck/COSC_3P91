@@ -44,6 +44,30 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
     private final Authentication auth = new Authentication();
 
+    private void authLoginClient(Socket socket){
+        new Thread(() -> {
+            try{
+                socket.setTcpNoDelay(true);
+                var reader = new Reader(socket.getInputStream());
+                var username = reader.readString();
+                var password = reader.readString();
+                while(!auth.authenticateCheckClient(username, password)){
+                    socket.getOutputStream().write(0);
+                    socket.getOutputStream().flush();
+                    username = reader.readString();
+                    password = reader.readString();
+                }
+                socket.getOutputStream().write(69);
+                socket.getOutputStream().flush();
+
+                var client = new Client( socket );
+                synchronized (newClients){
+                    newClients.add(client);
+                }
+            }catch (Exception ignore){}
+        }).start();
+    }
+
     public NetworkServerSystem() {
         super(200);
         this.roadIdMap.put(null, -1);
@@ -51,16 +75,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
             try {
                 socketServer = new ServerSocket(42069);
                 while(true){
-                    var socket = socketServer.accept();
-                    new Thread(() -> {
-                        try{
-                            while(!auth.authenticateCheckClient(socket)){}
-                            var client = new Client( socket );
-                            synchronized (newClients){
-                                newClients.add(client);
-                            }
-                        }catch (Exception ignore){}
-                    }).start();
+                    authLoginClient(socketServer.accept());
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -120,8 +135,9 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
         synchronized (newClients){
             for(var client : newClients){
-                var vehicle = new Car(client);
                 try {
+                    var vehicle = new Car(client);
+
                     initBuf.clear();
                     // kind
                     initBuf.writeByte((byte) 1);
@@ -160,12 +176,13 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                     }
 
                     client.socket.getOutputStream().write(initBuf.getAllData(), 0, initBuf.getSize());
+                    client.socket.getOutputStream().flush();
 
                     source.toAdd(vehicle);
                     clients.add(client);
 
                 } catch (Exception e){
-                    throw new RuntimeException(e);
+//                    throw new RuntimeException(e);
                 }
 
             }
