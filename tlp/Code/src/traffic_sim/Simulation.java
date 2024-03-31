@@ -206,12 +206,12 @@ public class Simulation implements Runnable{
      */
     @Override
     public void run(){
-        long start = System.nanoTime();
 
         for(int i = 0; i < this.systems.size(); i ++){
             this.systems.get(i).init(this);
         }
 
+        long start = System.nanoTime();
         while(true){
             var delta = 0.1f;
             for(int i = 0; i < this.systems.size(); i ++){
@@ -253,7 +253,7 @@ public class Simulation implements Runnable{
     public void attachRawModeTUI() {
         this.addSystem(SimSystem.initializer(99999999, (system) -> {
             ConsoleUtils.enterRawMode();
-            ConsoleUtils.fullClear();
+            ConsoleUtils.hideCursor();
             ConsoleUtils.show();
         }));
     }

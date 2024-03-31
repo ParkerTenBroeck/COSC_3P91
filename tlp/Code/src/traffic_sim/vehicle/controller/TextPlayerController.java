@@ -19,8 +19,53 @@ public class TextPlayerController implements Controller {
     private boolean select = false;
     private final static int START_TURN_Y = 8;
 
+    Road.LaneChangeDecision laneChange = Road.LaneChangeDecision.Nothing;
+
     @Override
-    public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {}
+    public void tick(Vehicle v, Simulation sim, Road.Lane lane, int laneIndex, boolean changedLanes, float delta) {
+
+        ConsoleUtils.show();
+        ConsoleUtils.fullClear();
+        ConsoleUtils.moveCursor(0, 0);
+        try{
+            ConsoleUtils.moveCursor(13, 20);
+            while(ConsoleUtils.hasNext()) {
+                var read = ConsoleUtils.read();
+                switch(read){
+                    case 'A' -> index -= 1;
+                    case 'B' -> index += 1;
+
+                    case 'D' -> laneChange = Road.LaneChangeDecision.WaitLeft;
+                    case 'C' -> laneChange = Road.LaneChangeDecision.WaitRight;
+                    case ' ', 13 -> select = true;
+                }
+            }
+        }catch (Exception ignore){}
+
+        ConsoleUtils.moveCursor(13, 3);
+        ConsoleUtils.println("Speed Multiplier: " + v.getSpeedMultiplier());
+        ConsoleUtils.moveCursor(13, 4);
+        ConsoleUtils.println("Health: " + v.getHealth());
+        ConsoleUtils.moveCursor(13, 5);
+        ConsoleUtils.println("Reputation: " + v.getReputation());
+        if(lane != null){
+            ConsoleUtils.moveCursor(13, 1);
+            ConsoleUtils.println("Desired Speed: " + v.getSpeedMultiplier()*lane.road().getSpeedLimit());
+            ConsoleUtils.moveCursor(13, 2);
+            ConsoleUtils.println("Current Speed Limit: " + lane.road().getSpeedLimit());
+            ConsoleUtils.moveCursor(13, 6);
+            ConsoleUtils.println("Road: '" + lane.road().getName()+"' lane " + lane.getLane());
+        }else{
+            ConsoleUtils.moveCursor(13, 1);
+            ConsoleUtils.println("Desired Speed:");
+            ConsoleUtils.moveCursor(13, 2);
+            ConsoleUtils.println("Current Speed Limit:");
+            ConsoleUtils.moveCursor(13, 6);
+            ConsoleUtils.println("Waiting to be placed on road");
+
+        }
+
+    }
 
     @Override
     public Intersection.Turn chooseTurn(Vehicle v, Simulation sim, Road.Lane current_lane, Intersection intersection, ArrayList<Intersection.Turn> turns) {
@@ -88,40 +133,9 @@ public class TextPlayerController implements Controller {
         }catch (Exception ignore){}
 
 
-        ConsoleUtils.moveCursor(13, 1);
-        ConsoleUtils.println("Speed: " + v.getSpeedMultiplier()*lane.road().getSpeedLimit());
-        ConsoleUtils.moveCursor(13, 2);
-        ConsoleUtils.println("Current Speed Limit: " + lane.road().getSpeedLimit());
-        ConsoleUtils.moveCursor(13, 3);
-        ConsoleUtils.println("Speed Multiplier: " + v.getSpeedMultiplier());
-        ConsoleUtils.moveCursor(13, 4);
-        ConsoleUtils.println("Health: " + v.getHealth());
-        ConsoleUtils.moveCursor(13, 5);
-        ConsoleUtils.println("Reputation: " + v.getReputation());
-        ConsoleUtils.moveCursor(13, 6);
-        ConsoleUtils.println("Road: '" + lane.road().getName()+"' lane " + lane.getLane());
-
-//        ConsoleUtils.println("Lane change? (nothing for no change) ForceLeft, NudgeLeft, WaitLeft, WaitRight, NudgeRight, ForceRight, SpeedUp, SlowDown");
-        var laneChange  = Road.LaneChangeDecision.Nothing;
-        try{
-            ConsoleUtils.moveCursor(13, 20);
-            while(ConsoleUtils.hasNext()) {
-                var read = ConsoleUtils.read();
-                switch(read){
-                    case 'A' -> index -= 1;
-                    case 'B' -> index += 1;
-
-                    case 'D' -> laneChange = Road.LaneChangeDecision.WaitLeft;
-                    case 'C' -> laneChange = Road.LaneChangeDecision.WaitRight;
-                    case ' ', 13 -> select = true;
-                }
-                System.out.println(read);
-            }
-        }catch (Exception ignore){}
-        ConsoleUtils.show();
-        ConsoleUtils.fullClear();
-        ConsoleUtils.moveCursor(0, 0);
-
+        var laneChange = this.laneChange;
+        if(laneChange != Road.LaneChangeDecision.Nothing)
+            this.laneChange = Road.LaneChangeDecision.Nothing;
         return laneChange;
     }
 
