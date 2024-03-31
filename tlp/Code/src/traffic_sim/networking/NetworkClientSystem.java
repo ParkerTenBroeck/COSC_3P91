@@ -278,7 +278,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                     case ForceRight -> writer.writeByte((byte) 3);
                 }
 
-                playerController.tick(player, sim, null, -1, false, delta);
+                playerController.tick(player, sim, currentLane, currentIndex, false, delta);
 
                 this.server.getOutputStream().write(writer.getAllData(), 0, writer.getSize());
                 this.server.getOutputStream().flush();
