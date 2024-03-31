@@ -1,3 +1,4 @@
+import traffic_sim.ConsoleUtils;
 import traffic_sim.networking.NetworkClientSystem;
 import traffic_sim.networking.NetworkServerSystem;
 import traffic_sim.Simulation;
@@ -25,14 +26,23 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-
-        while(cmd != null){
-            var in = System.in.read();
-            if(in == 3)return;
-            System.out.println(in);
+        if(true){
+            ConsoleUtils.enterRawMode();
+            ConsoleUtils.clear();
+            ConsoleUtils.moveCursor(0, 0);
+            while(true){
+                ConsoleUtils.show();
+                ConsoleUtils.moveCursor(0, 0);
+                ConsoleUtils.clear();
+                var read = ConsoleUtils.read();
+                ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
+                while(ConsoleUtils.hasNext()){
+                    read = ConsoleUtils.read();
+                    ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
+                }
+            }
         }
 
-//        System.out.println("asdasd");
         var item = args.length == 1? args[0].trim() : "__EMPTY";
         switch (item) {
             case "b" -> {
