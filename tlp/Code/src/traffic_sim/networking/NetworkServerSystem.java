@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class NetworkServerSystem extends Simulation.SimSystem {
+
     private SourceIntersection source;
     private final ArrayList<Client> clients = new ArrayList<>();
     private final ArrayList<Client> newClients = new ArrayList<>();
@@ -35,12 +36,13 @@ public class NetworkServerSystem extends Simulation.SimSystem {
     private final ArrayList<Vehicle> newVehicles = new ArrayList<>();
 
 
-    BufferedWriter vehicleBuf = new BufferedWriter();
-    BufferedWriter deltaBuf = new BufferedWriter();
-    BufferedWriter initBuf = new BufferedWriter(1<<20);
+    private final BufferedWriter vehicleBuf = new BufferedWriter();
+    private final BufferedWriter deltaBuf = new BufferedWriter();
+    private final BufferedWriter initBuf = new BufferedWriter(1<<20);
 
-    java.net.ServerSocket socketServer;
+    private java.net.ServerSocket socketServer;
 
+    private final Authentication auth = new Authentication();
 
     public NetworkServerSystem() {
         super(200);
@@ -49,10 +51,16 @@ public class NetworkServerSystem extends Simulation.SimSystem {
             try {
                 socketServer = new ServerSocket(42069);
                 while(true){
-                    var client = new Client( socketServer.accept());
-                    synchronized (newClients){
-                        newClients.add(client);
-                    }
+                    var socket = socketServer.accept();
+                    new Thread(() -> {
+                        try{
+                            while(!auth.authenticateCheckClient(socket)){}
+                            var client = new Client( socket );
+                            synchronized (newClients){
+                                newClients.add(client);
+                            }
+                        }catch (Exception ignore){}
+                    }).start();
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -112,7 +120,6 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
         synchronized (newClients){
             for(var client : newClients){
-                var source = (SourceIntersection)sim.getMap().getIntersectionById("Source");
                 var vehicle = new Car(client);
                 try {
                     initBuf.clear();

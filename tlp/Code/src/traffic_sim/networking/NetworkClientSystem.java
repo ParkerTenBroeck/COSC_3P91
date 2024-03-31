@@ -8,10 +8,12 @@ import traffic_sim.vehicle.Vehicle;
 import traffic_sim.vehicle.controller.Controller;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Scanner;
 
 public class NetworkClientSystem extends Simulation.SimSystem {
 
@@ -32,16 +34,79 @@ public class NetworkClientSystem extends Simulation.SimSystem {
         this.playerController = controller;
     }
 
+
+    private String[] authThing(String title){
+        var logininformation = new String[2];
+
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.add(new JLabel(title), BorderLayout.NORTH);
+        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2));
+        label.add(new JLabel("Username", SwingConstants.RIGHT));
+        label.add(new JLabel("Password", SwingConstants.RIGHT));
+        panel.add(label, BorderLayout.WEST);
+
+        JPanel controls = new JPanel(new GridLayout(0, 1, 2, 2));
+        JTextField username = new JTextField();
+        controls.add(username);
+        JPasswordField password = new JPasswordField();
+        controls.add(password);
+        panel.add(controls, BorderLayout.CENTER);
+
+        var result = JOptionPane.showConfirmDialog(null, panel, "login", JOptionPane.OK_CANCEL_OPTION);
+        if(result == 2) System.exit(1);
+        
+        logininformation[0] = username.getText();
+        logininformation[1] = new String(password.getPassword());
+        return logininformation;
+}
+
     @Override
     public void init(Simulation sim) {
+
         String message = "Enter IP/URL";
+        outer:
         while(true){
-            String path = JOptionPane.showInputDialog(message, "localhost");
+            String path;
+            if(sim.getView() == null){
+                System.out.print(message + ": ");
+                try{
+                    path = new Scanner(System.in).nextLine().trim();
+                }catch (Exception ignore){ path = "";}
+            }else{
+                path = JOptionPane.showInputDialog(message, "localhost");
+                if(path == null) System.exit(1);
+            }
             try{
                 server = new Socket(InetAddress.getByName(path), 42069);
-                break;
+                try{
+                    var authMessage = "Enter Username/Password";
+                    while(true){
+                        String username;
+                        String password;
+                        if(sim.getView() == null){
+                            System.out.println(authMessage);
+                            try{
+                                System.out.print("Username: ");
+                                username = new Scanner(System.in).nextLine().trim();
+                                System.out.print("Password: ");
+                                password = new Scanner(System.in).nextLine().trim();
+                            }catch (Exception e) {throw new RuntimeException(e);}
+                        }else{
+                            var results = authThing(authMessage);
+                            username = results[0];
+                            password = results[1];
+                        }
+                        if(Authentication.authenticateClient(username, password, server)){
+                            break outer;
+                        }else{
+                            authMessage = "Incorrect Attempt: Enter Username/Password";
+                        }
+                    }
+                }catch (Exception e){
+                    message = "Failed to Authenticate: Enter IP/URL";
+                }
             }catch (Exception ignore){}
-            message = "Invalid, Enter IP/URL";
+            message = "Failed to Connect, Enter IP/URL";
         }
 
         try{
