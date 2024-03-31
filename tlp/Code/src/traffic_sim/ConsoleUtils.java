@@ -1,10 +1,7 @@
 package traffic_sim;
 
-import traffic_sim.networking.BufferedWriter;
-
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
 
 public class ConsoleUtils {
 
@@ -31,10 +28,26 @@ public class ConsoleUtils {
     public static boolean hasNext() throws IOException {
         return in.available() > 0;
     }
-    public static int read() throws IOException {
+
+
+    public static class Key{
+        boolean ctrl = false;
+        boolean shift = false;
+        boolean alt = false;
+        int code;
+        char key;
+        public Key(){
+
+        }
+    }
+
+    public static int nextCode() throws IOException{
         var read = in.read();
         if(read == 3 || read == -1)System.exit(1);
         return read;
+    }
+    public static int nextChar() throws IOException {
+        return nextCode();
     }
 
     public static void fullClear(){

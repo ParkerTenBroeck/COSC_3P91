@@ -106,7 +106,7 @@ public class TextPlayerController implements Controller {
         try{
             ConsoleUtils.moveCursor(13, 20);
             while(ConsoleUtils.hasNext()) {
-                var read = ConsoleUtils.read();
+                var read = ConsoleUtils.nextChar();
                 switch(read){
                     case 'A' -> index -= 1;
                     case 'B' -> index += 1;

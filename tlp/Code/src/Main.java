@@ -8,14 +8,9 @@ import traffic_sim.io.Input;
 import traffic_sim.vehicle.controller.TextPlayerController;
 import traffic_sim.io.View;
 import traffic_sim.map.xml.MapXmlTools;
-import traffic_sim.map.intersection.DrainIntersection;
-import traffic_sim.map.RoadMap;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.map.intersection.SourceIntersection;
-import traffic_sim.map.intersection.TimedIntersection;
 import traffic_sim.vehicle.Car;
-import traffic_sim.vehicle.Truck;
-import traffic_sim.vehicle.Vehicle;
 import traffic_sim.vehicle.controller.GUIPlayerController;
 
 import java.awt.*;
@@ -25,22 +20,22 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-//        if(true){
-//            ConsoleUtils.enterRawMode();
-//            ConsoleUtils.clear();
-//            ConsoleUtils.moveCursor(0, 0);
-//            while(true){
-//                ConsoleUtils.show();
-//                ConsoleUtils.moveCursor(0, 0);
-//                ConsoleUtils.clear();
-//                var read = ConsoleUtils.read();
-//                ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
-//                while(ConsoleUtils.hasNext()){
-//                    read = ConsoleUtils.read();
-//                    ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
-//                }
-//            }
-//        }
+        if(true){
+            ConsoleUtils.enterRawMode();
+            ConsoleUtils.clear();
+            ConsoleUtils.moveCursor(0, 0);
+            while(true){
+                ConsoleUtils.show();
+                ConsoleUtils.moveCursor(0, 0);
+                ConsoleUtils.clear();
+                var read = ConsoleUtils.nextChar();
+                ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
+                while(ConsoleUtils.hasNext()){
+                    read = ConsoleUtils.nextChar();
+                    ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
+                }
+            }
+        }
 
         var item = args.length == 1? args[0].trim() : "__EMPTY";
         switch (item) {
