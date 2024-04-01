@@ -1,6 +1,7 @@
 package traffic_sim;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
 
 public class ConsoleUtils {
@@ -31,13 +32,22 @@ public class ConsoleUtils {
 
 
     public static class Key{
-        boolean ctrl = false;
-        boolean shift = false;
-        boolean alt = false;
-        int code;
-        char key;
-        public Key(){
+        public boolean ctrl = false;
+        public boolean shift = false;
+        public boolean alt = false;
+        public int code;
+        public char key;
+        public Key(int code){
+            this.code = code;
+        }
+        @Override
+        public String toString(){
 
+            return KeyEvent.getKeyText(this.code) + "("+this.code+")"
+                    + (this.key != 0?(String.format("'%s'", this.key)): " ")
+                    + (this.ctrl?" Ctlr ":"")
+                    + (this.alt?" Alt ":"")
+                    + (this.shift?" Shift; ":"");
         }
     }
 
@@ -46,8 +56,178 @@ public class ConsoleUtils {
         if(read == 3 || read == -1)System.exit(1);
         return read;
     }
-    public static int nextChar() throws IOException {
-        return nextCode();
+
+    private static void read59Seq(Key key) throws IOException{
+        var kind = nextCode();
+        kind %= 10;
+        key.ctrl = kind >= 3;
+        key.alt = kind == 1 || kind == 2 || kind == 5 || kind == 6;
+        key.shift = kind == 0 || kind == 2 || kind == 4 || kind == 6;
+    }
+
+    private static void checkRegularChar(Key key){
+        if(key.code >= 1  && key.code <= 26){
+            if(key.code == 9){
+                key.key = '\t';
+            }else if(key.code == 8){
+                key.ctrl = true;
+            }else if(key.code == 13){
+                key.key = '\n';
+                key.code = key.key;
+            }else{
+                key.ctrl = true;
+                key.key = (char) ('A' - 1 + key.code);
+                key.code = key.key;
+            }
+        }else if(key.code == 127){
+            key.code = 8;
+        }else if(key.code >= 'a' && key.code <= 'z'){
+            key.shift = false;
+            key.key = (char) key.code;
+            key.code = key.code - 'a' + 'A';
+        }else if(key.code >= 'A' && key.code <= 'Z'){
+            key.shift = true;
+            key.key = (char) key.code;
+        }else{
+            switch(key.code){
+                case '0', ')' -> sCase('0', ')', key);
+                case '1', '!' -> sCase('1', '!', key);
+                case '2', '@' -> sCase('2', '@', key);
+                case '3', '#' -> sCase('3', '#', key);
+                case '4', '$' -> sCase('4', '$', key);
+                case '5', '%' -> sCase('5', '%', key);
+                case '6', '^' -> sCase('6', '^', key);
+                case '7', '&' -> sCase('7', '&', key);
+                case '8', '*' -> sCase('8', '*', key);
+                case '9', '(' -> sCase('9', '(', key);
+
+                case ';', ':' -> sCase(';', ':', key);
+
+                case '-', '_' -> sCase('-', '_', key);
+                case '=', '+' -> sCase('=', '+', key);
+                case '[', '{' -> sCase('[', '{', key);
+                case ']', '}' -> sCase(']', '}', key);
+                case '\\', '|' -> sCase( '\\', '|', key);
+                case '\'', '"' -> sCase( '\'', '"', key);
+                case ',', '<' -> sCase(',', '<', key);
+                case '.', '>' -> sCase(';', ':', key);
+                case '/', '?' -> sCase('/', '?', key);
+
+                case '`', '~' -> cCase('`', '~', key, 192);
+            }
+        }
+    }
+
+    private static void sCase(char lower, char upper, Key key) {
+        key.shift = key.code == upper;
+        key.key = (char) key.code;
+        key.code = lower;
+    }
+
+    private static void cCase(char lower, char upper, Key key, int code) {
+        key.shift = key.code == upper;
+        key.key = (char) key.code;
+        key.code = code;
+    }
+
+    public static Key nextKey() throws IOException {
+        var key = new Key(nextCode());
+        if(key.code == 27 && hasNext()){
+            key.alt = true;
+            key.code = nextCode();
+            if(key.code == 91 && hasNext()){
+                key.alt = false;
+                key.code = nextCode();
+
+                if(key.code == 49 && hasNext()){
+                    key.code = nextCode();
+
+                    var next = key.code;
+                    switch (key.code){
+                        // F5/6/7/8
+                        case 53 -> key.code = 116;
+                        case 55 -> key.code = 117;
+                        case 56 -> key.code = 118;
+                        case 57 -> key.code = 119;
+                    }
+                    switch (next){
+                        // F5/6/7/8
+                        case 53, 55, 56, 57 -> next = nextCode();
+                    }
+
+                    if(next == 59) {
+                        read59Seq(key);
+                        next = nextCode();
+                    }
+
+                    if(next == 126) return key;
+                    key.code = next;
+                }
+                switch(key.code){
+                    // arrow keys
+                    case 65 -> key.code = 38;
+                    case 66 -> key.code = 40;
+                    case 67 -> key.code = 39;
+                    case 68 -> key.code = 37;
+
+                    //home
+                    case 72 -> key.code = 36;
+                    //end
+                    case 70 -> key.code = 35;
+
+                    case 50, 51, 53, 54 -> {
+                        var next = nextCode();
+                        if(next == 59) {
+                            read59Seq(key);
+                            next = nextCode();
+                        }
+                        if(next == 126){
+                            switch(key.code){
+                                case 50 -> key.code = 0x9B;
+                                case 51 -> key.code = 0x7F;
+                                case 53 -> key.code = 33;
+                                case 54 -> key.code = 34;
+                            }
+                        }else{
+                            switch(next){
+                                // F9/10/11/12
+                                case 48 -> key.code = 120;
+                                case 49 -> key.code = 121;
+                                case 51 -> key.code = 122;
+                                case 52 -> key.code = 123;
+                            }
+                            next = nextCode();
+                            if(next == 59) {
+                                read59Seq(key);
+                                next = nextCode();
+                            }
+                            // this really should be 126 but who cares right?
+                        }
+                    }
+                    case 90 -> {
+                        key.code = 9;
+                        key.key = '\t';
+                        key.shift = true;
+                    }
+
+                    // F1, F2, F3, F4
+                    case 80, 81, 82, 83 -> key.code = 112 + key.code - 80;
+                }
+            }else if(key.code == 79 && hasNext()){
+                key.alt = false;
+                key.code = nextCode();
+
+                switch(key.code){
+                    // F1, F2, F3, F4
+                    case 80, 81, 82, 83 -> key.code = 112 + key.code - 80;
+                }
+            }else{
+                checkRegularChar(key);
+            }
+        }else{
+            checkRegularChar(key);
+        }
+        return key;
     }
 
     public static void fullClear(){

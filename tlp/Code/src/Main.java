@@ -22,18 +22,21 @@ public class Main {
     public static void main(String[] args) throws Exception {
         if(true){
             ConsoleUtils.enterRawMode();
-            ConsoleUtils.clear();
+            ConsoleUtils.fullClear();
             ConsoleUtils.moveCursor(0, 0);
             while(true){
                 ConsoleUtils.show();
-                ConsoleUtils.moveCursor(0, 0);
-                ConsoleUtils.clear();
-                var read = ConsoleUtils.nextChar();
-                ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
-                while(ConsoleUtils.hasNext()){
-                    read = ConsoleUtils.nextChar();
-                    ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
-                }
+//                ConsoleUtils.moveCursor(0, 0);
+//                ConsoleUtils.fullClear();
+                ConsoleUtils.println(ConsoleUtils.nextKey().toString());
+//                var read = ConsoleUtils.nextCode();
+//                ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
+//                try{Thread.sleep(10);}catch (Exception ignore){}
+//                while(ConsoleUtils.hasNext()){
+//                    read = ConsoleUtils.nextCode();
+//                    ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
+//                    try{Thread.sleep(10);}catch (Exception ignore){}
+//                }
             }
         }
 
