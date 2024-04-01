@@ -29,7 +29,9 @@ public class SourceIntersection extends Intersection{
                 var lane = (int)(random.getNumLanes()*Math.random());
 
                 if(toAdd.isEmpty()){
-                    toAdd.add(getRandom());
+                    var newCar = getRandom();
+                    if(newCar == null) return;
+                    toAdd.add(newCar);
                 }
 
                 if (random.getRemainingSpace(lane) > toAdd.get(0).getSize()){

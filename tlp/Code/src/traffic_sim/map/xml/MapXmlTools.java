@@ -61,9 +61,7 @@ public class MapXmlTools {
         documentFactory.setValidating(true);
 
         documentFactory.setAttribute(JAXP_SCHEMA_LANGUAGE,XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        String schema = new File("./res/roadmap_schema.xsd").getCanonicalPath();
-        String[] schemas = { schema };
-        documentFactory.setAttribute(JAXP_SCHEMA_SOURCE,schemas);
+        documentFactory.setAttribute(JAXP_SCHEMA_SOURCE,MapXmlTools.class.getResourceAsStream("/res/roadmap_schema.xsd"));
 
         var builder = documentFactory.newDocumentBuilder();
         builder.setErrorHandler(new ErrorHandler() {

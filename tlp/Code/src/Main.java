@@ -19,6 +19,10 @@ import java.io.*;
 /*UML_HIDE*/
 public class Main {
 
+    public static InputStream getXMLMap(){
+        return Main.class.getResourceAsStream("/res/road_map.xml");
+    }
+
     public static void main(String[] args) throws Exception {
 
         var item = args.length == 1? args[0].trim() : "__EMPTY";
@@ -60,6 +64,7 @@ public class Main {
                     """
             );
         }
+        ConsoleUtils.show();
     }
 
     public static void runClientTerm() {
@@ -103,7 +108,7 @@ public class Main {
     }
 
     public static void runServer() throws Exception{
-        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
+        var map = MapXmlTools.loadMap(getXMLMap());
         var is = (SourceIntersection)map.getIntersectionById("Source");
         for(var road : map.getRoads()){
             for(var lane : road.getLanes()){
@@ -120,7 +125,7 @@ public class Main {
 
     public static void runLocal() throws Exception {
 
-        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
+        var map = MapXmlTools.loadMap(getXMLMap());
 
         var is = (SourceIntersection)map.getIntersectionById("Source");
         for(var road : map.getRoads()){
@@ -143,7 +148,7 @@ public class Main {
     }
     public static void runLocalGraphical() throws Exception{
 
-        var map = MapXmlTools.loadMap(new FileInputStream("res/road_map.xml"));
+        var map = MapXmlTools.loadMap(getXMLMap());
         var is = (SourceIntersection)map.getIntersectionById("Source");
 
         for(var road : map.getRoads()){
@@ -288,6 +293,7 @@ public class Main {
 
         player.setSpeedMultiplier(1f);
         is.toAdd(player);
+        simulation.getView().setFollowing(player);
         simulation.run();
     }
 }

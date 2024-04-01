@@ -32,13 +32,13 @@ public class TextPlayerController implements Controller {
                 var read = ConsoleUtils.nextKey();
                 switch(read.code){
                     case 38 -> {
-                        if(read.shift)
+                        if(read.ctrl)
                             v.setSpeedMultiplier(v.getSpeedMultiplier()+0.1f);
                         else
                             index -= 1;
                     }
                     case 40 -> {
-                        if(read.shift)
+                        if(read.ctrl)
                             v.setSpeedMultiplier(v.getSpeedMultiplier()-0.1f);
                         else
                             index += 1;
@@ -71,7 +71,7 @@ public class TextPlayerController implements Controller {
         }catch (Exception ignore){}
 
         ConsoleUtils.moveCursor(13, 1);
-        ConsoleUtils.println("Up/Down + Shift Increase/Decrease speed");
+        ConsoleUtils.println("Up/Down + Ctrl Increase/Decrease speed");
         ConsoleUtils.moveCursor(13, 2);
         ConsoleUtils.println("Left/Right Change Lanes(Wait) + Shift(Nudge) + Ctrl(Force)");
 

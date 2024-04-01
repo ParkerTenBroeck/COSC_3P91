@@ -10,6 +10,7 @@ public class ConsoleUtils {
 
     public static void enterRawMode() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            showCursor();
             show();
             String[] cmd = {"/bin/sh", "-c", "stty -raw </dev/tty"};
             try {

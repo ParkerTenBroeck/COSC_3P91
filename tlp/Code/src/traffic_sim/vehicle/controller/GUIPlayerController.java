@@ -54,7 +54,6 @@ public class GUIPlayerController implements Controller{
             if (menu_index >= 0 && menu_index < turns.size()){
                 choice = turns.get(menu_index);
                 menu_index = 0;
-                sim.setPaused(false);
             }
         }
 
@@ -67,10 +66,7 @@ public class GUIPlayerController implements Controller{
             }else{
                 return null;
             }
-        }else{
-            sim.setPaused(true);
         }
-
 
 
         var offset = 0;

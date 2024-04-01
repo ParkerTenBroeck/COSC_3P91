@@ -18,7 +18,10 @@ public class DrainIntersection extends Intersection{
         for(var road : incoming){
             for(var lane : road.getLanes()){
                 var removed = lane.removeLastVehicle();
-                if (removed != null) removed.removeFromRoad();
+                if (removed != null) {
+                    removed.removeFromRoad();
+//                    ((SourceIntersection)sim.getMap().getIntersectionById("Source")).toAdd(removed);
+                }
             }
         }
     }

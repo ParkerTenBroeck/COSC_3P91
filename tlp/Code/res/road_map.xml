@@ -110,7 +110,7 @@
   <intersection id='I40' name='Manor Rd/Grammar Ave' x='5.413346' y='6.4211893'>    <default/>  </intersection>
   <intersection id='I41' name='Manor Rd/Nickerson Ave' x='-4.7037325' y='7.611434'>    <default/>  </intersection>
   <intersection id='I42' name='Manor Rd/Woodbine Ave' x='-13.333006' y='6.867531'>    <default/>  </intersection>
-  <intersection id='I43' name='Windsor Rd/Woodbine Ave' x='-12.621851' y='-8.220033'>    <default/>  </intersection>
+  <intersection id='I43' name='Windsor Rd/Woodbine Ave' x='-12.621851' y='-8.220033'>    <drain/>  </intersection>
   <intersection id='I44' name='Glenview Ave/Brisbane Glen' x='9.226619' y='-16.045685'>    <default/>  </intersection>
   <intersection id='I45' name='Nickerson Ave/Glenview Ave' x='-1.0151825' y='-17.131935'>    <default/>  </intersection>
   <intersection id='I46' name='Woodbine Ave/Nickerson Ave' x='-2.5669699' y='-25.201233'>    <default/>  </intersection>

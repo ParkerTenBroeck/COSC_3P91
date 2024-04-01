@@ -60,7 +60,8 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 socket.getOutputStream().write(69);
                 socket.getOutputStream().flush();
 
-                var client = new Client( socket );
+                var player = source.getRandom();
+                var client = new Client( player, socket );
                 synchronized (newClients){
                     newClients.add(client);
                 }
@@ -136,14 +137,13 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         synchronized (newClients){
             for(var client : newClients){
                 try {
-                    var vehicle = new Car(client);
 
                     initBuf.clear();
                     // kind
                     initBuf.writeByte((byte) 1);
-                    initBuf.writeInt(this.getVehicleId(vehicle));
+                    initBuf.writeInt(this.getVehicleId(client.player));
                     ObjectOutputStream oos = new ObjectOutputStream(initBuf);
-                    oos.writeObject(vehicle);
+                    oos.writeObject(client.player);
                     oos.writeObject(sim.getMap());
                     oos.flush();
 
@@ -178,7 +178,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                     client.socket.getOutputStream().write(initBuf.getAllData(), 0, initBuf.getSize());
                     client.socket.getOutputStream().flush();
 
-                    source.toAdd(vehicle);
+                    source.toAdd(client.player);
                     clients.add(client);
 
                 } catch (Exception e){
@@ -235,8 +235,12 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         private Road.Lane turnLane;
         private Intersection turnIntersection;
 
+        private final Vehicle player;
 
-        public Client(Socket socket){
+
+        public Client(Vehicle player, Socket socket){
+            this.player = player;
+            this.player.setController(this);
             this.socket = socket;
         }
 
@@ -253,6 +257,9 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 writer.writeFloat(sim.getFrameDelta());
                 writer.writeLong(sim.getSimNanos());
 
+                writer.writeFloat(player.getHealth());
+                writer.writeFloat(player.getActualSpeed());
+                writer.writeFloat(player.getReputation());
 
                 writer.writeInt(rightVehicleBackIndex);
                 writer.writeInt(leftVehicleBackIndex);

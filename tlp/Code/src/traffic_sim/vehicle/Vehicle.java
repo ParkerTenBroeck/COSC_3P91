@@ -224,4 +224,8 @@ public abstract class Vehicle implements Serializable {
     public float getLastY(){
         return this.lastY;
     }
+
+    public void setActualSpeed(float val) {
+        this.actualSpeed = val;
+    }
 }

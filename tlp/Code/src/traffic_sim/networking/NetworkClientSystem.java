@@ -122,6 +122,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
 
             var oin = new ObjectInputStream(in);
             player = (Vehicle)oin.readObject();
+            if(sim.getView() != null) sim.getView().setFollowing(player);
             this.vehicleIdMap.put(myid, player);
             sim.setMap((RoadMap)oin.readObject());
             var vehicles = in.readInt();
@@ -176,6 +177,10 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                             sim.setTick(in.readInt());
                             delta = in.readFloat();
                             sim.setSimNanos(in.readLong());
+
+                            player.setHealth(in.readFloat());
+                            player.setActualSpeed(in.readFloat());
+                            player.setReputation(in.readFloat());
 
                             rightVehicleBackIndex = in.readInt();
                             leftVehicleBackIndex = in.readInt();
