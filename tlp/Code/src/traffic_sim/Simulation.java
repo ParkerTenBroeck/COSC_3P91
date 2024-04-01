@@ -21,7 +21,7 @@ public class Simulation implements Runnable{
     private float frameDelta = 0.1f;
 
     private boolean pause = false;
-    private boolean debug = true;
+    private boolean debug = false;
     private float simulationMultiplier = 1.0f;
     private final float maxDeltaTick = 0.1f/1f;
     private long targetFrameTime = 41666666;//33333333;//16666667;

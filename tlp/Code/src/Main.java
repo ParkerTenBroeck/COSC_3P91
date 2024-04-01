@@ -20,25 +20,6 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        if(true){
-            ConsoleUtils.enterRawMode();
-            ConsoleUtils.fullClear();
-            ConsoleUtils.moveCursor(0, 0);
-            while(true){
-                ConsoleUtils.show();
-//                ConsoleUtils.moveCursor(0, 0);
-//                ConsoleUtils.fullClear();
-                ConsoleUtils.println(ConsoleUtils.nextKey().toString());
-//                var read = ConsoleUtils.nextCode();
-//                ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
-//                try{Thread.sleep(10);}catch (Exception ignore){}
-//                while(ConsoleUtils.hasNext()){
-//                    read = ConsoleUtils.nextCode();
-//                    ConsoleUtils.stylePrintln(read+"", ConsoleUtils.BasicBackground.Red, ConsoleUtils.Style.Underline);
-//                    try{Thread.sleep(10);}catch (Exception ignore){}
-//                }
-            }
-        }
 
         var item = args.length == 1? args[0].trim() : "__EMPTY";
         switch (item) {
@@ -151,7 +132,7 @@ public class Main {
 
         var displayController = new TextPlayerController();
         var simulation = new Simulation(map);
-        simulation.attachConstantTimeSteppedSim();
+        simulation.attachRealTimeSim();
         simulation.attachRawModeTUI();
 
         var player = new Car(displayController, Color.MAGENTA);

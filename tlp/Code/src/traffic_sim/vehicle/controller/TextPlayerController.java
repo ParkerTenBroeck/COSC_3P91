@@ -28,42 +28,74 @@ public class TextPlayerController implements Controller {
         ConsoleUtils.fullClear();
         ConsoleUtils.moveCursor(0, 0);
         try{
-//            ConsoleUtils.moveCursor(13, 20);
             while(ConsoleUtils.hasNext()) {
-                var read = ConsoleUtils.nextCode();
-                switch(read){
-                    case 'A' -> index -= 1;
-                    case 'B' -> index += 1;
+                var read = ConsoleUtils.nextKey();
+                switch(read.code){
+                    case 38 -> {
+                        if(read.shift)
+                            v.setSpeedMultiplier(v.getSpeedMultiplier()+0.1f);
+                        else
+                            index -= 1;
+                    }
+                    case 40 -> {
+                        if(read.shift)
+                            v.setSpeedMultiplier(v.getSpeedMultiplier()-0.1f);
+                        else
+                            index += 1;
+                    }
 
-                    case 'D' -> laneChange = Road.LaneChangeDecision.WaitLeft;
-                    case 'C' -> laneChange = Road.LaneChangeDecision.WaitRight;
-                    case ' ', 13 -> select = true;
+                    case '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+                        index = read.code - '1';
+                    }
+
+                    case 37 -> {
+                        if(read.ctrl)
+                            laneChange = Road.LaneChangeDecision.ForceLeft;
+                        else if(read.shift)
+                            laneChange = Road.LaneChangeDecision.NudgeLeft;
+                        else
+                            laneChange = Road.LaneChangeDecision.WaitLeft;
+                    }
+                    case 39 -> {
+                        if(read.ctrl)
+                            laneChange = Road.LaneChangeDecision.ForceRight;
+                        else if(read.shift)
+                            laneChange = Road.LaneChangeDecision.NudgeRight;
+                        else
+                            laneChange = Road.LaneChangeDecision.WaitRight;
+                    }
+                    // enter / space
+                    case ' ', '\n' -> select = true;
                 }
-                System.out.println(read);
             }
         }catch (Exception ignore){}
 
-        ConsoleUtils.moveCursor(13, 3);
+        ConsoleUtils.moveCursor(13, 1);
+        ConsoleUtils.println("Up/Down + Shift Increase/Decrease speed");
+        ConsoleUtils.moveCursor(13, 2);
+        ConsoleUtils.println("Left/Right Change Lanes(Wait) + Shift(Nudge) + Ctrl(Force)");
+
+
+        ConsoleUtils.moveCursor(13, 6);
         ConsoleUtils.println("Speed Multiplier: " + v.getSpeedMultiplier());
-        ConsoleUtils.moveCursor(13, 4);
+        ConsoleUtils.moveCursor(13, 7);
         ConsoleUtils.println("Health: " + v.getHealth());
-        ConsoleUtils.moveCursor(13, 5);
+        ConsoleUtils.moveCursor(13, 8);
         ConsoleUtils.println("Reputation: " + v.getReputation());
         if(lane != null){
-            ConsoleUtils.moveCursor(13, 1);
+            ConsoleUtils.moveCursor(13, 4);
             ConsoleUtils.println("Desired Speed: " + v.getSpeedMultiplier()*lane.road().getSpeedLimit());
-            ConsoleUtils.moveCursor(13, 2);
+            ConsoleUtils.moveCursor(13, 5);
             ConsoleUtils.println("Current Speed Limit: " + lane.road().getSpeedLimit());
-            ConsoleUtils.moveCursor(13, 6);
+            ConsoleUtils.moveCursor(13, 9);
             ConsoleUtils.println("Road: '" + lane.road().getName()+"' lane " + lane.getLane());
         }else{
-            ConsoleUtils.moveCursor(13, 1);
+            ConsoleUtils.moveCursor(13, 4);
             ConsoleUtils.println("Desired Speed:");
-            ConsoleUtils.moveCursor(13, 2);
+            ConsoleUtils.moveCursor(13, 5);
             ConsoleUtils.println("Current Speed Limit:");
-            ConsoleUtils.moveCursor(13, 6);
+            ConsoleUtils.moveCursor(13, 9);
             ConsoleUtils.println("Waiting to be placed on road");
-
         }
 
     }

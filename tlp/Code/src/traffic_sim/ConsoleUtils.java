@@ -131,6 +131,8 @@ public class ConsoleUtils {
     }
 
     public static Key nextKey() throws IOException {
+        // this was one of the worst fucking things to write jesus christ who
+        // the fuck made this
         var key = new Key(nextCode());
         if(key.code == 27 && hasNext()){
             key.alt = true;
