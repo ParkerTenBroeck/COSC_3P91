@@ -4,10 +4,13 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.*;
 
+@SuppressWarnings("unused")
 public class ConsoleUtils {
 
 
-
+    /**
+     * Puts the terminal in raw mode and setup a shutdown hook to exit raw mode
+     */
     public static void enterRawMode() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             showCursor();
@@ -27,16 +30,28 @@ public class ConsoleUtils {
     private static InputStream in = System.in;
     private static PrintWriter out = new PrintWriter(System.out, true);//new PrintWriter(System.out, false);
 
+    /**
+     * @return if the console has new data we can read
+     */
     public static boolean hasNext() throws IOException {
         return in.available() > 0;
     }
 
 
+    /**
+     * Represents a single key press alongside modifier keys
+     */
     public static class Key{
         public boolean ctrl = false;
         public boolean shift = false;
         public boolean alt = false;
+        /**
+         * Java key code for the event
+         */
         public int code;
+        /**
+         * A char that represents the key. 0 if no char exists for it.
+         */
         public char key;
         public Key(int code){
             this.code = code;
@@ -52,12 +67,18 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     * @return The next code point of the input stream. It is just a single byte
+     */
     public static int nextCode() throws IOException{
         var read = in.read();
         if(read == 3 || read == -1)System.exit(1);
         return read;
     }
 
+    /**
+     * @param key Modifies the key modifiers such that they match the expected modifiers from a sequence starting in 59
+     */
     private static void read59Seq(Key key) throws IOException{
         var kind = nextCode();
         kind %= 10;
@@ -66,8 +87,15 @@ public class ConsoleUtils {
         key.shift = kind == 0 || kind == 2 || kind == 4 || kind == 6;
     }
 
+    /**
+     * Checks if a key is a regular key. and if it adjust the key, code, and modifiers
+     * depending on what it is.
+     *
+     * @param key   The key we want to check
+     */
     private static void checkRegularChar(Key key){
         if(key.code >= 1  && key.code <= 26){
+            // control keys. tab, newline
             if(key.code == 9){
                 key.key = '\t';
             }else if(key.code == 8){
@@ -81,15 +109,19 @@ public class ConsoleUtils {
                 key.code = key.key;
             }
         }else if(key.code == 127){
+            // backspace
             key.code = 8;
         }else if(key.code >= 'a' && key.code <= 'z'){
+            // lowercase alphabet
             key.shift = false;
             key.key = (char) key.code;
             key.code = key.code - 'a' + 'A';
         }else if(key.code >= 'A' && key.code <= 'Z'){
+            // uppercase alphabet
             key.shift = true;
             key.key = (char) key.code;
         }else{
+            // symbols and numbers.
             switch(key.code){
                 case '0', ')' -> sCase('0', ')', key);
                 case '1', '!' -> sCase('1', '!', key);
@@ -119,18 +151,34 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     * Checks if this key is a upper or lower case with a simple mapping between the char and code
+     *
+     * @param lower The lower case (non shift) char for this key
+     * @param upper The upper case (with shift) char for this key
+     * @param key   The key pressed
+     */
     private static void sCase(char lower, char upper, Key key) {
         key.shift = key.code == upper;
         key.key = (char) key.code;
         key.code = lower;
     }
-
+    /**
+     * Checks if this key is a upper or lower case with a provided mapping between the char and code
+     *
+     * @param lower The lower case (non shift) char for this key
+     * @param upper The upper case (with shift) char for this key
+     * @param key   The key pressed
+     */
     private static void cCase(char lower, char upper, Key key, int code) {
         key.shift = key.code == upper;
         key.key = (char) key.code;
         key.code = code;
     }
 
+    /**
+     * @return  Gets the next key press from the input stream
+     */
     public static Key nextKey() throws IOException {
         // this was one of the worst fucking things to write jesus christ who
         // the fuck made this
@@ -233,20 +281,35 @@ public class ConsoleUtils {
         return key;
     }
 
+    /**
+     * Filly clear the console
+     */
     public static void fullClear(){
         resetStyle();
         out.write("\033[2J");
     }
 
+    /**
+     * Clear the console... sorta
+     */
     public static void clear(){
         resetStyle();
         out.write("\033[J");
     }
+
+    /**
+     * Print to the console moving the cursor to the start of the next line
+     * @param msg   The message to print to the console
+     */
     public static void println(String msg) {
         out.write(msg);
         out.write("\033[0E");
     }
 
+    /**
+     *
+     * @return  the size of the console as a string, represented as x y
+     */
     private static String getSize(){
         try{
             var process = new ProcessBuilder("stty","size").redirectInput(ProcessBuilder.Redirect.INHERIT).start();
@@ -256,17 +319,30 @@ public class ConsoleUtils {
         }catch (Exception e){throw new RuntimeException(e);}
     }
 
+    /**
+     * @return  The width of the console
+     */
     public static int getWidth(){
         return Integer.parseInt(getSize().split(" ")[1].trim());
     }
+
+    /**
+     * @return  The height of the console
+     */
     public static int getHeight(){
         return Integer.parseInt(getSize().split(" ")[0].trim());
     }
 
+    /**
+     * Moves the cursor to the next line st the start of the row
+     */
     public static void println() {
         out.write("\033[0E");
     }
 
+    /**
+     * @param style The style(s) to apply to the console
+     */
     public static void applyStyle(StyleI... style){
         out.write("\033[");
         for(int i = 0; i < style.length; i ++){
@@ -279,45 +355,74 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     * See {@code   ConsoleUtils.println}
+     *
+     * @param msg the message to print
+     * @param style the style(s) to apply to the console
+     */
     public static void stylePrintln(String msg, StyleI... style) {
         applyStyle(style);
         out.write(msg);
         out.write("\033[0E");
     }
 
+    /**
+     * Move the cursor to (x,y) where 1,1 is the top left point
+     *
+     * @param x the row we want to move to
+     * @param y The column we want to move to
+     */
     public static void moveCursor(int x, int y) {
         out.write("\033["+y+";"+x+"H");
         out.write("\033["+y+";"+x+"f");
     }
 
+    /**
+     * Resets the current style
+     */
     public static void resetStyle(){
         out.write("\033[0m");
     }
 
-    public static void setBold(){
-        out.write("\033[1m");
-    }
-
-    public static void setUnderline(){
-        out.write("\033[4m");
-    }
-
-    public static void setBlinking(){
-        out.write("\033[5m");
-    }
-
+    /**
+     * Hides the cursor
+     */
     public static void hideCursor(){
         out.write("\033[?25l");
     }
 
-    public static void print(String s) {
-        out.write(s);
+    /**
+     * Shows the cursor
+     */
+    public static void showCursor(){
+        out.write("\033[?25h");
     }
 
+    /**
+     * @param msg The message to print to the console.
+     */
+    public static void print(String msg) {
+        out.write(msg);
+    }
+
+    /**
+     * Show all the contents printed to the console at once
+     */
+    public static void show(){
+        out.flush();
+    }
+
+    /**
+     * Represents a style we can apply to the console
+     */
     public interface StyleI {
         void writePartial(PrintWriter out);
     }
 
+    /**
+     * A color represented by r,g,b values
+     */
     private static class RGB implements StyleI{
         final byte r;
         final byte g;
@@ -343,6 +448,9 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     * A foreground color represented with RGB
+     */
     private final static class RGBF extends RGB implements StyleI{
 
         public RGBF(Color color) {
@@ -360,6 +468,9 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     * A background color represented with RGB
+     */
     private final static class RGBB extends RGB implements StyleI{
 
         public RGBB(Color color) {
@@ -377,6 +488,9 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     * A kind of style that can be applied
+     */
     public enum Style implements StyleI{
         Bold(1),
         UnBold(22),
@@ -396,7 +510,10 @@ public class ConsoleUtils {
             out.print(code);
         }
     }
-
+    
+    /**
+     * A background color represented with basic terminal colors
+     */
     public enum BasicForeground implements StyleI {
         Black(30),
         Red(31),
@@ -420,6 +537,9 @@ public class ConsoleUtils {
         }
     }
 
+    /**
+     * A foreground color represented with basic terminal colors
+     */
     public enum BasicBackground implements StyleI {
         Black(40),
         Red(41),
@@ -441,13 +561,5 @@ public class ConsoleUtils {
         public void writePartial(PrintWriter out) {
             out.print(this.code);
         }
-    }
-
-    public static void showCursor(){
-        out.write("\033[?25h");
-    }
-
-    public static void show(){
-        out.flush();
     }
 }

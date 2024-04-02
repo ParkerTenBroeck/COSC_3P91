@@ -9,6 +9,7 @@ import traffic_sim.vehicle.controller.Controller;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -35,7 +36,13 @@ public class NetworkClientSystem extends Simulation.SimSystem {
     }
 
 
-    private String[] authThing(String title){
+    /**
+     * Show a GUI prompt asking for a username and password.
+     *
+     * @param title The title of the message box
+     * @return  A 2 long array with index 0 being the provided username and index 1 being the provided password
+     */
+    private String[] showAuthUI(String title){
         var logininformation = new String[2];
 
         JPanel panel = new JPanel(new BorderLayout(5, 5));
@@ -58,11 +65,42 @@ public class NetworkClientSystem extends Simulation.SimSystem {
         logininformation[0] = username.getText();
         logininformation[1] = new String(password.getPassword());
         return logininformation;
-}
+    }
 
-    @Override
-    public void init(Simulation sim) {
+    /**
+     *
+     * @param user      The username
+     * @param password  The password
+     * @param server    The server connection we want to authenticate with
+     * @return          True if the authenticate request was successful, false otherwise.
+     * @throws IOException
+     */
+    public static boolean sendAuthenticationRequest(String user, String password, Socket server) throws IOException {
+        var output = server.getOutputStream();
 
+        var userBytes = user.getBytes();
+        output.write((userBytes.length >> 8) & 0xFF);
+        output.write(userBytes.length & 0xFF);
+        output.write(userBytes);
+
+        var passwordBytes = password.getBytes();
+        output.write((passwordBytes.length >> 8) & 0xFF);
+        output.write(passwordBytes.length & 0xFF);
+        output.write(passwordBytes);
+
+        output.flush();
+
+        return server.getInputStream().read() == 69;
+    }
+
+
+    /**
+     * Prompt the user to connect and authenticate with a server. This method will not return till a
+     * valid connection is made and the user has authenticated.
+     *
+     * @param sim   the current simulation
+     */
+    private void connect(Simulation sim){
         String message = "Enter IP/URL";
         outer:
         while(true){
@@ -93,11 +131,11 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                                 password = new Scanner(System.in).nextLine().trim();
                             }catch (Exception e) {throw new RuntimeException(e);}
                         }else{
-                            var results = authThing(authMessage);
+                            var results = showAuthUI(authMessage);
                             username = results[0];
                             password = results[1];
                         }
-                        if(Authentication.authenticateClient(username, password, server)){
+                        if(sendAuthenticationRequest(username, password, server)){
                             break outer;
                         }else{
                             authMessage = "Incorrect Attempt: Enter Username/Password";
@@ -110,21 +148,28 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                 message = "Failed to Connect, Enter IP/URL";
             }
         }
+    }
 
+    /**
+     * Performs the initialization sequence for loading map/vehicle/ID data
+     *
+     * @param sim   the current simulation
+     */
+    private void initialize(Simulation sim){
         try{
             var in = new Reader(server.getInputStream());
-            var kind = in.readByte();
-            if(kind != 1){
-                throw new RuntimeException("nbruh");
-            }
 
+            // loading player vehicle data and initializing client player.
             var myid = in.readInt();
-
             var oin = new ObjectInputStream(in);
             player = (Vehicle)oin.readObject();
             if(sim.getView() != null) sim.getView().setFollowing(player);
             this.vehicleIdMap.put(myid, player);
+
+            // loading map
             sim.setMap((RoadMap)oin.readObject());
+
+            // vehicle ID Map.
             var vehicles = in.readInt();
             oin = new ObjectInputStream(in);
             for(int i = 0; i < vehicles; i ++){
@@ -132,7 +177,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                 this.vehicleIdMap.put(vid, (Vehicle) oin.readObject());
             }
 
-
+            // road ID map
             var roads = in.readInt();
             for(int i = 0; i < roads; i ++){
                 var rid = in.readInt();
@@ -140,6 +185,7 @@ public class NetworkClientSystem extends Simulation.SimSystem {
                 roadIdMap.put(rid, sim.getMap().getRoadById(id));
             }
 
+            // intersection ID map
             var intersections = in.readInt();
             for(int i = 0; i < intersections; i ++){
                 var iid = in.readInt();
@@ -153,140 +199,163 @@ public class NetworkClientSystem extends Simulation.SimSystem {
     }
 
     @Override
+    public void init(Simulation sim) {
+        this.connect(sim);
+        this.initialize(sim);
+    }
+
+
+    /**
+     * Reads a lane from the input stream. returns null if it is none.
+     *
+     * @param in    The input stream we are reading from
+     * @return      A lane read from the input stream, null if it is none.
+     * @throws IOException  When the input stream throws an IOException
+     */
+    private Road.Lane readLane(Reader in) throws IOException{
+        var rid = in.readInt();
+        var lane = in.readInt();
+        var road = this.roadIdMap.get(rid);
+        if (road != null) {
+            return road.getLane(lane);
+        }else{
+            return null;
+        }
+    }
+
+    /**
+     * @param sim   The simulation we want to read into
+     * @param in    The input stream we are reading from
+     * @return      The read delta time
+     * @throws IOException  When the input stream throws an IOException
+     */
+    private float readSimData(Simulation sim, Reader in) throws IOException{
+        sim.setTick(in.readInt());
+        var delta = in.readFloat();
+        sim.setSimNanos(in.readLong());
+        return delta;
+    }
+
+    /**
+     * Read new vehicles that have been added to the network since the last update
+     *
+     * @param in    The input stream we are reading from
+     * @throws IOException  When the input stream throws an {@link IOException}
+     * @throws ClassNotFoundException   If a vehicle is deserialized that we can't find
+     */
+    private void readNewVehicles(Reader in) throws IOException, ClassNotFoundException {                var vehicles = in.readInt();
+        var oin = new ObjectInputStream(in);
+        for (int i = 0; i < vehicles; i++) {
+            var vid = in.readInt();
+            if (!this.vehicleIdMap.containsKey(vid))
+                this.vehicleIdMap.put(vid, (Vehicle) oin.readObject());
+            else {
+                oin.readObject();
+            }
+        }
+    }
+
+    /**
+     * Reads all the positions (Road, Lane and distance along the lane) for vehicles on the road network.
+     *
+     * @param in    The input stream we are reading from
+     * @throws IOException  WHen the input stream throws an {@link IOException}
+     */
+    private void readVehiclePositions(Reader in) throws IOException {
+        var roads = in.readInt();
+        for (int r = 0; r < roads; r++) {
+            var rid = in.readInt();
+            var road = this.roadIdMap.get(rid);
+            var lanes = in.readInt();
+            for (int l = 0; l < lanes; l++) {
+                var lane = road.getLane(l);
+                lane.empty();
+                var vehicles = in.readInt();
+                for (int v = 0; v < vehicles; v++) {
+                    var vid = in.readInt();
+                    var distance = in.readFloat();
+                    var vehicle = this.vehicleIdMap.get(vid);
+                    if (vehicle != null) {
+                        vehicle.setDistanceAlongRoad(distance);
+                        lane.addVehicle(vehicle);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void run(Simulation sim, float delta) {
         if(this.server.isInputShutdown()) throw new RuntimeException();
         try{
             // make client fps independent of server updates
 //            if(this.server.getInputStream().available() > 0) {
-                var in = new Reader(this.server.getInputStream());
+            var in = new Reader(this.server.getInputStream());
 
 
-                Road.Lane putInLane = null;
-                int rightVehicleBackIndex = -1;
-                int leftVehicleBackIndex = -1;
-                int currentIndex = -1;
-                Road.Lane currentLane = null;
-                int intersectionId = -1;
-                int turnsRid = -1;
-                int turnsLane = -1;
+            delta = this.readSimData(sim, in);
+
+            // player data
+            player.setHealth(in.readFloat());
+            player.setActualSpeed(in.readFloat());
+            player.setReputation(in.readFloat());
+            // lane change data
+            int rightVehicleBackIndex = in.readInt();
+            int leftVehicleBackIndex = in.readInt();
+            int currentIndex = in.readInt();
+            Road.Lane currentLane = this.readLane(in);
+
+            Road.Lane putInLane = this.readLane(in);
+
+            // turn data
+            int turnsRid = in.readInt();
+            int turnsLane = in.readInt();
+            int intersectionId = in.readInt();
 
 
-                for (int bruh = 0; bruh < 3; bruh++) {
-                    switch (in.readByte()) {
-                        case 2 -> {
-                            sim.setTick(in.readInt());
-                            delta = in.readFloat();
-                            sim.setSimNanos(in.readLong());
+            readNewVehicles(in);
+            readVehiclePositions(in);
 
-                            player.setHealth(in.readFloat());
-                            player.setActualSpeed(in.readFloat());
-                            player.setReputation(in.readFloat());
 
-                            rightVehicleBackIndex = in.readInt();
-                            leftVehicleBackIndex = in.readInt();
-                            currentIndex = in.readInt();
+            // The following relays the provided data about the player to the controller provided to this client
+            // then responds to the server with the decisions made by the controller
+            if (putInLane != null)
+                playerController.putInLane(player, putInLane);
 
-                            {
-                                var rid = in.readInt();
-                                var lane = in.readInt();
-                                var road = this.roadIdMap.get(rid);
-                                if (road != null) {
-                                    currentLane = road.getLane(lane);
-                                }
-                            }
 
-                            {
-                                var rid = in.readInt();
-                                var lane = in.readInt();
-                                var road = this.roadIdMap.get(rid);
-                                if (road != null) {
-                                    putInLane = road.getLane(lane);
-                                }
-                            }
-
-                            turnsRid = in.readInt();
-                            turnsLane = in.readInt();
-                            intersectionId = in.readInt();
-
-                        }
-                        case 3 -> {
-                            var vehicles = in.readInt();
-                            var oin = new ObjectInputStream(in);
-                            for (int i = 0; i < vehicles; i++) {
-                                var vid = in.readInt();
-                                if (!this.vehicleIdMap.containsKey(vid))
-                                    this.vehicleIdMap.put(vid, (Vehicle) oin.readObject());
-                                else {
-                                    oin.readObject();
-                                }
-
-                            }
-                        }
-                        case 4 -> {
-                            var roads = in.readInt();
-                            for (int r = 0; r < roads; r++) {
-                                var rid = in.readInt();
-                                var road = this.roadIdMap.get(rid);
-                                var lanes = in.readInt();
-                                for (int l = 0; l < lanes; l++) {
-                                    var lane = road.getLane(l);
-                                    lane.empty();
-                                    var vehicles = in.readInt();
-                                    for (int v = 0; v < vehicles; v++) {
-                                        var vid = in.readInt();
-                                        var distance = in.readFloat();
-                                        var vehicle = this.vehicleIdMap.get(vid);
-                                        if (vehicle != null) {
-                                            vehicle.setDistanceAlongRoad(distance);
-//                                        stuff.add(vehicle);
-                                            lane.addVehicle(vehicle);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        default -> throw new RuntimeException("Invalid kind");
-                    }
+            var turn = -1;
+            if (intersectionId != -1) {
+                var intersection = intersectionIdMap.get(intersectionId);
+                var currentLaneTurn = roadIdMap.get(turnsRid).getLane(turnsLane);
+                var turns = intersection.getTurns(currentLaneTurn);
+                var chosenTurn = playerController.chooseTurn(player, sim, currentLaneTurn, intersection, turns);
+                if (chosenTurn != null) {
+                    turn = turns.indexOf(chosenTurn);
                 }
+            }
 
 
-                if (putInLane != null)
-                    playerController.putInLane(player, putInLane);
+            Road.LaneChangeDecision decision = Road.LaneChangeDecision.Nothing;
+            if (currentLane != null) {
+                decision = playerController.laneChange(player, sim, currentLane, currentIndex, leftVehicleBackIndex, rightVehicleBackIndex);
+            }
+            writer.clear();
+            writer.writeFloat(player.getSpeedMultiplier());
+            writer.writeInt(turn);
+            switch (decision) {
+                case ForceLeft -> writer.writeByte((byte) -3);
+                case NudgeLeft -> writer.writeByte((byte) -2);
+                case WaitLeft -> writer.writeByte((byte) -1);
+                case Nothing -> writer.writeByte((byte) 0);
+                case WaitRight -> writer.writeByte((byte) 1);
+                case NudgeRight -> writer.writeByte((byte) 2);
+                case ForceRight -> writer.writeByte((byte) 3);
+            }
 
+            playerController.tick(player, sim, currentLane, currentIndex, false, delta);
 
-                var turn = -1;
-                if (intersectionId != -1) {
-                    var intersection = intersectionIdMap.get(intersectionId);
-                    var currentLaneTurn = roadIdMap.get(turnsRid).getLane(turnsLane);
-                    var turns = intersection.getTurns(currentLaneTurn);
-                    var chosenTurn = playerController.chooseTurn(player, sim, currentLaneTurn, intersection, turns);
-                    if (chosenTurn != null) {
-                        turn = turns.indexOf(chosenTurn);
-                    }
-                }
-
-
-                Road.LaneChangeDecision decision = Road.LaneChangeDecision.Nothing;
-                if (currentLane != null) {
-                    decision = playerController.laneChange(player, sim, currentLane, currentIndex, leftVehicleBackIndex, rightVehicleBackIndex);
-                }
-                writer.clear();
-                writer.writeFloat(player.getSpeedMultiplier());
-                writer.writeInt(turn);
-                switch (decision) {
-                    case ForceLeft -> writer.writeByte((byte) -3);
-                    case NudgeLeft -> writer.writeByte((byte) -2);
-                    case WaitLeft -> writer.writeByte((byte) -1);
-                    case Nothing -> writer.writeByte((byte) 0);
-                    case WaitRight -> writer.writeByte((byte) 1);
-                    case NudgeRight -> writer.writeByte((byte) 2);
-                    case ForceRight -> writer.writeByte((byte) 3);
-                }
-
-                playerController.tick(player, sim, currentLane, currentIndex, false, delta);
-
-                this.server.getOutputStream().write(writer.getAllData(), 0, writer.getSize());
-                this.server.getOutputStream().flush();
+            this.server.getOutputStream().write(writer.getAllData(), 0, writer.getSize());
+            this.server.getOutputStream().flush();
 //            }
         }catch (Exception e){throw new RuntimeException(e);}
     }

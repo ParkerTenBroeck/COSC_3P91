@@ -4,12 +4,12 @@ import traffic_sim.Simulation;
 import traffic_sim.map.Road;
 import traffic_sim.map.intersection.Intersection;
 import traffic_sim.map.intersection.SourceIntersection;
-import traffic_sim.vehicle.Car;
 import traffic_sim.vehicle.Vehicle;
 import traffic_sim.vehicle.controller.Controller;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -42,8 +42,13 @@ public class NetworkServerSystem extends Simulation.SimSystem {
 
     private java.net.ServerSocket socketServer;
 
-    private final Authentication auth = new Authentication();
+    private final AuthenticationDatabase auth = new AuthenticationDatabase();
 
+    /**
+     * Waits till the client sends a valid login attempt before adding it to the newClients list
+     *
+     * @param socket    The newly connected client socket
+     */
     private void authLoginClient(Socket socket){
         new Thread(() -> {
             try{
@@ -51,7 +56,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 var reader = new Reader(socket.getInputStream());
                 var username = reader.readString();
                 var password = reader.readString();
-                while(!auth.authenticateCheckClient(username, password)){
+                while(!auth.authenticateReceiveFromClient(username, password)){
                     socket.getOutputStream().write(0);
                     socket.getOutputStream().flush();
                     username = reader.readString();
@@ -89,6 +94,9 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         this.source = (SourceIntersection) sim.getMap().getIntersectionById("Source");
     }
 
+    /**
+     * Clear the contents of all buffers
+     */
     private void clear(){
         this.vehicleBuf.clear();
         this.deltaBuf.clear();
@@ -97,17 +105,25 @@ public class NetworkServerSystem extends Simulation.SimSystem {
     }
 
 
-    private int getIntersectionId(Intersection r){
-        var id = this.intersectionIdMap.get(r);
+    /**
+     * @param i The intersection whos ID we want
+     * @return  A unique ID that represents this intersection
+     */
+    private int getIntersectionId(Intersection i){
+        var id = this.intersectionIdMap.get(i);
         if (id == null){
-            this.newIntersections.add(r);
-            this.intersectionIdMap.put(r, this.nextIntersectionId);
+            this.newIntersections.add(i);
+            this.intersectionIdMap.put(i, this.nextIntersectionId);
             id = this.nextIntersectionId;
             this.nextIntersectionId += 1;
         }
         return id;
     }
 
+    /**
+     * @param r The road whos ID we want
+     * @return  A unique ID that represents this road
+     */
     private int getRoadId(Road r){
         var id = this.roadIdMap.get(r);
         if (id == null){
@@ -119,6 +135,10 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         return id;
     }
 
+    /**
+     * @param v The vehicle whos ID we want
+     * @return  A unique ID that represents this vehicle
+     */
     private int getVehicleId(Vehicle v){
         var id = this.vehicleIdMap.get(v);
         if (id == null){
@@ -130,65 +150,85 @@ public class NetworkServerSystem extends Simulation.SimSystem {
         return id;
     }
 
+    /**
+     * Initializes the provided client, sends map data, vehicle data, ID maps and attaches
+     * the client to a vehicle that is queued to be spawned.
+     *
+     * @param sim   The current simulation
+     * @param client    The client we want to initialize
+     * @throws IOException
+     */
+    private void initializeClient(Simulation sim, Client client) throws IOException {
+        initBuf.clear();
+
+        // send player vehicle data.
+        initBuf.writeInt(this.getVehicleId(client.player));
+        ObjectOutputStream oos = new ObjectOutputStream(initBuf);
+        oos.writeObject(client.player);
+
+        // write the map
+        oos.writeObject(sim.getMap());
+        oos.flush();
+
+        // write vehicle id map.
+        var list = new ArrayList<Vehicle>();
+        for (var road : sim.getMap().getRoads()){
+            for(var lane : road.getLanes()){
+                lane.inorder(list::add);
+            }
+        }
+        this.initBuf.writeInt(list.size());
+        oos = new ObjectOutputStream(initBuf);
+        for(var v : list){
+            this.initBuf.writeInt(getVehicleId(v));
+            oos.writeObject(v);
+        }
+        oos.flush();
+
+        // write road ID map
+        this.initBuf.writeInt(sim.getMap().getRoads().size());
+        for(var road : sim.getMap().getRoads()){
+            this.initBuf.writeInt(this.getRoadId(road));
+            this.initBuf.writeString(sim.getMap().getRoadId(road));
+        }
+
+        // write intersection id map
+        this.initBuf.writeInt(sim.getMap().getIntersections().size());
+        for(var intersection : sim.getMap().getIntersections()){
+            this.initBuf.writeInt(this.getIntersectionId(intersection));
+            this.initBuf.writeString(sim.getMap().getIntersectionId(intersection));
+        }
+
+        client.socket.getOutputStream().write(initBuf.getAllData(), 0, initBuf.getSize());
+        client.socket.getOutputStream().flush();
+
+        source.toAdd(client.player);
+        clients.add(client);
+    }
+
+    /**
+     * Check for new connections and initialize them
+     *
+     * @param sim the current simulation
+     */
+    private void checkNew(Simulation sim){
+        synchronized (newClients){
+            for(var client : newClients){
+                try {
+                    this.initializeClient(sim, client);
+                } catch (Exception ignore){}
+            }
+            newClients.clear();
+        }
+    }
+
     @Override
     public void run(Simulation sim, float delta) {
         this.clear();
 
-        synchronized (newClients){
-            for(var client : newClients){
-                try {
+        this.checkNew(sim);
 
-                    initBuf.clear();
-                    // kind
-                    initBuf.writeByte((byte) 1);
-                    initBuf.writeInt(this.getVehicleId(client.player));
-                    ObjectOutputStream oos = new ObjectOutputStream(initBuf);
-                    oos.writeObject(client.player);
-                    oos.writeObject(sim.getMap());
-                    oos.flush();
-
-                    try{
-                        var list = new ArrayList<Vehicle>();
-                        for (var road : sim.getMap().getRoads()){
-                            for(var lane : road.getLanes()){
-                                lane.inorder(list::add);
-                            }
-                        }
-                        this.initBuf.writeInt(list.size());
-                        oos = new ObjectOutputStream(initBuf);
-                        for(var v : list){
-                            this.initBuf.writeInt(getVehicleId(v));
-                            oos.writeObject(v);
-                        }
-                        oos.flush();
-                    }catch (Exception e){throw new RuntimeException(e);}
-
-                    this.initBuf.writeInt(sim.getMap().getRoads().size());
-                    for(var road : sim.getMap().getRoads()){
-                        this.initBuf.writeInt(this.getRoadId(road));
-                        this.initBuf.writeString(sim.getMap().getRoadId(road));
-                    }
-
-                    this.initBuf.writeInt(sim.getMap().getIntersections().size());
-                    for(var intersection : sim.getMap().getIntersections()){
-                        this.initBuf.writeInt(this.getIntersectionId(intersection));
-                        this.initBuf.writeString(sim.getMap().getIntersectionId(intersection));
-                    }
-
-                    client.socket.getOutputStream().write(initBuf.getAllData(), 0, initBuf.getSize());
-                    client.socket.getOutputStream().flush();
-
-                    source.toAdd(client.player);
-                    clients.add(client);
-
-                } catch (Exception e){
-//                    throw new RuntimeException(e);
-                }
-
-            }
-            newClients.clear();
-        }
-
+        // write the vehicle position data to a buffer
         this.vehicleBuf.writeInt(sim.getMap().getRoads().size());
         for (var road : sim.getMap().getRoads()){
             this.vehicleBuf.writeInt(this.getRoadId(road));
@@ -202,6 +242,7 @@ public class NetworkServerSystem extends Simulation.SimSystem {
             }
         }
 
+        // write new vehicle data to the buffer
         try{
             this.deltaBuf.writeInt(this.newVehicles.size());
             var out = new ObjectOutputStream(this.deltaBuf);
@@ -210,12 +251,15 @@ public class NetworkServerSystem extends Simulation.SimSystem {
                 out.writeObject(newVehicle);
             }
             out.flush();
-        }catch (Exception e){throw new RuntimeException(e);}
+        }catch (IOException e){throw new RuntimeException(e);}
 
 
         clients.removeIf((client) -> client.update(sim, this));
     }
 
+    /**
+     * A client who as connected to this server. Can remotely control a vehicle from the network.
+     */
     public static class Client  implements Controller{
 
         private final Socket socket;
@@ -244,98 +288,138 @@ public class NetworkServerSystem extends Simulation.SimSystem {
             this.socket = socket;
         }
 
-        public boolean update(Simulation sim, NetworkServerSystem system){
+        /** Write the simulation data part of the packet.
+         *
+         * @param sim   The current simulation
+         * @throws IOException
+         */
+        private void writeSimData(Simulation sim) throws IOException{
+            writer.writeInt(sim.getSimTick());
+            writer.writeFloat(sim.getFrameDelta());
+            writer.writeLong(sim.getSimNanos());
+        }
 
+        /**
+         * Writes lane data to the writer
+         *
+         * @param writer    Where we want to write the data to.
+         * @param system    The network system this client is apart of
+         * @param lane      The lane we want to write
+         */
+        private void writeLaneData(BufferedWriter writer, NetworkServerSystem system, Road.Lane lane){
+            if(lane != null){
+                writer.writeInt(system.roadIdMap.get(lane.road()));
+                writer.writeInt(lane.getLane());
+            }else{
+                writer.writeInt(-1);
+                writer.writeInt(-1);
+            }
+        }
+
+        /**
+         * Writes lane change information.
+         *
+         * @param system    The network system this client is apart of
+         */
+        private void writeLaneChangeData(NetworkServerSystem system) {
+            writer.writeInt(rightVehicleBackIndex);
+            writer.writeInt(leftVehicleBackIndex);
+            writer.writeInt(currentIndex);
+            writeLaneData(writer, system, currentLane);
+            currentLane = null;
+        }
+
+        /**
+         * Writes turning data/information.
+         *
+         * @param system    The network system this client is apart of.
+         */
+        private void writeTurnData(NetworkServerSystem system){
+            // turn data
+            if(turnLane != null){
+                writer.writeInt(system.roadIdMap.get(turnLane.road()));
+                writer.writeInt(turnLane.getLane());
+                writer.writeInt(system.intersectionIdMap.get(turnIntersection));
+                turnLane = null;
+                turnIntersection = null;
+            }else{
+                writer.writeInt(-1);
+                writer.writeInt(-1);
+                writer.writeInt(-1);
+            }
+        }
+
+        /**
+         * Writes the player data
+         *
+         * @param system    The network system this client is apart of.
+         */
+        private void writePlayerData(NetworkServerSystem system) {
+            writer.writeFloat(player.getHealth());
+            writer.writeFloat(player.getActualSpeed());
+            writer.writeFloat(player.getReputation());
+
+            this.writeLaneChangeData(system);
+
+            writeLaneData(writer, system, putInLane);
+            putInLane = null;
+
+            writeTurnData(system);
+        }
+
+
+        /**
+         * Reads the client response
+         *
+         * @param in    Where we want to read the client response from
+         * @throws IOException  If the in reader throws an IOException
+         */
+        private void readClientResponse(Reader in) throws IOException {
+            speed = in.readFloat();
+            if(Float.isNaN(speed) | Float.isInfinite(speed)) speed = 0;
+            chosenTurn = in.readInt();
+            switch(in.readByte()){
+                case -3 -> laneChangeDecision = Road.LaneChangeDecision.ForceLeft;
+                case -2 -> laneChangeDecision = Road.LaneChangeDecision.NudgeLeft;
+                case -1 -> laneChangeDecision = Road.LaneChangeDecision.WaitLeft;
+                default -> laneChangeDecision = Road.LaneChangeDecision.Nothing;
+                case 1 -> laneChangeDecision = Road.LaneChangeDecision.WaitRight;
+                case 2 -> laneChangeDecision = Road.LaneChangeDecision.NudgeRight;
+                case 3 -> laneChangeDecision = Road.LaneChangeDecision.ForceRight;
+            }
+        }
+
+        /**
+         * Run this every simulation system tick. Receives and sends the update packets
+         *
+         * @param sim   The simulation this client is apart of
+         * @param system    The network system this client is apart of
+         * @return  True if this client should be removed from the list of active clients.
+         */
+        public boolean update(Simulation sim, NetworkServerSystem system){
             if(socket.isClosed()) return true;
             try{
                 var in = new Reader(socket.getInputStream());
                 var out = socket.getOutputStream();
 
-                // write sim data
-                writer.writeByte((byte) 2);
-                writer.writeInt(sim.getSimTick());
-                writer.writeFloat(sim.getFrameDelta());
-                writer.writeLong(sim.getSimNanos());
-
-                writer.writeFloat(player.getHealth());
-                writer.writeFloat(player.getActualSpeed());
-                writer.writeFloat(player.getReputation());
-
-                writer.writeInt(rightVehicleBackIndex);
-                writer.writeInt(leftVehicleBackIndex);
-                writer.writeInt(currentIndex);
-
-                if(currentLane != null){
-                    writer.writeInt(system.roadIdMap.get(currentLane.road()));
-                    writer.writeInt(currentLane.getLane());
-                    currentLane = null;
-                }else{
-                    writer.writeInt(-1);
-                    writer.writeInt(-1);
-                }
-
-
-                if(putInLane != null){
-                    writer.writeInt(system.roadIdMap.get(putInLane.road()));
-                    writer.writeInt(putInLane.getLane());
-                    putInLane = null;
-                }else{
-                    writer.writeInt(-1);
-                    writer.writeInt(-1);
-                }
-
-
-
-                // intersections
-                if(turnLane != null){
-                    writer.writeInt(system.roadIdMap.get(turnLane.road()));
-                    writer.writeInt(turnLane.getLane());
-                    writer.writeInt(system.intersectionIdMap.get(turnIntersection));
-                    turnLane = null;
-                    turnIntersection = null;
-                }else{
-                    writer.writeInt(-1);
-                    writer.writeInt(-1);
-                    writer.writeInt(-1);
-                }
-//                writer.write
+                this.writeSimData(sim);
+                this.writePlayerData(system);
 
                 out.write(writer.getAllData(), 0, writer.getSize());
                 writer.clear();
-
 
                 // write delta data
-                writer.writeByte((byte) 3);
-                out.write(writer.getAllData(), 0, writer.getSize());
                 out.write(system.deltaBuf.getAllData(), 0, system.deltaBuf.getSize());
-                writer.clear();
 
                 // write vehicle data
-                writer.writeByte((byte) 4);
-                out.write(writer.getAllData(), 0, writer.getSize());
                 out.write(system.vehicleBuf.getAllData(), 0, system.vehicleBuf.getSize());
                 out.flush();
-                writer.clear();
 
-
-                speed = in.readFloat();
-                if(Float.isNaN(speed) | Float.isInfinite(speed)) speed = 0;
-                chosenTurn = in.readInt();
-                switch(in.readByte()){
-                    case -3 -> laneChangeDecision = Road.LaneChangeDecision.ForceLeft;
-                    case -2 -> laneChangeDecision = Road.LaneChangeDecision.NudgeLeft;
-                    case -1 -> laneChangeDecision = Road.LaneChangeDecision.WaitLeft;
-                    default -> laneChangeDecision = Road.LaneChangeDecision.Nothing;
-                    case 1 -> laneChangeDecision = Road.LaneChangeDecision.WaitRight;
-                    case 2 -> laneChangeDecision = Road.LaneChangeDecision.NudgeRight;
-                    case 3 -> laneChangeDecision = Road.LaneChangeDecision.ForceRight;
-                }
-
+                this.readClientResponse(in);
             }catch (Exception e){
                 try {
                     this.socket.close();
-                } catch (IOException ignore) {
-                }
+                } catch (IOException ignore) {}
                 return true;
             }
             return false;
